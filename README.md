@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # RafBook-Frontend
 
 A web and desktop application for students to communicate via text, images, videos, and audio messages. The app features organized channels for different courses, departments, and academic years, as well as notifications and optional video/audio calling capabilities. The frontend is built with **React** for the web, and **Electron** enables it to function as a cross-platform desktop app. It connects to a Java Spring backend.
