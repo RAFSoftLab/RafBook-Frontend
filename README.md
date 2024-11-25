@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # RafBook-Frontend
 
 A web and desktop application for students to communicate via text, images, videos, and audio messages. The app features organized channels for different courses, departments, and academic years, as well as notifications and optional video/audio calling capabilities. The frontend is built with **React** for the web, and **Electron** enables it to function as a cross-platform desktop app. It connects to a Java Spring backend.
@@ -136,4 +135,101 @@ export default tseslint.config({
   },
 })
 ```
->>>>>>> d5e772e (init commit)
+
+
+
+---
+
+## Using Git with Forks and Creating Pull Requests
+
+### 1. Forking a Repository
+1. Go to the repository you want to fork on GitHub.
+2. Click the `Fork` button at the top right of the repository page.
+3. This will create a copy of the repository under your GitHub account.
+
+### 2. Cloning the Forked Repository
+1. Navigate to your forked repository on GitHub.
+2. Click the `Code` button and copy the URL.
+3. Open your terminal and run the following command to clone the repository:
+
+```bash
+git clone <your-forked-repo-url>
+```
+
+4. Navigate into the cloned repository:
+
+```bash
+cd <repository-name>
+```
+
+### 3. Setting Up the Upstream Remote
+1. Add the original repository as an upstream remote:
+
+```bash
+git remote add upstream <original-repo-url>
+```
+
+2. Verify the new upstream remote:
+
+```bash
+git remote -v
+```
+
+### 4. Creating a New Branch
+1. Create a new branch for your changes:
+
+```bash
+git checkout -b <new-branch-name>
+```
+
+### 5. Making Changes and Committing
+1. Make your changes to the code.
+2. Stage the changes:
+
+```bash
+git add .
+```
+
+3. Commit the changes:
+
+```bash
+git commit -m "Description of the changes"
+```
+
+### 6. Pushing Changes to Your Fork
+1. Push the changes to your forked repository:
+
+```bash
+git push origin <new-branch-name>
+```
+
+### 7. Creating a Pull Request
+1. Go to your forked repository on GitHub.
+2. Click the `Compare & pull request` button.
+3. Ensure the base repository is the original repository and the base branch is the branch you want to merge into.
+4. Provide a title and description for your pull request.
+5. Click `Create pull request`.
+
+### 8. Keeping Your Fork Updated
+1. Fetch the latest changes from the upstream repository:
+
+```bash
+git fetch upstream
+```
+
+2. Merge the changes into your local branch:
+
+```bash
+git checkout <branch-name>
+git merge upstream/<branch-name>
+```
+
+3. Push the updated branch to your fork:
+
+```bash
+git push origin <branch-name>
+```
+
+This tutorial covers the basic workflow for using Git with forks and creating pull requests.
+
+---
