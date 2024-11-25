@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import {
   Box,
   Typography,
@@ -15,6 +14,7 @@ import { motion } from 'framer-motion';
 import { slideUp } from '../animations/animations';
 import { useNavigate } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { login } from '../api/authApi';
 
 declare global {
   interface Window {
@@ -47,8 +47,8 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      const response = await axios.post('/api/auth/login', { username, password });
-      const token = response.data.token;
+      const response = await login({ username, password });
+      const token = response.token;
 
       if (token) {
         window.api.setToken(token);
