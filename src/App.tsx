@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import SplashScreen from './components/SplashScreen';
+import LoginScreen from './components/LoginScreen';
+import Dashboard from './components/Dashboard';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import getTheme from './theme/theme';
+import { AnimatePresence } from 'framer-motion';
+import ProtectedRoute from './components/ProtectedRoute';
+import { IconButton } from '@mui/material';
+import { Brightness4, Brightness7 } from '@mui/icons-material';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const theme = getTheme(mode);
+
+  const toggleTheme = () => {
+    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        {/* Theme Toggle Button */}
+        <IconButton
+          sx={{ position: 'absolute', top: 16, right: 16 }}
+          onClick={toggleTheme}
+          color="inherit"
+        >
+          {mode === 'light' ? <Brightness4 /> : <Brightness7 />}
+        </IconButton>
+        <AnimatePresence mode="wait">
+          <Routes>
+            <Route path="/" element={<SplashScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
+      </Router>
+    </ThemeProvider>
+  );
+};
 
-export default App
+export default App;

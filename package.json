@@ -5,25 +5,64 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "electron:dev": "concurrently \"vite\" \"tsc -p electron/tsconfig.json --watch\" \"electron .\"",
     "build": "tsc -b && vite build",
+    "electron:build": "vite build && tsc -p electron/tsconfig.json && electron-builder",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@fontsource/roboto": "^5.1.0",
+    "@mui/icons-material": "^6.1.8",
+    "@mui/material": "^6.1.8",
+    "axios": "^1.7.7",
+    "electron-store": "^10.0.0",
+    "framer-motion": "^11.11.17",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
+    "concurrently": "^7.6.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-is-dev": "^3.0.1",
+    "electron-updater": "^6.3.9",
     "eslint": "^9.13.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.11.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.11.0",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vite-plugin-electron": "^0.29.0"
+  },
+  "build": {
+    "appId": "com.raf.book",
+    "productName": "Raf Book",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "electron/main.js",
+      "electron/preload.js"
+    ],
+    "directories": {
+      "output": "release-builds"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
