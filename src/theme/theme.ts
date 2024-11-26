@@ -8,6 +8,7 @@ import {
   grey,
   amber,
   teal,
+  pink,
   green,
 } from '@mui/material/colors';
 
@@ -19,7 +20,7 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
     palette: {
       mode,
       primary: {
-        main: mode === 'light' ? indigo[600] : deepPurple[500],
+        main: mode === 'light' ? indigo[600] : pink[500],
       },
       secondary: {
         main: mode === 'light' ? teal[500] : cyan[500],
@@ -95,7 +96,7 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
               },
             },
             '& .MuiInputLabel-filled.Mui-focused': {
-              color: mode === 'light' ? indigo[600] : deepPurple[500], 
+              // color: mode === 'light' ? indigo[600] : deepPurple[500], 
             },
             '& .MuiInputLabel-filled': {
               color: mode === 'light' ? grey[700] : grey[300],

@@ -90,8 +90,8 @@ const LoginScreen: React.FC = () => {
         sx={{
           backgroundColor:
             theme.palette.mode === 'light'
-              ? 'rgba(255, 255, 255, 0.85)'
-              : 'rgba(0, 0, 0, 0.85)',
+              ? 'rgba(233, 233, 233, 0.9)'
+              : 'rgba(32, 32, 32, 0.9)',
           padding: { xs: 4, sm: 6 },
           borderRadius: 3,
           boxShadow: 10,
