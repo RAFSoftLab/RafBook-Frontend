@@ -106,7 +106,10 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
           root: {
             color: mode === 'light' ? blue[600] : cyan[500],
             '&.Mui-checked': {
-              color: mode === 'light' ? blue[600] : cyan[500],
+              color: mode === 'light' ? indigo[600] : pink[500],
+            },
+            '&:not(.Mui-checked)': {
+              color: mode === 'light' ? indigo[600] : pink[500],
             },
           },
         },
