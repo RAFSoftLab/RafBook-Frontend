@@ -95,9 +95,6 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
                 }`,
               },
             },
-            '& .MuiInputLabel-filled.Mui-focused': {
-              // color: mode === 'light' ? indigo[600] : deepPurple[500], 
-            },
             '& .MuiInputLabel-filled': {
               color: mode === 'light' ? grey[700] : grey[300],
             },

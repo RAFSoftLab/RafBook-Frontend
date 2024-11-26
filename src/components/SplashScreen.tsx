@@ -29,7 +29,6 @@ const SplashScreen: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100vh',
-        backgroundColor: '#ffffff',
       }}
     >
       <Box
