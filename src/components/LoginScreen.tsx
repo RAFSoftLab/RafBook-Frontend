@@ -174,7 +174,6 @@ const LoginScreen: React.FC = () => {
           )}
         </Button>
 
-        {/* Optional: Forgot Password Link */}
         <Typography variant="body2" sx={{ mt: 2 }}>
           <a href="/forgot-password" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>
             Forgot Password?

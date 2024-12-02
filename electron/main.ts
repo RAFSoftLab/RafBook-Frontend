@@ -1,10 +1,9 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import isDev from 'electron-is-dev';
 
 let mainWindow: BrowserWindow | null;
 
-const createWindow = () => {
+function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -15,18 +14,23 @@ const createWindow = () => {
     },
   });
 
-  const startURL = isDev
+  const isDev = !app.isPackaged;
+  const url = isDev
     ? 'http://localhost:5173'
     : `file://${path.join(__dirname, '../dist/index.html')}`;
 
-  mainWindow.loadURL(startURL);
+  mainWindow.loadURL(url);
+
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-};
+}
 
-app.on('ready', createWindow);
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -35,7 +39,11 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (mainWindow === null) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+ipcMain.handle('example', async (event, args) => {
+  return 'Response from main process';
 });
