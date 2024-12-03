@@ -5,3 +5,4 @@ services:
     image: pstamenic1524m/rafbook:latest
     ports:
       - '8080:8080'
+    pull_policy: always
