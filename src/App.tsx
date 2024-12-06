@@ -1,36 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
-import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import getTheme from './theme/theme';
 import { AnimatePresence } from 'framer-motion';
 import ProtectedRoute from './components/ProtectedRoute';
 import { IconButton } from '@mui/material';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
+import { AppProvider, useAppContext } from './context/AppContext';
 
-const App: React.FC = () => {
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
-  const theme = getTheme(mode);
-
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-  };
+const ThemeToggleButton: React.FC = () => {
+  const { mode, toggleTheme } = useAppContext();
 
   return (
-    <ThemeProvider theme={theme}>
+    <IconButton
+      sx={{ position: 'absolute', top: 16, right: 16 }}
+      onClick={toggleTheme}
+      color="inherit"
+    >
+      {mode === 'light' ? <Brightness4 /> : <Brightness7 />}
+    </IconButton>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AppProvider>
       <CssBaseline />
       <Router>
         {/* Theme Toggle Button */}
-        <IconButton
-          sx={{ position: 'absolute', top: 16, right: 16 }}
-          onClick={toggleTheme}
-          color="inherit"
-        >
-          {mode === 'light' ? <Brightness4 /> : <Brightness7 />}
-        </IconButton>
+        <ThemeToggleButton />
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<SplashScreen />} />
@@ -46,7 +46,7 @@ const App: React.FC = () => {
           </Routes>
         </AnimatePresence>
       </Router>
-    </ThemeProvider>
+    </AppProvider>
   );
 };
 

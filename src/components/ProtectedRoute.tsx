@@ -2,15 +2,22 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
-  children: JSX.Element;
+  children: React.ReactElement;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const token = localStorage.getItem('jwtToken') || sessionStorage.getItem('jwtToken');
+  // let token: string | null = null;
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  // if (window.api && typeof window.api.getToken === 'function') {
+  //   token = window.api.getToken();
+  // } else {
+  //   // Fallback to localStorage for development
+  //   token = localStorage.getItem('token');
+  // }
+
+  // if (!token) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
   return children;
 };
