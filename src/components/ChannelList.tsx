@@ -1,8 +1,7 @@
 import React from 'react';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import TagIcon from '@mui/icons-material/Tag';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import TagIcon from '@mui/icons-material/Tag';
 
 interface Channel {
     id: number;
@@ -17,8 +16,10 @@ interface ChannelListProps {
 }
 
 const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, onSelectChannel, channelType }) => {
+    const theme = useTheme();
+
     const getChannelIcon = (type: 'voice' | 'text') => {
-        return type === 'voice' ? <VolumeUpIcon /> : <Typography variant="body2">#</Typography>;
+        return type === 'voice' ? <VolumeUpIcon /> : <TagIcon />;
     };
 
     return (
@@ -35,18 +36,18 @@ const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, on
                             display: 'flex',
                             alignItems: 'center',
                             '&.Mui-selected': {
-                                backgroundColor: 'action.selected',
+                                backgroundColor: theme.palette.action.selected,
                                 '&:hover': {
-                                    backgroundColor: 'action.selected',
+                                    backgroundColor: theme.palette.action.selected,
                                 },
                             },
                             '&:hover': {
-                                backgroundColor: 'action.hover',
+                                backgroundColor: theme.palette.action.hover,
                             },
                         }}
                     >
                         <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
-                            {channelType === 'voice' ? <VolumeUpIcon /> : <TagIcon />}
+                            {getChannelIcon(channelType)}
                         </ListItemIcon>
                         <ListItemText primary={channel.name} />
                     </ListItemButton>

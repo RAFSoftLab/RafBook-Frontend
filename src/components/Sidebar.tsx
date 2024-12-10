@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleMute, toggleDeafen, setChannelType } from '../store/voiceSlice';
 import SettingsModal from './SettingsModal'; 
+
 import ChannelTypeToggle from './ChannelTypeToggle';
 import ChannelList from './ChannelList';
 import UserControls from './UserControls';

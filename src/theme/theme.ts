@@ -10,10 +10,26 @@ import {
   teal,
   pink,
   green,
+  deepOrange,
 } from '@mui/material/colors';
 
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/700.css';
+
+declare module '@mui/material/styles' {
+  interface Palette {
+    avatar: {
+      ownMessage: string;
+      otherMessage: string;
+    };
+  }
+  interface PaletteOptions {
+    avatar?: {
+      ownMessage?: string;
+      otherMessage?: string;
+    };
+  }
+}
 
 const getTheme = (mode: 'light' | 'dark'): Theme =>
   createTheme({
@@ -42,6 +58,10 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
         primary: mode === 'light' ? grey[900] : grey[100],
         secondary: mode === 'light' ? grey[700] : grey[300],
       },
+      avatar: {
+        ownMessage: mode === 'light' ? deepPurple[500] : pink[500],
+        otherMessage: mode === 'light' ? deepOrange[500] : amber[500],
+      },
     },
     typography: {
       fontFamily: 'Roboto, Arial, sans-serif',
@@ -64,9 +84,7 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
             },
           },
         },
-        variants: [
-
-        ],
+        variants: [],
       },
       MuiTextField: {
         styleOverrides: {
@@ -82,12 +100,11 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
                 backgroundColor: mode === 'light' ? grey[300] : grey[700],
                 color: mode === 'light' ? grey[900] : grey[100],
               },
-
               '&:before': {
                 borderBottom: 'none',
               },
               '&:hover:before': {
-                borderBottom: 'none', 
+                borderBottom: 'none',
               },
               '&:after': {
                 borderBottom: `2px solid ${

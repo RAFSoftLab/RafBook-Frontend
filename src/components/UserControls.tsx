@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Avatar, Typography, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, Avatar } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import HeadsetIcon from '@mui/icons-material/Headset';
@@ -46,18 +46,35 @@ const UserControls: React.FC<UserControlsProps> = ({
 
             {/* Voice Controls */}
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {/* Mute/Unmute Button */}
                 <Tooltip title={isMuted ? 'Unmute' : 'Mute'}>
-                    <IconButton onClick={onToggleMute} color={isMuted ? 'error' : 'default'}>
+                    <IconButton
+                        onClick={onToggleMute}
+                        color={isMuted ? 'error' : 'default'}
+                        aria-label={isMuted ? 'Unmute' : 'Mute'}
+                    >
                         {isMuted ? <MicOffIcon /> : <MicIcon />}
                     </IconButton>
                 </Tooltip>
+
+                {/* Deafen/Undeafen Button */}
                 <Tooltip title={isDeafened ? 'Undeafen' : 'Deafen'}>
-                    <IconButton onClick={onToggleDeafen} color={isDeafened ? 'error' : 'default'}>
-                        {isDeafened ? <HeadsetOffIcon /> : <HeadsetIcon />}
+                    <IconButton
+                        onClick={onToggleDeafen}
+                        color={isDeafened ? 'error' : 'default'}
+                        aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
+                    >
+                        {isDeafened ? <HeadsetOffIcon /> : <HeadsetIcon />} {/* Corrected icon usage */}
                     </IconButton>
                 </Tooltip>
+
+                {/* Settings Button */}
                 <Tooltip title="Settings">
-                    <IconButton onClick={onOpenSettings} color="default">
+                    <IconButton
+                        onClick={onOpenSettings}
+                        color="default"
+                        aria-label="Settings"
+                    >
                         <SettingsIcon />
                     </IconButton>
                 </Tooltip>

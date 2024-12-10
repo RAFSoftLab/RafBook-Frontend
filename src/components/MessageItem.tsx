@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, Avatar, useTheme } from '@mui/material';
-import { deepOrange, deepPurple } from '@mui/material/colors';
 
 interface Message {
   id: number;
@@ -17,7 +16,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
   const isOwnMessage = message.sender === 'You';
 
-  const avatarColor = isOwnMessage ? deepPurple[500] : deepOrange[500];
+  const avatarColor = isOwnMessage
+    ? theme.palette.avatar.ownMessage
+    : theme.palette.avatar.otherMessage;
+
+  const messageBackground = isOwnMessage
+    ? theme.palette.primary.light
+    : theme.palette.grey[300];
+
+  const messageTextColor = isOwnMessage
+    ? theme.palette.primary.contrastText
+    : theme.palette.text.primary;
 
   return (
     <Box
@@ -50,10 +59,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         </Typography>
         <Box
           sx={{
-            backgroundColor: isOwnMessage
-              ? theme.palette.primary.light
-              : theme.palette.grey[300],
-            color: isOwnMessage ? theme.palette.primary.contrastText : 'inherit',
+            backgroundColor: messageBackground,
+            color: messageTextColor,
             borderRadius: 2,
             p: 1,
           }}
