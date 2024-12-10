@@ -1,285 +1,134 @@
-// src/components/Dashboard.tsx
-
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-  AppBar,
-  Toolbar,
-  IconButton,
-  TextField,
-  Button,
-  Divider,
-  useTheme,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import SendIcon from '@mui/icons-material/Send';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useAppContext } from '../context/AppContext';
+import React, { useState } from 'react';
+import { Box } from '@mui/material';
+import Header from './Header';
+import Sidebar from './Sidebar';
+import MessageList from './MessageList';
+import MessageInput from './MessageInput';
+import VoiceChannel from './VoiceChannel';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { sendMessage } from '../store/messageSlice';
 
 interface Channel {
   id: number;
   name: string;
 }
 
-interface Message {
-  id: number;
-  channelId: number;
-  sender: string;
-  content: string;
-  timestamp: string;
-}
-
 const Dashboard: React.FC = () => {
-  const theme = useTheme();
-  const { mode, toggleTheme } = useAppContext();
+  const drawerWidth = 240;
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedChannel, setSelectedChannel] = useState<number>(1);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      channelId: 1,
-      sender: 'Alice',
-      content: 'Hello everyone!',
-      timestamp: '10:00 AM',
-    },
-    {
-      id: 2,
-      channelId: 1,
-      sender: 'Bob',
-      content: 'Hi Alice! Welcome to the channel.',
-      timestamp: '10:05 AM',
-    },
-  ]);
+  
+  const [selectedTextChannel, setSelectedTextChannel] = useState<number>(1);
+  const [selectedVoiceChannel, setSelectedVoiceChannel] = useState<number>(4);
+  
   const [newMessage, setNewMessage] = useState('');
 
-  const channels: Channel[] = [
+  const dispatch = useAppDispatch();
+  const messages = useAppSelector((state) => state.messages.messages);
+  const channelType = useAppSelector((state) => state.voice.channelType);
+
+  const textChannels: Channel[] = [
     { id: 1, name: 'General' },
     { id: 2, name: 'Announcements' },
     { id: 3, name: 'Random' },
   ];
+
+  const voiceChannels: Channel[] = [
+    { id: 4, name: 'Gaming' },
+    { id: 5, name: 'Music' },
+    { id: 6, name: 'Study Group' },
+  ];
+
+  const allChannels: { [key: string]: Channel[] } = {
+    text: textChannels,
+    voice: voiceChannels,
+  };
+
+  const getSelectedChannelName = () => {
+    if (channelType === 'text') {
+      const channel = textChannels.find((ch) => ch.id === selectedTextChannel);
+      return channel ? channel.name : '';
+    } else {
+      const channel = voiceChannels.find((ch) => ch.id === selectedVoiceChannel);
+      return channel ? channel.name : '';
+    }
+  };
+
+  const selectedChannelName = getSelectedChannelName();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleChannelSelect = (id: number) => {
-    setSelectedChannel(id);
+    if (channelType === 'text') {
+      setSelectedTextChannel(id);
+    } else {
+      setSelectedVoiceChannel(id);
+    }
   };
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
 
-    const message: Message = {
-      id: messages.length + 1,
-      channelId: selectedChannel,
+    const messagePayload = {
+      channelId: channelType === 'text' ? selectedTextChannel : selectedVoiceChannel,
       sender: 'You',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages([...messages, message]);
+    dispatch(sendMessage(messagePayload));
     setNewMessage('');
-    scrollToBottom();
   };
-
-  const drawerWidth = 240;
-
-  const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Channels
-        </Typography>
-      </Toolbar>
-      <Divider />
-      <List>
-        {channels.map((channel) => (
-          <ListItem key={channel.id} disablePadding>
-            <ListItemButton
-              selected={selectedChannel === channel.id}
-              onClick={() => handleChannelSelect(channel.id)}
-            >
-              <ListItemText primary={`# ${channel.name}`} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, selectedChannel]);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* AppBar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-          boxShadow: 'none',
-          borderBottom: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Student Dashboard
-          </Typography>
-          {/* Theme Toggle Button */}
-          <IconButton onClick={toggleTheme} color="inherit">
-            {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
-      {/* Drawer */}
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="channels"
-      >
-        {/* Mobile Drawer */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-        >
-          {drawer}
-        </Drawer>
-
-        {/* Desktop Drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-
-      {/* Main Content */}
+      <Header
+        drawerWidth={drawerWidth}
+        handleDrawerToggle={handleDrawerToggle}
+        channelName={selectedChannelName}
+      />
+      <Sidebar
+        textChannels={textChannels}
+        voiceChannels={voiceChannels}
+        selectedChannel={channelType === 'text' ? selectedTextChannel : selectedVoiceChannel}
+        onSelectChannel={handleChannelSelect}
+        drawerWidth={drawerWidth}
+        mobileOpen={mobileOpen}
+        handleDrawerToggle={handleDrawerToggle}
+      />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+          backgroundColor: 'background.default',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.palette.background.default,
         }}
       >
-        <Toolbar />
+        {/* Spacer for the AppBar */}
+        <Box sx={{ height: '64px' }} />
 
-        {/* Channel Header */}
-        <Typography variant="h5" gutterBottom>
-          {channels.find((ch) => ch.id === selectedChannel)?.name}
-        </Typography>
+        {/* Conditional Rendering Based on Channel Type */}
+        {channelType === 'voice' ? (
+          <VoiceChannel selectedChannel={selectedVoiceChannel} />
+        ) : (
+          <>
+            {/* Message List */}
+            <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
+              <MessageList selectedChannel={selectedTextChannel} />
+            </Box>
 
-        {/* Messages */}
-        <Box
-          sx={{
-            flexGrow: 1,
-            overflowY: 'auto',
-            mb: 2,
-            paddingRight: 2,
-            pr: 2,
-          }}
-        >
-          {messages
-            .filter((msg) => msg.channelId === selectedChannel)
-            .map((msg) => (
-              <Box
-                key={msg.id}
-                sx={{
-                  mb: 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: msg.sender === 'You' ? 'flex-end' : 'flex-start',
-                }}
-              >
-                <Typography variant="subtitle2" color="text.secondary">
-                  {msg.sender} • {msg.timestamp}
-                </Typography>
-                <Box
-                  sx={{
-                    backgroundColor:
-                      msg.sender === 'You'
-                        ? theme.palette.primary.light
-                        : theme.palette.grey[300],
-                    color: msg.sender === 'You' ? theme.palette.primary.contrastText : 'inherit',
-                    borderRadius: 2,
-                    p: 1,
-                    maxWidth: '70%',
-                  }}
-                >
-                  <Typography variant="body1">{msg.content}</Typography>
-                </Box>
-              </Box>
-            ))}
-          <div ref={messagesEndRef} />
-        </Box>
-
-        {/* Message Input */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TextField
-            label="Type a message"
-            variant="outlined"
-            fullWidth
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ ml: 2, height: '56px' }}
-            onClick={handleSendMessage}
-          >
-            <SendIcon />
-          </Button>
-        </Box>
+            {/* Message Input */}
+            <MessageInput
+              newMessage={newMessage}
+              setNewMessage={setNewMessage}
+              onSend={handleSendMessage}
+            />
+          </>
+        )}
       </Box>
     </Box>
   );
