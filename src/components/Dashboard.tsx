@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MessageList from './MessageList';
@@ -7,6 +7,7 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage } from '../store/messageSlice';
+import { setSelectedChannelId } from '../store/channelSlice';
 
 interface Channel {
   id: number;
@@ -17,14 +18,13 @@ const Dashboard: React.FC = () => {
   const drawerWidth = 240;
   const [mobileOpen, setMobileOpen] = useState(false);
   
-  const [selectedTextChannel, setSelectedTextChannel] = useState<number>(1);
-  const [selectedVoiceChannel, setSelectedVoiceChannel] = useState<number>(4);
-  
   const [newMessage, setNewMessage] = useState('');
 
   const dispatch = useAppDispatch();
   const messages = useAppSelector((state) => state.messages.messages);
-  const channelType = useAppSelector((state) => state.voice.channelType);
+  
+  const channelType = useAppSelector((state) => state.channel.channelType);
+  const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
 
   const textChannels: Channel[] = [
     { id: 1, name: 'General' },
@@ -38,18 +38,15 @@ const Dashboard: React.FC = () => {
     { id: 6, name: 'Study Group' },
   ];
 
-  const allChannels: { [key: string]: Channel[] } = {
-    text: textChannels,
-    voice: voiceChannels,
-  };
-
   const getSelectedChannelName = () => {
     if (channelType === 'text') {
-      const channel = textChannels.find((ch) => ch.id === selectedTextChannel);
+      const channel = textChannels.find((ch) => ch.id === selectedChannelId);
+      return channel ? channel.name : '';
+    } else if (channelType === 'voice') {
+      const channel = voiceChannels.find((ch) => ch.id === selectedChannelId);
       return channel ? channel.name : '';
     } else {
-      const channel = voiceChannels.find((ch) => ch.id === selectedVoiceChannel);
-      return channel ? channel.name : '';
+      return '';
     }
   };
 
@@ -60,18 +57,18 @@ const Dashboard: React.FC = () => {
   };
 
   const handleChannelSelect = (id: number) => {
-    if (channelType === 'text') {
-      setSelectedTextChannel(id);
-    } else {
-      setSelectedVoiceChannel(id);
-    }
+    dispatch(setSelectedChannelId(id));
   };
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
 
+    if (channelType !== 'text' || selectedChannelId === null) {
+      return;
+    }
+
     const messagePayload = {
-      channelId: channelType === 'text' ? selectedTextChannel : selectedVoiceChannel,
+      channelId: selectedChannelId,
       sender: 'You',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -91,7 +88,7 @@ const Dashboard: React.FC = () => {
       <Sidebar
         textChannels={textChannels}
         voiceChannels={voiceChannels}
-        selectedChannel={channelType === 'text' ? selectedTextChannel : selectedVoiceChannel}
+        selectedChannel={selectedChannelId}
         onSelectChannel={handleChannelSelect}
         drawerWidth={drawerWidth}
         mobileOpen={mobileOpen}
@@ -111,24 +108,56 @@ const Dashboard: React.FC = () => {
         {/* Spacer for the AppBar */}
         <Box sx={{ height: '64px' }} />
 
-        {/* Conditional Rendering Based on Channel Type */}
+        {/* Conditional Rendering Based on Channel Type and Selection */}
         {channelType === 'voice' ? (
-          <VoiceChannel selectedChannel={selectedVoiceChannel} />
-        ) : (
-          <>
-            {/* Message List */}
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
-              <MessageList selectedChannel={selectedTextChannel} />
+          selectedChannelId ? (
+            <VoiceChannel selectedChannel={selectedChannelId} />
+          ) : (
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <Typography variant="h6">
+                Please select a voice channel to view participants.
+              </Typography>
             </Box>
+          )
+        ) : channelType === 'text' ? (
+          selectedChannelId ? (
+            <>
+              {/* Message List */}
+              <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
+                <MessageList selectedChannel={selectedChannelId} />
+              </Box>
 
-            {/* Message Input */}
-            <MessageInput
-              newMessage={newMessage}
-              setNewMessage={setNewMessage}
-              onSend={handleSendMessage}
-            />
-          </>
-        )}
+              {/* Message Input */}
+              <MessageInput
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                onSend={handleSendMessage}
+              />
+            </>
+          ) : (
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <Typography variant="h6">
+                Please select a text channel to view messages.
+              </Typography>
+            </Box>
+          )
+        ) : null}
       </Box>
     </Box>
   );

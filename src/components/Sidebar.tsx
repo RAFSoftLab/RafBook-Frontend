@@ -7,7 +7,8 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { toggleMute, toggleDeafen, setChannelType } from '../store/voiceSlice';
+import { toggleMute, toggleDeafen } from '../store/voiceSlice';
+import { setChannelType } from '../store/channelSlice';
 import SettingsModal from './SettingsModal'; 
 
 import ChannelTypeToggle from './ChannelTypeToggle';
@@ -22,7 +23,7 @@ interface Channel {
 interface SidebarProps {
     textChannels: Channel[];
     voiceChannels: Channel[];
-    selectedChannel: number;
+    selectedChannel: number | null;
     onSelectChannel: (id: number) => void;
     drawerWidth: number;
     mobileOpen: boolean;
@@ -42,7 +43,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     const dispatch = useAppDispatch();
 
     const user = useAppSelector((state) => state.user);
-    const { isMuted, isDeafened, channelType } = useAppSelector((state) => state.voice);
+    const { isMuted, isDeafened } = useAppSelector((state) => state.voice);
+    const channelType = useAppSelector((state) => state.channel.channelType);
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 

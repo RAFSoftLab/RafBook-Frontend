@@ -10,7 +10,7 @@ interface Channel {
 
 interface ChannelListProps {
     channels: Channel[];
-    selectedChannel: number;
+    selectedChannel: number | null;
     onSelectChannel: (id: number) => void;
     channelType: 'voice' | 'text';
 }

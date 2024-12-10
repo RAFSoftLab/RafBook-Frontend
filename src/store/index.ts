@@ -3,15 +3,26 @@ import themeReducer from './themeSlice';
 import messageReducer from './messageSlice';
 import voiceReducer from './voiceSlice';
 import userReducer from './userSlice';
+import channelReducer from './channelSlice';
 
-import storage from 'redux-persist/lib/storage'; // Defaults to localStorage for web
-import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
 
 const rootReducer = combineReducers({
   theme: themeReducer,
   messages: messageReducer,
   voice: voiceReducer,
   user: userReducer,
+  channel: channelReducer,
 });
 
 const persistConfig = {
