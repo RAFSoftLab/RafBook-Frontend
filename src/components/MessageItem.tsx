@@ -1,3 +1,5 @@
+// src/components/MessageItem.tsx
+
 import React from 'react';
 import { Box, Typography, Avatar, useTheme } from '@mui/material';
 
@@ -21,12 +23,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     : theme.palette.avatar.otherMessage;
 
   const messageBackground = isOwnMessage
-    ? theme.palette.primary.light
-    : theme.palette.grey[300];
+    ? theme.palette.primary.main
+    : theme.palette.mode === 'light'
+    ? theme.palette.grey[500]
+    : theme.palette.grey[700];
 
   const messageTextColor = isOwnMessage
     ? theme.palette.primary.contrastText
-    : theme.palette.text.primary;
+    : theme.palette.primary.contrastText;
 
   return (
     <Box
