@@ -4,6 +4,7 @@ import {
   DialogContent,
   IconButton,
   Box,
+  useTheme,
 } from '@mui/material';
 import { Close as CloseIcon, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { Attachment } from '../types/global';
@@ -27,6 +28,8 @@ const Lightbox: React.FC<LightboxProps> = ({
   onNext,
   onThumbnailClick,
 }) => {
+  const theme = useTheme();
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (open) {
@@ -56,7 +59,10 @@ const Lightbox: React.FC<LightboxProps> = ({
       fullWidth
       maxWidth="lg"
       PaperProps={{
-        sx: { backgroundColor: 'rgba(0, 0, 0, 0.9)', boxShadow: 'none' },
+        sx: { 
+          backgroundColor: theme.palette.background.default,
+          boxShadow: 'none' 
+        },
       }}
     >
       {/* Close Button */}
@@ -67,7 +73,7 @@ const Lightbox: React.FC<LightboxProps> = ({
           position: 'absolute',
           top: 16,
           right: 16,
-          color: 'white',
+          color: theme.palette.text.primary,
           zIndex: 1,
         }}
       >
@@ -82,6 +88,7 @@ const Lightbox: React.FC<LightboxProps> = ({
           justifyContent: 'center',
           height: '80vh',
           padding: 0,
+          backgroundColor: theme.palette.background.paper,
         }}
       >
         {/* Previous Arrow */}
@@ -92,7 +99,7 @@ const Lightbox: React.FC<LightboxProps> = ({
             sx={{
               position: 'absolute',
               left: 16,
-              color: 'white',
+              color: theme.palette.text.primary,
             }}
           >
             <ArrowBackIos />
@@ -107,6 +114,8 @@ const Lightbox: React.FC<LightboxProps> = ({
             maxHeight: '100%',
             maxWidth: '100%',
             objectFit: 'contain',
+            borderRadius: 1,
+            boxShadow: 3,
           }}
         />
         {/* Next Arrow */}
@@ -117,7 +126,7 @@ const Lightbox: React.FC<LightboxProps> = ({
             sx={{
               position: 'absolute',
               right: 16,
-              color: 'white',
+              color: theme.palette.text.primary,
             }}
           >
             <ArrowForwardIos />
@@ -130,7 +139,7 @@ const Lightbox: React.FC<LightboxProps> = ({
           display: 'flex',
           overflowX: 'auto',
           p: 2,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backgroundColor: theme.palette.background.default,
         }}
       >
         {images.map((attachment, index) => (
@@ -143,7 +152,7 @@ const Lightbox: React.FC<LightboxProps> = ({
               mr: 1,
               border:
                 index === currentIndex
-                  ? '2px solid white'
+                  ? `2px solid ${theme.palette.primary.main}`
                   : '2px solid transparent',
               borderRadius: 1,
               overflow: 'hidden',

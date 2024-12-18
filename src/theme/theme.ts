@@ -1,5 +1,3 @@
-// src/theme.ts
-
 import { createTheme, Theme } from '@mui/material/styles';
 import {
   indigo,
@@ -17,8 +15,8 @@ import {
 
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/700.css';
-import '@fontsource/open-sans/400.css'; // Import Open Sans 400
-import '@fontsource/open-sans/700.css'; // Import Open Sans 700
+import '@fontsource/open-sans/400.css';
+import '@fontsource/open-sans/700.css';
 
 declare module '@mui/material/styles' {
   interface Palette {
