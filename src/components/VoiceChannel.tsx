@@ -1,5 +1,3 @@
-// src/components/VoiceChannel.tsx
-
 import React, { useEffect } from 'react';
 import {
   Box,
@@ -35,7 +33,6 @@ const VoiceChannel: React.FC<VoiceChannelProps> = ({ selectedChannel }) => {
   const placeholderParticipants = ['Alice', 'Bob', 'Charlie'];
 
   useEffect(() => {
-    // Simulate fetching participants based on the selected channel
     dispatch(setParticipants(placeholderParticipants));
   }, [dispatch, selectedChannel]);
 

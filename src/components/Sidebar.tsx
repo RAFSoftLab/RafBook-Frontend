@@ -1,5 +1,3 @@
-// src/components/Sidebar.tsx
-
 import React, { useState } from 'react';
 import {
     Drawer,
@@ -107,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 open={mobileOpen}
                 onClose={handleDrawerToggle}
                 ModalProps={{
-                    keepMounted: true, // Better open performance on mobile
+                    keepMounted: true,
                 }}
                 sx={{
                     display: { xs: 'block', sm: 'none' },

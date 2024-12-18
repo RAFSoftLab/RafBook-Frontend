@@ -1,5 +1,3 @@
-// src/store/channelSlice.ts
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Channel, ChannelState } from '../types/global';
 

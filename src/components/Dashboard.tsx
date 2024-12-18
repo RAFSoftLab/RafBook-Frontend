@@ -1,5 +1,3 @@
-// src/components/Dashboard.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import Header from './Header';
@@ -10,7 +8,7 @@ import VoiceChannel from './VoiceChannel';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage } from '../store/messageSlice';
 import { setSelectedChannelId, setChannels } from '../store/channelSlice';
-import { Channel } from '../types/global';
+import { Channel, Message } from '../types/global';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -19,12 +17,10 @@ const Dashboard: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
 
   const dispatch = useAppDispatch();
-  const messages = useAppSelector((state) => state.messages.messages);
   
-  const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
   const channels = useAppSelector((state) => state.channel.channels);
+  const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
 
-  // Initialize channels (this could also come from an API)
   useEffect(() => {
     const initialChannels: Channel[] = [
       // Text Channels
@@ -40,7 +36,7 @@ const Dashboard: React.FC = () => {
     dispatch(setChannels(initialChannels));
   }, [dispatch]);
 
-  const getSelectedChannel = () => {
+  const getSelectedChannel = (): Channel | null => {
     return channels.find((ch) => ch.id === selectedChannelId) || null;
   };
 
@@ -56,22 +52,40 @@ const Dashboard: React.FC = () => {
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
-  
+
     if (!selectedChannel || selectedChannel.type !== 'text') {
       return;
     }
-  
-    const messagePayload = {
-      channelId: selectedChannel.id, // Ensures channelId is a number
+
+    const messagePayload: Omit<Message, 'id'> = {
+      channelId: selectedChannel.id,
       sender: 'You',
+      type: 'text',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-  
+
     dispatch(sendMessage(messagePayload));
     setNewMessage('');
   };
-  
+
+  const handleSendGif = (gifUrl: string) => {
+    if (!selectedChannel || selectedChannel.type !== 'text') {
+      return;
+    }
+
+    const messagePayload: Omit<Message, 'id'> = {
+      channelId: selectedChannel.id,
+      sender: 'You',
+      type: 'gif',
+      content: '',
+      gifUrl: gifUrl,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    dispatch(sendMessage(messagePayload));
+  };
+
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <Header
@@ -117,6 +131,7 @@ const Dashboard: React.FC = () => {
                 newMessage={newMessage}
                 setNewMessage={setNewMessage}
                 onSend={handleSendMessage}
+                onSendGif={handleSendGif}
               />
             </>
           )

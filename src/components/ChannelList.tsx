@@ -1,5 +1,3 @@
-// src/components/ChannelList.tsx
-
 import React from 'react';
 import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';

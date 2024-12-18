@@ -1,66 +1,100 @@
-// src/components/MessageItem.tsx
-
 import React from 'react';
 import { Box, Typography, Avatar, useTheme } from '@mui/material';
 import { MessageItemProps } from '../types/global';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
+
   const isOwnMessage = message.sender === 'You';
 
   const avatarColor = isOwnMessage
-    ? theme.palette.avatar.ownMessage
-    : theme.palette.avatar.otherMessage;
+    ? theme.palette.primary.main
+    : theme.palette.grey[500];
 
   const messageBackground = isOwnMessage
     ? theme.palette.primary.main
     : theme.palette.mode === 'light'
-    ? theme.palette.grey[500]
+    ? theme.palette.grey[300]
     : theme.palette.grey[700];
 
   const messageTextColor = isOwnMessage
     ? theme.palette.primary.contrastText
-    : theme.palette.primary.contrastText;
+    : theme.palette.text.primary;
+
+  const timestampOffset = theme.spacing(6);
 
   return (
     <Box
       sx={{
         mb: 2,
         display: 'flex',
-        flexDirection: isOwnMessage ? 'row-reverse' : 'row',
+        flexDirection: 'column',
         alignItems: 'flex-start',
       }}
     >
-      <Avatar
+      {/* Timestamp */}
+      <Typography
+        variant="subtitle2"
+        color="text.secondary"
         sx={{
-          bgcolor: avatarColor,
-          mr: isOwnMessage ? 0 : 1,
-          ml: isOwnMessage ? 1 : 0,
+          mb: 0.5,
+          ml: timestampOffset,
         }}
       >
-        {message.sender.charAt(0)}
-      </Avatar>
+        {message.sender} • {message.timestamp}
+      </Typography>
+
+      {/* Message and Avatar Container */}
       <Box
         sx={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
+          flexDirection: 'row',
+          alignItems: 'flex-start',
           maxWidth: '70%',
         }}
       >
-        <Typography variant="subtitle2" color="text.secondary">
-          {message.sender} • {message.timestamp}
-        </Typography>
-        <Box
+        {/* Avatar */}
+        <Avatar
           sx={{
-            backgroundColor: messageBackground,
-            color: messageTextColor,
-            borderRadius: 2,
-            p: 1,
+            bgcolor: avatarColor,
+            mr: 1,
+            width: 40,
+            height: 40,
           }}
         >
-          <Typography variant="body1">{message.content}</Typography>
-        </Box>
+          {message.sender.charAt(0)}
+        </Avatar>
+
+        {/* Message Content */}
+        {message.type === 'text' ? (
+          <Box
+            sx={{
+              backgroundColor: messageBackground,
+              color: messageTextColor,
+              borderRadius: 2,
+              p: 1,
+              wordBreak: 'break-word',
+            }}
+          >
+            <Typography variant="body1" component="span">
+              {message.content}
+            </Typography>
+          </Box>
+        ) : message.type === 'gif' && message.gifUrl ? (
+          <Box
+            sx={{
+              borderRadius: 2,
+              overflow: 'hidden',
+              maxWidth: '300px',
+            }}
+          >
+            <img
+              src={message.gifUrl}
+              alt="GIF"
+              style={{ width: '100%', borderRadius: '8px' }}
+            />
+          </Box>
+        ) : null}
       </Box>
     </Box>
   );

@@ -1,5 +1,3 @@
-// src/store/messageSlice.ts
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message, MessageState } from '../types/global';
 
@@ -7,7 +5,6 @@ const initialState: MessageState = {
   messages: {},
 };
 
-// Initialize a simple ID counter
 let nextMessageId = 1;
 
 const messageSlice = createSlice({
@@ -15,8 +12,8 @@ const messageSlice = createSlice({
   initialState,
   reducers: {
     sendMessage(state, action: PayloadAction<Omit<Message, 'id'>>) {
-      const { channelId, sender, content, timestamp } = action.payload;
-      const newMessage: Message = { id: nextMessageId++, channelId, sender, content, timestamp };
+      const { channelId, sender, type, content, gifUrl, timestamp } = action.payload;
+      const newMessage: Message = { id: nextMessageId++, channelId, sender, type, content, gifUrl, timestamp };
       if (!state.messages[channelId]) {
         state.messages[channelId] = [];
       }

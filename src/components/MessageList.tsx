@@ -1,5 +1,3 @@
-// src/components/MessageList.tsx
-
 import React, { useEffect, useRef } from 'react';
 import { Box, Typography, List } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -10,7 +8,6 @@ import { MessageListProps } from '../types/global';
 const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
   const dispatch = useAppDispatch();
   
-  // Access messages for the selected channel
   const messages = useAppSelector((state) => state.messages.messages[selectedChannel] || []);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -20,7 +17,6 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
   };
 
   useEffect(() => {
-    // Fetch messages when the selected channel changes
     dispatch(fetchMessages(selectedChannel));
   }, [dispatch, selectedChannel]);
 

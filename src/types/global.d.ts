@@ -1,4 +1,3 @@
-// src/types/global.d.ts
 export interface Channel {
     id: number;
     name: string;
@@ -19,15 +18,18 @@ export interface HeaderProps {
 
 export interface MessageInputProps {
     newMessage: string;
-    setNewMessage: (msg: string) => void;
+    setNewMessage: React.Dispatch<React.SetStateAction<string>>;
     onSend: () => void;
-}
+    onSendGif: (gifUrl: string) => void;
+  }
 
 export interface Message {
     id: number;
     channelId: number;
     sender: string;
+    type: 'text' | 'gif';
     content: string;
+    gifUrl?: string;
     timestamp: string;
 }
 
@@ -89,11 +91,16 @@ export interface UserState {
     avatar: string;
 }
 
-
 export interface VoiceState {
     isMuted: boolean;
     isDeafened: boolean;
     channelType: 'voice' | 'text';
     participants: string[];
     isJoined: boolean;
+}
+
+export interface EmojiData {
+    id: string;
+    name: string;
+    native: string;
 }
