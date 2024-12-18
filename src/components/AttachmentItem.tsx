@@ -1,17 +1,15 @@
 import React from 'react';
-import { Box, Link } from '@mui/material';
+import { Box, Link, IconButton, Typography } from '@mui/material';
 import { Attachment } from '../types/global';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DescriptionIcon from '@mui/icons-material/Description';
-import AudiotrackIcon from '@mui/icons-material/Audiotrack';
-import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
+import { getFileIcon } from '../utils';
 
 interface AttachmentItemProps {
   attachment: Attachment;
+  onRemove?: (id: number) => void;
 }
 
-const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment }) => {
+const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, onRemove }) => {
   const renderAttachment = () => {
     switch (attachment.type) {
       case 'image':
@@ -50,31 +48,31 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment }) => {
     }
   };
 
-  const getFileIcon = (fileName?: string) => {
-    if (fileName) {
-      const extension = fileName.split('.').pop()?.toLowerCase();
-      switch (extension) {
-        case 'pdf':
-          return <PictureAsPdfIcon />;
-        case 'doc':
-        case 'docx':
-          return <DescriptionIcon />;
-        case 'mp3':
-        case 'wav':
-          return <AudiotrackIcon />;
-        case 'jpg':
-        case 'jpeg':
-        case 'png':
-        case 'gif':
-          return <ImageIcon />;
-        default:
-          return <InsertDriveFileIcon />;
-      }
-    }
-    return <InsertDriveFileIcon />;
-  };
-
-  return <>{renderAttachment()}</>;
+  return (
+    <Box sx={{ position: 'relative', mb: 1 }}>
+      {renderAttachment()}
+      {/* Conditionally render the Remove Button */}
+      {onRemove && (
+        <IconButton
+          size="small"
+          onClick={() => onRemove(attachment.id)}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bgcolor: 'black',
+            color: 'white',
+            '&:hover': {
+              bgcolor: 'rgba(0,0,0,0.8)',
+            },
+          }}
+          aria-label="Remove attachment"
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  );
 };
 
 export default React.memo(AttachmentItem);

@@ -1,7 +1,14 @@
-import React from 'react';
-import { Box, Typography, Avatar, useTheme } from '@mui/material';
-import { MessageItemProps, Attachment } from '../types/global';
-import AttachmentItem from './AttachmentItem';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Avatar,
+  useTheme,
+} from '@mui/material';
+import { MessageItemProps } from '../types/global';
+import ImageGrid from './ImageGrid';
+import Lightbox from './Lightbox';
+import FileList from './FileList';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
@@ -23,6 +30,61 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     : theme.palette.text.primary;
 
   const timestampOffset = theme.spacing(6);
+
+  const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
+  const otherAttachments = message.attachments?.filter(att => att.type !== 'image') || [];
+
+  const maxVisibleImages = 4;
+  const visibleImages = imageAttachments.slice(0, maxVisibleImages);
+  const excessImageCount = imageAttachments.length - maxVisibleImages;
+
+  const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+
+  const handleImageClick = (index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const handlePrevImage = useCallback(() => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? imageAttachments.length - 1 : prevIndex - 1
+    );
+  }, [imageAttachments.length]);
+
+  const handleNextImage = useCallback(() => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === imageAttachments.length - 1 ? 0 : prevIndex + 1
+    );
+  }, [imageAttachments.length]);
+
+  const handleThumbnailClick = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
+  const handleCloseLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (lightboxOpen) {
+        if (event.key === 'ArrowLeft') {
+          handlePrevImage();
+        } else if (event.key === 'ArrowRight') {
+          handleNextImage();
+        } else if (event.key === 'Escape') {
+          handleCloseLightbox();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lightboxOpen, handlePrevImage, handleNextImage]);
 
   return (
     <Box
@@ -99,16 +161,38 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               />
             </Box>
           )}
-          {/* Render Attachments */}
-          {message.attachments && message.attachments.length > 0 && (
+          {/* Render Image Attachments */}
+          {imageAttachments.length > 0 && (
             <Box sx={{ mt: 1 }}>
-              {message.attachments.map((attachment: Attachment) => (
-                <AttachmentItem key={attachment.id} attachment={attachment} />
-              ))}
+              <ImageGrid
+                imageAttachments={imageAttachments}
+                maxVisibleImages={maxVisibleImages}
+                onImageClick={handleImageClick}
+              />
             </Box>
+          )}
+          {/* Render Other Attachments */}
+          {otherAttachments.length > 0 && (
+            <FileList
+              files={otherAttachments}
+              canRemove={false}
+            />
           )}
         </Box>
       </Box>
+
+      {/* Lightbox Overlay */}
+      {imageAttachments.length > 0 && (
+        <Lightbox
+          open={lightboxOpen}
+          onClose={handleCloseLightbox}
+          images={imageAttachments}
+          currentIndex={currentImageIndex}
+          onPrev={handlePrevImage}
+          onNext={handleNextImage}
+          onThumbnailClick={handleThumbnailClick}
+        />
+      )}
     </Box>
   );
 };
