@@ -2,17 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, Avatar, useTheme } from '@mui/material';
-
-interface Message {
-  id: number;
-  sender: string;
-  content: string;
-  timestamp: string;
-}
-
-interface MessageItemProps {
-  message: Message;
-}
+import { MessageItemProps } from '../types/global';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();

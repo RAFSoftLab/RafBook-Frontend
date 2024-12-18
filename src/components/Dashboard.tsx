@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+// src/components/Dashboard.tsx
+
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -7,12 +9,8 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage } from '../store/messageSlice';
-import { setSelectedChannelId } from '../store/channelSlice';
-
-interface Channel {
-  id: number;
-  name: string;
-}
+import { setSelectedChannelId, setChannels } from '../store/channelSlice';
+import { Channel } from '../types/global';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -23,34 +21,30 @@ const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const messages = useAppSelector((state) => state.messages.messages);
   
-  const channelType = useAppSelector((state) => state.channel.channelType);
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
+  const channels = useAppSelector((state) => state.channel.channels);
 
-  const textChannels: Channel[] = [
-    { id: 1, name: 'General' },
-    { id: 2, name: 'Announcements' },
-    { id: 3, name: 'Random' },
-  ];
+  // Initialize channels (this could also come from an API)
+  useEffect(() => {
+    const initialChannels: Channel[] = [
+      // Text Channels
+      { id: 1, name: 'General', type: 'text' },
+      { id: 2, name: 'Announcements', type: 'text' },
+      { id: 3, name: 'Random', type: 'text' },
+      // Voice Channels
+      { id: 4, name: 'Gaming', type: 'voice' },
+      { id: 5, name: 'Music', type: 'voice' },
+      { id: 6, name: 'Study Group', type: 'voice' },
+    ];
 
-  const voiceChannels: Channel[] = [
-    { id: 4, name: 'Gaming' },
-    { id: 5, name: 'Music' },
-    { id: 6, name: 'Study Group' },
-  ];
+    dispatch(setChannels(initialChannels));
+  }, [dispatch]);
 
-  const getSelectedChannelName = () => {
-    if (channelType === 'text') {
-      const channel = textChannels.find((ch) => ch.id === selectedChannelId);
-      return channel ? channel.name : '';
-    } else if (channelType === 'voice') {
-      const channel = voiceChannels.find((ch) => ch.id === selectedChannelId);
-      return channel ? channel.name : '';
-    } else {
-      return '';
-    }
+  const getSelectedChannel = () => {
+    return channels.find((ch) => ch.id === selectedChannelId) || null;
   };
 
-  const selectedChannelName = getSelectedChannelName();
+  const selectedChannel = getSelectedChannel();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -62,32 +56,31 @@ const Dashboard: React.FC = () => {
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return;
-
-    if (channelType !== 'text' || selectedChannelId === null) {
+  
+    if (!selectedChannel || selectedChannel.type !== 'text') {
       return;
     }
-
+  
     const messagePayload = {
-      channelId: selectedChannelId,
+      channelId: selectedChannel.id, // Ensures channelId is a number
       sender: 'You',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-
+  
     dispatch(sendMessage(messagePayload));
     setNewMessage('');
   };
-
+  
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <Header
         drawerWidth={drawerWidth}
         handleDrawerToggle={handleDrawerToggle}
-        channelName={selectedChannelName}
+        channelName={selectedChannel ? selectedChannel.name : 'Channels'}
       />
       <Sidebar
-        textChannels={textChannels}
-        voiceChannels={voiceChannels}
+        channels={channels}
         selectedChannel={selectedChannelId}
         onSelectChannel={handleChannelSelect}
         drawerWidth={drawerWidth}
@@ -109,30 +102,14 @@ const Dashboard: React.FC = () => {
         <Box sx={{ height: '64px' }} />
 
         {/* Conditional Rendering Based on Channel Type and Selection */}
-        {channelType === 'voice' ? (
-          selectedChannelId ? (
-            <VoiceChannel selectedChannel={selectedChannelId} />
+        {selectedChannel ? (
+          selectedChannel.type === 'voice' ? (
+            <VoiceChannel selectedChannel={selectedChannel.id} />
           ) : (
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-              }}
-            >
-              <Typography variant="h6">
-                Please select a voice channel to view participants.
-              </Typography>
-            </Box>
-          )
-        ) : channelType === 'text' ? (
-          selectedChannelId ? (
             <>
               {/* Message List */}
               <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
-                <MessageList selectedChannel={selectedChannelId} />
+                <MessageList selectedChannel={selectedChannel.id} />
               </Box>
 
               {/* Message Input */}
@@ -142,22 +119,22 @@ const Dashboard: React.FC = () => {
                 onSend={handleSendMessage}
               />
             </>
-          ) : (
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-              }}
-            >
-              <Typography variant="h6">
-                Please select a text channel to view messages.
-              </Typography>
-            </Box>
           )
-        ) : null}
+        ) : (
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+            }}
+          >
+            <Typography variant="h6">
+              Please select a channel to view content.
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

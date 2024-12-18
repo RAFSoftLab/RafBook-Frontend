@@ -12,11 +12,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleTheme } from '../store/themeSlice';
-
-interface SettingsModalProps {
-  open: boolean;
-  onClose: () => void;
-}
+import { SettingsModalProps } from '../types/global';
 
 const style = {
   position: 'absolute' as const,

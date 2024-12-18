@@ -1,49 +1,34 @@
+// src/store/messageSlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface Message {
-  id: number;
-  channelId: number;
-  sender: string;
-  content: string;
-  timestamp: string;
-}
-
-interface MessageState {
-  messages: Message[];
-}
+import { Message, MessageState } from '../types/global';
 
 const initialState: MessageState = {
-  messages: [
-    {
-      id: 1,
-      channelId: 1,
-      sender: 'Alice',
-      content: 'Hello everyone!',
-      timestamp: '10:00 AM',
-    },
-    {
-      id: 2,
-      channelId: 1,
-      sender: 'Bob',
-      content: 'Hi Alice! Welcome to the channel.',
-      timestamp: '10:05 AM',
-    },
-  ],
+  messages: {},
 };
+
+// Initialize a simple ID counter
+let nextMessageId = 1;
 
 const messageSlice = createSlice({
   name: 'messages',
   initialState,
   reducers: {
     sendMessage(state, action: PayloadAction<Omit<Message, 'id'>>) {
-      const newMessage: Message = {
-        id: state.messages.length + 1,
-        ...action.payload,
-      };
-      state.messages.push(newMessage);
+      const { channelId, sender, content, timestamp } = action.payload;
+      const newMessage: Message = { id: nextMessageId++, channelId, sender, content, timestamp };
+      if (!state.messages[channelId]) {
+        state.messages[channelId] = [];
+      }
+      state.messages[channelId].push(newMessage);
+    },
+    fetchMessages(state, action: PayloadAction<number>) {
+      // Implement fetching messages logic, possibly async
+      // For now, it's a placeholder
+      // e.g., state.messages[action.payload] = fetchedMessages;
     },
   },
 });
 
-export const { sendMessage } = messageSlice.actions;
+export const { sendMessage, fetchMessages } = messageSlice.actions;
 export default messageSlice.reducer;

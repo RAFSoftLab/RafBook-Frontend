@@ -5,18 +5,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import HeadsetIcon from '@mui/icons-material/Headset';
 import HeadsetOffIcon from '@mui/icons-material/HeadsetOff';
 import SettingsIcon from '@mui/icons-material/Settings';
-
-interface UserControlsProps {
-    user: {
-        name: string;
-        avatar: string;
-    };
-    isMuted: boolean;
-    isDeafened: boolean;
-    onToggleMute: () => void;
-    onToggleDeafen: () => void;
-    onOpenSettings: () => void;
-}
+import { UserControlsProps } from '../types/global';
 
 const UserControls: React.FC<UserControlsProps> = ({
     user,

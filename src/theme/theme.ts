@@ -1,3 +1,5 @@
+// src/theme.ts
+
 import { createTheme, Theme } from '@mui/material/styles';
 import {
   indigo,
@@ -15,6 +17,8 @@ import {
 
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/700.css';
+import '@fontsource/open-sans/400.css'; // Import Open Sans 400
+import '@fontsource/open-sans/700.css'; // Import Open Sans 700
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -36,7 +40,7 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
     palette: {
       mode,
       primary: {
-        main: mode === 'light' ? indigo[600] : pink[500],
+        main: mode === 'light' ? indigo[600] : red[500],
       },
       secondary: {
         main: mode === 'light' ? teal[500] : cyan[500],
@@ -64,13 +68,14 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
       },
     },
     typography: {
-      fontFamily: 'Roboto, Arial, sans-serif',
+      fontFamily: '"Open Sans", "Roboto", Arial, sans-serif',
       h4: {
         fontWeight: 700,
       },
       button: {
         textTransform: 'none',
       },
+      // Additional typography customizations
     },
     components: {
       MuiButton: {
@@ -123,10 +128,10 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
           root: {
             color: mode === 'light' ? blue[600] : cyan[500],
             '&.Mui-checked': {
-              color: mode === 'light' ? indigo[600] : pink[500],
+              color: mode === 'light' ? indigo[600] : red[500],
             },
             '&:not(.Mui-checked)': {
-              color: mode === 'light' ? indigo[600] : pink[500],
+              color: mode === 'light' ? indigo[600] : red[500],
             },
           },
         },

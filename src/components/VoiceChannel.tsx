@@ -1,3 +1,5 @@
+// src/components/VoiceChannel.tsx
+
 import React, { useEffect } from 'react';
 import {
   Box,
@@ -7,7 +9,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Button,
+  Avatar,
+  Button
 } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
@@ -21,10 +24,7 @@ import {
   leaveChannel,
   setParticipants,
 } from '../store/voiceSlice';
-
-interface VoiceChannelProps {
-  selectedChannel: number;
-}
+import { VoiceChannelProps } from '../types/global';
 
 const VoiceChannel: React.FC<VoiceChannelProps> = ({ selectedChannel }) => {
   const dispatch = useAppDispatch();
@@ -35,6 +35,7 @@ const VoiceChannel: React.FC<VoiceChannelProps> = ({ selectedChannel }) => {
   const placeholderParticipants = ['Alice', 'Bob', 'Charlie'];
 
   useEffect(() => {
+    // Simulate fetching participants based on the selected channel
     dispatch(setParticipants(placeholderParticipants));
   }, [dispatch, selectedChannel]);
 
@@ -111,7 +112,11 @@ const VoiceChannel: React.FC<VoiceChannelProps> = ({ selectedChannel }) => {
           <List>
             {participants.map((participant, index) => (
               <ListItem key={index}>
-                <ListItemText primary={participant} />
+                <Avatar>{participant.charAt(0)}</Avatar>
+                <ListItemText
+                  primary={participant}
+                  sx={{ ml: 2 }}
+                />
               </ListItem>
             ))}
           </List>

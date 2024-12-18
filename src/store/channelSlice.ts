@@ -1,28 +1,25 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+// src/store/channelSlice.ts
 
-interface ChannelState {
-  channelType: 'text' | 'voice';
-  selectedChannelId: number | null;
-}
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Channel, ChannelState } from '../types/global';
 
 const initialState: ChannelState = {
-  channelType: 'text',
   selectedChannelId: null,
+  channels: [],
 };
 
 const channelSlice = createSlice({
   name: 'channel',
   initialState,
   reducers: {
-    setChannelType(state, action: PayloadAction<'text' | 'voice'>) {
-      state.channelType = action.payload;
-      state.selectedChannelId = null;
-    },
-    setSelectedChannelId(state, action: PayloadAction<number | null>) {
+    setSelectedChannelId(state, action: PayloadAction<number>) {
       state.selectedChannelId = action.payload;
+    },
+    setChannels(state, action: PayloadAction<Channel[]>) {
+      state.channels = action.payload;
     },
   },
 });
 
-export const { setChannelType, setSelectedChannelId } = channelSlice.actions;
+export const { setSelectedChannelId, setChannels } = channelSlice.actions;
 export default channelSlice.reducer;

@@ -1,12 +1,8 @@
 import React from 'react';
 import { Box, TextField, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import { MessageInputProps } from '../types/global';
 
-interface MessageInputProps {
-  newMessage: string;
-  setNewMessage: (msg: string) => void;
-  onSend: () => void;
-}
 
 const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, onSend }) => {
   return (

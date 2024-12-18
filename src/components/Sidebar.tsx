@@ -1,3 +1,5 @@
+// src/components/Sidebar.tsx
+
 import React, { useState } from 'react';
 import {
     Drawer,
@@ -8,31 +10,13 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleMute, toggleDeafen } from '../store/voiceSlice';
-import { setChannelType } from '../store/channelSlice';
 import SettingsModal from './SettingsModal'; 
-
-import ChannelTypeToggle from './ChannelTypeToggle';
 import ChannelList from './ChannelList';
 import UserControls from './UserControls';
-
-interface Channel {
-    id: number;
-    name: string;
-}
-
-interface SidebarProps {
-    textChannels: Channel[];
-    voiceChannels: Channel[];
-    selectedChannel: number | null;
-    onSelectChannel: (id: number) => void;
-    drawerWidth: number;
-    mobileOpen: boolean;
-    handleDrawerToggle: () => void;
-}
+import { SidebarProps } from '../types/global';
 
 const Sidebar: React.FC<SidebarProps> = ({
-    textChannels,
-    voiceChannels,
+    channels,
     selectedChannel,
     onSelectChannel,
     drawerWidth,
@@ -44,8 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     const user = useAppSelector((state) => state.user);
     const { isMuted, isDeafened } = useAppSelector((state) => state.voice);
-    const channelType = useAppSelector((state) => state.channel.channelType);
-
+    
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const handleToggleMute = () => {
@@ -56,15 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         dispatch(toggleDeafen());
     };
 
-    const handleChannelTypeChange = (
-        event: React.MouseEvent<HTMLElement>,
-        newChannelType: 'voice' | 'text' | null
-    ) => {
-        if (newChannelType !== null) {
-            dispatch(setChannelType(newChannelType));
-        }
-    };
-
     const handleOpenSettings = () => {
         setIsSettingsOpen(true);
     };
@@ -72,8 +46,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     const handleCloseSettings = () => {
         setIsSettingsOpen(false);
     };
-
-    const displayedChannels = channelType === 'voice' ? voiceChannels : textChannels;
 
     const drawerContent = (
         <Box
@@ -93,21 +65,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Divider */}
             <Divider />
 
-            {/* Channel Type Toggle */}
-            <Box sx={{ p: 2 }}>
-                <ChannelTypeToggle
-                    channelType={channelType}
-                    onChange={handleChannelTypeChange}
-                />
-            </Box>
-
             {/* Channel List */}
             <Box sx={{ p: 2 }}>
                 <ChannelList
-                    channels={displayedChannels}
+                    channels={channels}
                     selectedChannel={selectedChannel}
                     onSelectChannel={onSelectChannel}
-                    channelType={channelType}
                 />
             </Box>
 
@@ -144,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 open={mobileOpen}
                 onClose={handleDrawerToggle}
                 ModalProps={{
-                    keepMounted: true,
+                    keepMounted: true, // Better open performance on mobile
                 }}
                 sx={{
                     display: { xs: 'block', sm: 'none' },

@@ -1,12 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface VoiceState {
-  isMuted: boolean;
-  isDeafened: boolean;
-  channelType: 'voice' | 'text';
-  participants: string[];
-  isJoined: boolean;
-}
+import { VoiceState } from '../types/global';
 
 const initialState: VoiceState = {
   isMuted: false,

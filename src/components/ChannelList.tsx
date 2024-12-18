@@ -1,25 +1,16 @@
+// src/components/ChannelList.tsx
+
 import React from 'react';
 import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import TagIcon from '@mui/icons-material/Tag';
+import TextsmsIcon from '@mui/icons-material/Textsms';
+import { ChannelListProps } from '../types/global';
 
-interface Channel {
-    id: number;
-    name: string;
-}
-
-interface ChannelListProps {
-    channels: Channel[];
-    selectedChannel: number | null;
-    onSelectChannel: (id: number) => void;
-    channelType: 'voice' | 'text';
-}
-
-const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, onSelectChannel, channelType }) => {
+const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, onSelectChannel }) => {
     const theme = useTheme();
 
-    const getChannelIcon = (type: 'voice' | 'text') => {
-        return type === 'voice' ? <VolumeUpIcon /> : <TagIcon />;
+    const getChannelIcon = (type: 'text' | 'voice') => {
+        return type === 'voice' ? <VolumeUpIcon /> : <TextsmsIcon />;
     };
 
     return (
@@ -47,7 +38,7 @@ const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, on
                         }}
                     >
                         <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
-                            {getChannelIcon(channelType)}
+                            {getChannelIcon(channel.type)}
                         </ListItemIcon>
                         <ListItemText primary={channel.name} />
                     </ListItemButton>

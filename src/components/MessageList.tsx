@@ -1,14 +1,18 @@
-import React, { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
-import { useAppSelector } from '../store/hooks';
-import MessageItem from './MessageItem';
+// src/components/MessageList.tsx
 
-interface MessageListProps {
-  selectedChannel: number;
-}
+import React, { useEffect, useRef } from 'react';
+import { Box, Typography, List } from '@mui/material';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { fetchMessages } from '../store/messageSlice';
+import MessageItem from './MessageItem';
+import { MessageListProps } from '../types/global';
 
 const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
-  const messages = useAppSelector((state) => state.messages.messages);
+  const dispatch = useAppDispatch();
+  
+  // Access messages for the selected channel
+  const messages = useAppSelector((state) => state.messages.messages[selectedChannel] || []);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -16,10 +20,13 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, selectedChannel]);
+    // Fetch messages when the selected channel changes
+    dispatch(fetchMessages(selectedChannel));
+  }, [dispatch, selectedChannel]);
 
-  const filteredMessages = messages.filter((msg) => msg.channelId === selectedChannel);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <Box
@@ -31,9 +38,15 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
         pr: 2,
       }}
     >
-      {filteredMessages.map((msg) => (
-        <MessageItem key={msg.id} message={msg} />
-      ))}
+      {messages.length === 0 ? (
+        <Typography variant="h6">No messages in this channel.</Typography>
+      ) : (
+        <List>
+          {messages.map((msg) => (
+            <MessageItem key={msg.id} message={msg} />
+          ))}
+        </List>
+      )}
       <div ref={messagesEndRef} />
     </Box>
   );

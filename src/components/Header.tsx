@@ -6,12 +6,7 @@ import {
   IconButton,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-
-interface HeaderProps {
-  drawerWidth: number;
-  handleDrawerToggle: () => void;
-  channelName: string;
-}
+import { HeaderProps } from '../types/global';
 
 const Header: React.FC<HeaderProps> = ({ drawerWidth, handleDrawerToggle, channelName }) => {
   return (
