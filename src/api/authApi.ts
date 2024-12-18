@@ -1,15 +1,20 @@
 import axiosInstance from './axiosConfig';
 
-interface LoginRequest {
+export interface LoginRequest {
   username: string;
   password: string;
 }
 
-interface LoginResponse {
+export interface LoginResponse {
   token: string;
 }
 
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
-  const response = await axiosInstance.post<LoginResponse>('/api/auth/login', credentials);
-  return response.data;
+  try {
+    console.log('credentials', credentials);
+    const response = await axiosInstance.post<LoginResponse>('/users/auth/login', credentials);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Login failed');
+  }
 };

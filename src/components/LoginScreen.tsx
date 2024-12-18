@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,16 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { login } from '../api/authApi';
 
-declare global {
-  interface Window {
-    api: {
-      getToken: () => string | undefined;
-      setToken: (token: string) => void;
-      removeToken: () => void;
-    };
-  }
-}
-
 const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -34,6 +24,13 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,16 +44,17 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      // const response = await login({ username, password });
-      // const token = response.token;
+      const response = await login({ username, password });
+      const token = response.token;
 
-      // if (token) {
-        // window.api.setToken(token);
-        // navigate('/dashboard');
-      // }
-      navigate('/dashboard');
+      if (token) {
+        localStorage.setItem('token', token);
+        navigate('/dashboard');
+      } else {
+        setError('Invalid response from server.');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -122,6 +120,7 @@ const LoginScreen: React.FC = () => {
           Sign In
         </Typography>
 
+        {/* Display error if any */}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -176,7 +175,10 @@ const LoginScreen: React.FC = () => {
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
-          <a href="/forgot-password" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>
+          <a
+            href="/forgot-password"
+            style={{ color: theme.palette.primary.main, textDecoration: 'none' }}
+          >
             Forgot Password?
           </a>
         </Typography>

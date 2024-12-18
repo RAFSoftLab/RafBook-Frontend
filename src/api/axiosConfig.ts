@@ -1,16 +1,15 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8080/",
+  baseURL: "http://192.168.124.28:8080/api",
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = window.api.getToken();
+    const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -27,7 +26,7 @@ axiosInstance.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          window.api.removeToken();
+          localStorage.removeItem('token');
           break;
         case 500:
           break;
