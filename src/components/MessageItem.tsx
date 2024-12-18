@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Avatar, useTheme } from '@mui/material';
-import { MessageItemProps } from '../types/global';
+import { MessageItemProps, Attachment } from '../types/global';
+import AttachmentItem from './AttachmentItem';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
@@ -66,35 +67,47 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         </Avatar>
 
         {/* Message Content */}
-        {message.type === 'text' ? (
-          <Box
-            sx={{
-              backgroundColor: messageBackground,
-              color: messageTextColor,
-              borderRadius: 2,
-              p: 1,
-              wordBreak: 'break-word',
-            }}
-          >
-            <Typography variant="body1" component="span">
-              {message.content}
-            </Typography>
-          </Box>
-        ) : message.type === 'gif' && message.gifUrl ? (
-          <Box
-            sx={{
-              borderRadius: 2,
-              overflow: 'hidden',
-              maxWidth: '300px',
-            }}
-          >
-            <img
-              src={message.gifUrl}
-              alt="GIF"
-              style={{ width: '100%', borderRadius: '8px' }}
-            />
-          </Box>
-        ) : null}
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+          {message.type === 'text' && (
+            <Box
+              sx={{
+                backgroundColor: messageBackground,
+                color: messageTextColor,
+                borderRadius: 2,
+                p: 1,
+                wordBreak: 'break-word',
+              }}
+            >
+              <Typography variant="body1" component="span">
+                {message.content}
+              </Typography>
+            </Box>
+          )}
+          {message.type === 'gif' && message.gifUrl && (
+            <Box
+              sx={{
+                borderRadius: 2,
+                overflow: 'hidden',
+                maxWidth: '300px',
+                mt: 1,
+              }}
+            >
+              <img
+                src={message.gifUrl}
+                alt="GIF"
+                style={{ width: '100%', borderRadius: '8px' }}
+              />
+            </Box>
+          )}
+          {/* Render Attachments */}
+          {message.attachments && message.attachments.length > 0 && (
+            <Box sx={{ mt: 1 }}>
+              {message.attachments.map((attachment: Attachment) => (
+                <AttachmentItem key={attachment.id} attachment={attachment} />
+              ))}
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );

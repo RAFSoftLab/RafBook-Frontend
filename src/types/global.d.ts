@@ -21,16 +21,25 @@ export interface MessageInputProps {
     setNewMessage: React.Dispatch<React.SetStateAction<string>>;
     onSend: () => void;
     onSendGif: (gifUrl: string) => void;
-  }
+    onSendAttachments: (attachments: Attachment[]) => void; // New prop
+}
 
 export interface Message {
     id: number;
     channelId: number;
     sender: string;
-    type: 'text' | 'gif';
+    type: 'text' | 'gif' | 'file';
     content: string;
     gifUrl?: string;
     timestamp: string;
+    attachments?: Attachment[];
+}
+
+export interface Attachment {
+    id: number;
+    type: 'image' | 'audio' | 'file';
+    url: string;
+    name?: string;
 }
 
 export interface MessageItemProps {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -8,18 +8,24 @@ import VoiceChannel from './VoiceChannel';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage } from '../store/messageSlice';
 import { setSelectedChannelId, setChannels } from '../store/channelSlice';
-import { Channel, Message } from '../types/global';
+import { Channel, Message, Attachment } from '../types/global';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
   const [mobileOpen, setMobileOpen] = useState(false);
   
   const [newMessage, setNewMessage] = useState('');
+  const [attachments, setAttachments] = useState<Attachment[]>([]); 
 
   const dispatch = useAppDispatch();
   
   const channels = useAppSelector((state) => state.channel.channels);
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
+  const messages = useAppSelector((state) => 
+    selectedChannelId !== null 
+      ? (state.messages.messages[selectedChannelId] || []) 
+      : []
+  );
 
   useEffect(() => {
     const initialChannels: Channel[] = [
@@ -48,10 +54,11 @@ const Dashboard: React.FC = () => {
 
   const handleChannelSelect = (id: number) => {
     dispatch(setSelectedChannelId(id));
+    setAttachments([]);
   };
 
   const handleSendMessage = () => {
-    if (newMessage.trim() === '') return;
+    if (newMessage.trim() === '' && attachments.length === 0) return;
 
     if (!selectedChannel || selectedChannel.type !== 'text') {
       return;
@@ -60,13 +67,15 @@ const Dashboard: React.FC = () => {
     const messagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: 'You',
-      type: 'text',
+      type: newMessage.trim() !== '' ? 'text' : 'file',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      attachments: attachments.length > 0 ? attachments : undefined,
     };
 
     dispatch(sendMessage(messagePayload));
     setNewMessage('');
+    setAttachments([]);
   };
 
   const handleSendGif = (gifUrl: string) => {
@@ -84,6 +93,10 @@ const Dashboard: React.FC = () => {
     };
 
     dispatch(sendMessage(messagePayload));
+  };
+
+  const handleSendAttachments = (newAttachments: Attachment[]) => {
+    setAttachments((prev) => [...prev, ...newAttachments]);
   };
 
   return (
@@ -110,6 +123,7 @@ const Dashboard: React.FC = () => {
           backgroundColor: 'background.default',
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
         }}
       >
         {/* Spacer for the AppBar */}
@@ -132,6 +146,7 @@ const Dashboard: React.FC = () => {
                 setNewMessage={setNewMessage}
                 onSend={handleSendMessage}
                 onSendGif={handleSendGif}
+                onSendAttachments={handleSendAttachments}
               />
             </>
           )
