@@ -10,6 +10,8 @@ import {
   CircularProgress,
   Tooltip,
   InputAdornment,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
@@ -42,6 +44,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   const emojiButtonRef = React.useRef<HTMLButtonElement>(null);
   const gifButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const gifCols = isSmallScreen ? 1 : 2;
 
   const handleEmojiClick = (event: React.MouseEvent<HTMLElement>) => {
     setEmojiAnchorEl(event.currentTarget);
@@ -77,7 +83,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       }
       setIsLoading(true);
       try {
-        const response = await gf.search(query, { limit: 5 });
+        const response = await gf.search(query, { limit: 10 });
         setGifs(response.data);
       } catch (error) {
         console.error('Error fetching GIFs:', error);
@@ -339,7 +345,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           horizontal: 'center',
         }}
         PaperProps={{
-          style: { width: 300, padding: 10 },
+          style: { width: 600, padding: 10 },
         }}
       >
         <TextField
@@ -358,14 +364,14 @@ const MessageInput: React.FC<MessageInputProps> = ({
           {isLoading ? (
             <Typography>Loading GIFs...</Typography>
           ) : gifs.length > 0 ? (
-            <ImageList cols={1} rowHeight={100} gap={8}>
+            <ImageList variant="masonry" cols={gifCols} gap={8}>
               {gifs.map((gif) => (
                 <ImageListItem key={gif.id}>
                   <img
                     src={gif.images.fixed_height_small.url}
                     alt={gif.title}
                     loading="lazy"
-                    style={{ cursor: 'pointer', borderRadius: '8px' }}
+                    style={{ cursor: 'pointer', borderRadius: '8px', width: '100%', height: 'auto' }}
                     onClick={() => handleGifSelect(gif.images.original.url)}
                   />
                 </ImageListItem>
