@@ -33,7 +33,7 @@ const GifPicker: React.FC<GifPickerProps> = ({ open, onClose, onSelectGif, ancho
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
-  const gifCols = isLargeScreen ? 4 : isMediumScreen ? 3 : 2;
+  const gifCols = isLargeScreen ? 3 : isMediumScreen ? 2 : 2;
 
   const fetchGifs = useCallback(
     async (query: string) => {

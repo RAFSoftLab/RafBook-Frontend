@@ -39,7 +39,22 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
       ) : (
         <List>
           {messages.map((msg) => (
-            <MessageItem key={msg.id} message={msg} />
+            <Box
+              key={msg.id}
+              sx={{
+                borderRadius: 2,
+                transition: 'background-color 0.3s',
+                '&:hover': {
+                  backgroundColor: (theme) =>
+                    theme.palette.action.hover,
+                },
+                mb: 1,
+                paddingY: 0.5,
+                paddingX: 1,
+              }}
+            >
+              <MessageItem message={msg} />
+            </Box>
           ))}
         </List>
       )}
