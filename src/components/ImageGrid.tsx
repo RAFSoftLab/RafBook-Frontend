@@ -21,9 +21,8 @@ const ImageGrid: React.FC<ImageGridProps> = ({
   const visibleImages = imageAttachments.slice(0, maxVisibleImages);
   const excessImageCount = imageAttachments.length - maxVisibleImages;
 
-  // Determine the number of columns based on maxVisibleImages
-  // For example, aim for 2 columns on small screens, more on larger screens
-  let columns = 2; // default
+
+  let columns = 2;
 
   if (maxVisibleImages >= 6) {
     columns = 3;
@@ -36,7 +35,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({
   return (
     <Grid container spacing={1}>
       {visibleImages.map((attachment, index) => {
-        const gridXs = Math.floor(12 / columns); // Ensures equal width for all grid items
+        const gridXs = Math.floor(12 / columns);
 
         const isLastVisible = index === maxVisibleImages - 1 && excessImageCount > 0;
 

@@ -1,5 +1,3 @@
-// src/components/MessageItem.tsx
-
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
@@ -12,20 +10,17 @@ import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
-import AttachmentPreview from './AttachmentPreview';
 import { Attachment } from '../types/global';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
   
-  // Define breakpoints
-  const isXs = useMediaQuery(theme.breakpoints.down('sm')); // <600px
-  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 960px
-  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 960px - 1280px
-  const isLgUp = useMediaQuery(theme.breakpoints.up('lg')); // >1280px
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
 
-  // Determine maxVisibleImages based on screen size
-  let maxVisibleImages = 4; // default
+  let maxVisibleImages = 4;
   if (isXs) {
     maxVisibleImages = 2;
   } else if (isSm) {
@@ -59,7 +54,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
-  // Synchronize attachments with message.attachments
   useEffect(() => {
     setAttachments(message.attachments || []);
   }, [message.attachments]);
@@ -93,16 +87,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
   const handleCloseLightbox = () => {
     setLightboxOpen(false);
-  };
-
-  const handleRemoveAttachment = (id: number) => {
-    const attachmentToRemove = attachments.find((att) => att.id === id);
-    if (attachmentToRemove && attachmentToRemove.url.startsWith('blob:')) {
-      URL.revokeObjectURL(attachmentToRemove.url);
-    }
-    setAttachments((prev) => prev.filter((att) => att.id !== id));
-    // If you have a prop callback for removing attachments, call it here
-    // onRemoveAttachment?.(id);
   };
 
   useEffect(() => {
@@ -207,7 +191,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
                 imageAttachments={imageAttachments}
                 maxVisibleImages={maxVisibleImages}
                 onImageClick={handleImageClick}
-                onRemoveImage={handleRemoveAttachment} // Pass if needed
               />
             </Box>
           )}

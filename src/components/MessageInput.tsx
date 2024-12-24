@@ -1,5 +1,3 @@
-// src/components/MessageInput.tsx
-
 import React, { useState, useCallback } from 'react';
 import {
   Box,
@@ -36,14 +34,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
   const theme = useTheme();
 
-  // Define breakpoints
-  const isXs = useMediaQuery(theme.breakpoints.down('sm')); // <600px
-  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 960px
-  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 960px - 1280px
-  const isLgUp = useMediaQuery(theme.breakpoints.up('lg')); // >1280px
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
 
-  // Determine maxVisibleImages based on screen size
-  let maxVisibleImages = 4; // default
+  
+  let maxVisibleImages = 4;
   if (isXs) {
     maxVisibleImages = 2;
   } else if (isSm) {
@@ -130,7 +127,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         <AttachmentPreview
           attachments={attachments}
           onRemoveAttachment={handleRemoveAttachment}
-          maxVisibleImages={maxVisibleImages} // Pass the dynamic value
+          maxVisibleImages={maxVisibleImages}
         />
       )}
 
