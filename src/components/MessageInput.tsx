@@ -16,6 +16,8 @@ import GifPicker from './GifPicker';
 import EmojiPicker from './EmojiPicker';
 import FileUploader from './FileUploader';
 
+
+
 const getFileType = (file: File): 'image' | 'audio' | 'file' => {
   if (file.type.startsWith('image/')) return 'image';
   if (file.type.startsWith('audio/')) return 'audio';
@@ -28,6 +30,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   onSend,
   onSendGif,
   onSendAttachments,
+  onRemoveAttachment,
 }) => {
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<HTMLElement | null>(null);
   const [gifAnchorEl, setGifAnchorEl] = useState<HTMLElement | null>(null);
@@ -45,6 +48,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const handleSelectEmoji = useCallback(
     (emoji: EmojiData) => {
       setNewMessage((prev) => prev + emoji.native);
+      handleEmojiClose();
     },
     [setNewMessage]
   );
@@ -80,6 +84,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       URL.revokeObjectURL(attachmentToRemove.url);
     }
     setAttachments((prev) => prev.filter((att) => att.id !== id));
+    onRemoveAttachment(id);
   };
 
   const handleSend = () => {

@@ -2,12 +2,9 @@ import React from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { getFileIcon } from '../utils';
-import { Attachment } from '../types/global';
+import { AttachmentPreviewProps } from '../types/global';
 
-interface AttachmentPreviewProps {
-  attachments: Attachment[];
-  onRemoveAttachment: (id: number) => void;
-}
+
 
 const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
   attachments,
@@ -36,9 +33,11 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
         zIndex: 1000,
       }}
     >
-      <Typography variant="subtitle2" gutterBottom>
-        Attachments
-      </Typography>
+      {imageAttachments.length > 0 && (
+        <Typography variant="subtitle2" gutterBottom>
+          Attachments
+        </Typography>
+      )}
 
       {/* Image Attachments */}
       {imageAttachments.length > 0 && (

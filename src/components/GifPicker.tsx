@@ -33,14 +33,28 @@ const GifPicker: React.FC<GifPickerProps> = ({ open, onClose, onSelectGif, ancho
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
+
   const gifCols = isLargeScreen ? 3 : isMediumScreen ? 2 : 2;
 
-  const fetchGifs = useCallback(
+  const fetchTrendingGifs = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await gf.trending({ limit: 20 });
+      setGifs(response.data);
+    } catch (error) {
+      console.error('Error fetching trending GIFs:', error);
+      setError('Failed to load trending GIFs. Please try again.');
+      setGifs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [gf]);
+
+  const fetchSearchGifs = useCallback(
     async (query: string) => {
       if (query.trim() === '') {
-        setGifs([]);
-        setIsLoading(false);
-        setError(null);
+        await fetchTrendingGifs();
         return;
       }
       setIsLoading(true);
@@ -56,24 +70,30 @@ const GifPicker: React.FC<GifPickerProps> = ({ open, onClose, onSelectGif, ancho
         setIsLoading(false);
       }
     },
-    []
+    [gf, fetchTrendingGifs]
   );
 
-  const debouncedFetchGifs = useCallback(
+  const debouncedFetchSearchGifs = useCallback(
     debounce((query: string) => {
-      fetchGifs(query);
+      fetchSearchGifs(query);
     }, 500),
-    [fetchGifs]
+    [fetchSearchGifs]
   );
 
   useEffect(() => {
     if (open) {
-      debouncedFetchGifs(gifSearchTerm);
+      fetchTrendingGifs();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      debouncedFetchSearchGifs(gifSearchTerm);
     }
     return () => {
-      debouncedFetchGifs.cancel();
+      debouncedFetchSearchGifs.cancel();
     };
-  }, [gifSearchTerm, debouncedFetchGifs, open]);
+  }, [gifSearchTerm, debouncedFetchSearchGifs, open]);
 
   const handleGifSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGifSearchTerm(e.target.value);
@@ -90,67 +110,86 @@ const GifPicker: React.FC<GifPickerProps> = ({ open, onClose, onSelectGif, ancho
       anchorEl={anchorEl}
       onClose={onClose}
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
         vertical: 'bottom',
         horizontal: 'center',
       }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'center',
+      }}
       PaperProps={{
-        style: {
-          width: 600,
-          padding: 20,
-          maxHeight: '80vh',
-          overflowY: 'auto',
+        sx: {
+          width: isSmallScreen ? '90vw' : '600px',
+          height: isSmallScreen ? '60vh' : isMediumScreen ? '70vh' : '80vh',
+          padding: 2,
+          boxSizing: 'border-box',
+          overflow: 'hidden',
         },
       }}
+      disablePortal={false}
     >
-      <TextField
-        autoFocus
-        label="Search GIFs"
-        variant="outlined"
-        size="medium"
-        fullWidth
-        value={gifSearchTerm}
-        onChange={handleGifSearch}
-        placeholder="e.g., funny cats"
-        InputProps={{
-          endAdornment: isLoading && <CircularProgress size={24} />,
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
         }}
-      />
-      <Box sx={{ mt: 3 }}>
-        {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <CircularProgress />
-          </Box>
-        ) : gifs.length > 0 ? (
-          <ImageList variant="masonry" cols={gifCols} gap={16}>
-            {gifs.map((gif) => (
-              <ImageListItem key={gif.id}>
-                <img
-                  src={gif.images.fixed_height.url}
-                  alt={gif.title}
-                  loading="lazy"
-                  style={{
-                    cursor: 'pointer',
-                    borderRadius: '12px',
-                    width: '100%',
-                    height: 'auto',
-                    transition: 'transform 0.2s',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                  onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                  onClick={() => handleGifSelect(gif.images.original.url)}
-                />
-              </ImageListItem>
-            ))}
-          </ImageList>
-        ) : (
-          <Typography variant="body2" color="textSecondary" align="center">
-            {error ? error : 'No GIFs found. Try a different search term.'}
-          </Typography>
-        )}
+      >
+        {/* Search Bar */}
+        <TextField
+          autoFocus
+          label="Search GIFs"
+          variant="outlined"
+          size="medium"
+          fullWidth
+          value={gifSearchTerm}
+          onChange={handleGifSearch}
+          placeholder="e.g., funny cats"
+          InputProps={{
+            endAdornment: isLoading && <CircularProgress size={24} />,
+          }}
+        />
+
+        {/* GIFs or Loading/Error */}
+        <Box
+          sx={{
+            mt: 2,
+            overflowY: 'auto',
+            flexGrow: 1,
+          }}
+        >
+          {isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <CircularProgress />
+            </Box>
+          ) : gifs.length > 0 ? (
+            <ImageList variant="masonry" cols={gifCols} gap={16}>
+              {gifs.map((gif) => (
+                <ImageListItem key={gif.id}>
+                  <img
+                    src={gif.images.fixed_height.url}
+                    alt={gif.title}
+                    loading="lazy"
+                    style={{
+                      cursor: 'pointer',
+                      borderRadius: '12px',
+                      width: '100%',
+                      height: 'auto',
+                      transition: 'transform 0.2s',
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+                    onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                    onClick={() => handleGifSelect(gif.images.original.url)}
+                  />
+                </ImageListItem>
+              ))}
+            </ImageList>
+          ) : (
+            <Typography variant="body2" color="textSecondary" align="center" sx={{ mt: 2 }}>
+              {error ? error : 'No GIFs found. Try a different search term.'}
+            </Typography>
+          )}
+        </Box>
       </Box>
     </Popover>
   );

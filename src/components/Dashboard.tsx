@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -99,6 +99,10 @@ const Dashboard: React.FC = () => {
     setAttachments((prev) => [...prev, ...newAttachments]);
   };
 
+  const handleRemoveAttachment = (id: number) => {
+    setAttachments((prev) => prev.filter((att) => att.id !== id));
+  };
+
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <Header
@@ -147,6 +151,7 @@ const Dashboard: React.FC = () => {
                 onSend={handleSendMessage}
                 onSendGif={handleSendGif}
                 onSendAttachments={handleSendAttachments}
+                onRemoveAttachment={handleRemoveAttachment}
               />
             </>
           )

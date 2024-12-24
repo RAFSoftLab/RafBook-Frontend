@@ -21,8 +21,9 @@ export interface MessageInputProps {
     setNewMessage: React.Dispatch<React.SetStateAction<string>>;
     onSend: () => void;
     onSendGif: (gifUrl: string) => void;
-    onSendAttachments: (attachments: Attachment[]) => void; // New prop
-}
+    onSendAttachments: (newAttachments: Attachment[]) => void;
+    onRemoveAttachment: (id: number) => void;
+  }
 
 export interface Message {
     id: number;
@@ -40,6 +41,11 @@ export interface Attachment {
     type: 'image' | 'audio' | 'file';
     url: string;
     name?: string;
+}
+
+export interface AttachmentPreviewProps {
+  attachments: Attachment[];
+  onRemoveAttachment: (id: number) => void;
 }
 
 export interface MessageItemProps {
@@ -107,6 +113,13 @@ export interface VoiceState {
     participants: string[];
     isJoined: boolean;
 }
+
+export interface EmojiPickerProps {
+    open: boolean;
+    onClose: () => void;
+    onSelectEmoji: (emoji: EmojiData) => void;
+    anchorEl: HTMLElement | null;
+  }
 
 export interface EmojiData {
     id: string;

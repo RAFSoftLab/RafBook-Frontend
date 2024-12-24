@@ -2,15 +2,8 @@ import React from 'react';
 import { Popover } from '@mui/material';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
-import { EmojiData } from '../types/global';
+import { EmojiPickerProps } from '../types/global';
 import { useTheme, useMediaQuery } from '@mui/material';
-
-interface EmojiPickerProps {
-  open: boolean;
-  onClose: () => void;
-  onSelectEmoji: (emoji: EmojiData) => void;
-  anchorEl: HTMLElement | null;
-}
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({ open, onClose, onSelectEmoji, anchorEl }) => {
   if (!open) return null;

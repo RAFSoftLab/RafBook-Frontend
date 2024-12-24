@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, IconButton, Link } from '@mui/material';
+import { Box, IconButton, Link } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { getFileIcon } from '../utils';
 import { Attachment } from '../types/global';
@@ -12,10 +12,6 @@ interface FileListProps {
 
 const FileList: React.FC<FileListProps> = ({ files, onRemoveFile, canRemove = true }) => {
   return (
-    <Box sx={{ mt: files.length > 0 ? 2 : 0 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Files
-      </Typography>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         {files.map((file) => (
           <Box
@@ -65,7 +61,6 @@ const FileList: React.FC<FileListProps> = ({ files, onRemoveFile, canRemove = tr
           </Box>
         ))}
       </Box>
-    </Box>
   );
 };
 
