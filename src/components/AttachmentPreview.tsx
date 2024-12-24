@@ -1,19 +1,19 @@
+// src/components/AttachmentPreview.tsx
+
 import React from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, Link } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { getFileIcon } from '../utils';
 import { AttachmentPreviewProps } from '../types/global';
 
-
-
 const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
   attachments,
   onRemoveAttachment,
+  maxVisibleImages,
 }) => {
   const imageAttachments = attachments.filter(att => att.type === 'image');
   const otherAttachments = attachments.filter(att => att.type !== 'image');
 
-  const maxVisibleImages = 4;
   const visibleImages = imageAttachments.slice(0, maxVisibleImages);
   const excessImageCount = imageAttachments.length - maxVisibleImages;
 

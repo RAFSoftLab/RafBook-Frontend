@@ -1,3 +1,5 @@
+// src/components/MessageInput.tsx
+
 import React, { useState, useCallback } from 'react';
 import {
   Box,
@@ -5,6 +7,8 @@ import {
   IconButton,
   InputAdornment,
   Tooltip,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
@@ -15,8 +19,6 @@ import AttachmentPreview from './AttachmentPreview';
 import GifPicker from './GifPicker';
 import EmojiPicker from './EmojiPicker';
 import FileUploader from './FileUploader';
-
-
 
 const getFileType = (file: File): 'image' | 'audio' | 'file' => {
   if (file.type.startsWith('image/')) return 'image';
@@ -32,6 +34,26 @@ const MessageInput: React.FC<MessageInputProps> = ({
   onSendAttachments,
   onRemoveAttachment,
 }) => {
+  const theme = useTheme();
+
+  // Define breakpoints
+  const isXs = useMediaQuery(theme.breakpoints.down('sm')); // <600px
+  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 960px
+  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 960px - 1280px
+  const isLgUp = useMediaQuery(theme.breakpoints.up('lg')); // >1280px
+
+  // Determine maxVisibleImages based on screen size
+  let maxVisibleImages = 4; // default
+  if (isXs) {
+    maxVisibleImages = 2;
+  } else if (isSm) {
+    maxVisibleImages = 3;
+  } else if (isMd) {
+    maxVisibleImages = 4;
+  } else if (isLgUp) {
+    maxVisibleImages = 6;
+  }
+
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<HTMLElement | null>(null);
   const [gifAnchorEl, setGifAnchorEl] = useState<HTMLElement | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -108,6 +130,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         <AttachmentPreview
           attachments={attachments}
           onRemoveAttachment={handleRemoveAttachment}
+          maxVisibleImages={maxVisibleImages} // Pass the dynamic value
         />
       )}
 

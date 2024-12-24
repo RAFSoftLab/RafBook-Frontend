@@ -1,3 +1,5 @@
+// src/components/ImageGrid.tsx
+
 import React from 'react';
 import { Grid } from '@mui/material';
 import ImageThumbnail from './ImageThumbnail';
@@ -19,12 +21,22 @@ const ImageGrid: React.FC<ImageGridProps> = ({
   const visibleImages = imageAttachments.slice(0, maxVisibleImages);
   const excessImageCount = imageAttachments.length - maxVisibleImages;
 
-  const columns = 2;
+  // Determine the number of columns based on maxVisibleImages
+  // For example, aim for 2 columns on small screens, more on larger screens
+  let columns = 2; // default
+
+  if (maxVisibleImages >= 6) {
+    columns = 3;
+  } else if (maxVisibleImages >= 4) {
+    columns = 2;
+  } else {
+    columns = 1;
+  }
 
   return (
     <Grid container spacing={1}>
       {visibleImages.map((attachment, index) => {
-        const gridXs = 12 / columns;
+        const gridXs = Math.floor(12 / columns); // Ensures equal width for all grid items
 
         const isLastVisible = index === maxVisibleImages - 1 && excessImageCount > 0;
 

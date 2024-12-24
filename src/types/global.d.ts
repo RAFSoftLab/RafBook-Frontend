@@ -44,8 +44,9 @@ export interface Attachment {
 }
 
 export interface AttachmentPreviewProps {
-  attachments: Attachment[];
-  onRemoveAttachment: (id: number) => void;
+    attachments: Attachment[];
+    onRemoveAttachment: (id: number) => void;
+    maxVisibleImages: number;
 }
 
 export interface MessageItemProps {
