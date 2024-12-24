@@ -1,5 +1,3 @@
-// src/components/ImageGrid.tsx
-
 import React from 'react';
 import { Grid } from '@mui/material';
 import ImageThumbnail from './ImageThumbnail';
@@ -21,15 +19,12 @@ const ImageGrid: React.FC<ImageGridProps> = ({
   const visibleImages = imageAttachments.slice(0, maxVisibleImages);
   const excessImageCount = imageAttachments.length - maxVisibleImages;
 
+  const columns = 2;
+
   return (
     <Grid container spacing={1}>
       {visibleImages.map((attachment, index) => {
-        let gridXs = 4; // Default for up to 3 images
-
-        if (imageAttachments.length === 1) gridXs = 12;
-        else if (imageAttachments.length === 2) gridXs = 6;
-        else if (imageAttachments.length === 3) gridXs = 4;
-        else if (imageAttachments.length >= 4) gridXs = 6; // For 2x2 grid
+        const gridXs = 12 / columns;
 
         const isLastVisible = index === maxVisibleImages - 1 && excessImageCount > 0;
 

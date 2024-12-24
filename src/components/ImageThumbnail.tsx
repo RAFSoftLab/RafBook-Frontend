@@ -1,5 +1,3 @@
-// src/components/ImageThumbnail.tsx
-
 import React from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -28,9 +26,8 @@ const ImageThumbnail: React.FC<ImageThumbnailProps> = ({
         borderRadius: 1,
         overflow: 'hidden',
         border: '1px solid #ccc',
-        minHeight: { xs: 100, sm: 150, md: 200 },
-        maxHeight: { xs: 200, sm: 250, md: 300 },
         cursor: 'pointer',
+        aspectRatio: '1 / 1',
       }}
       onClick={onClick}
     >
@@ -49,7 +46,7 @@ const ImageThumbnail: React.FC<ImageThumbnailProps> = ({
         <IconButton
           size="small"
           onClick={(e) => {
-            e.stopPropagation(); // Prevent triggering onClick
+            e.stopPropagation();
             onRemove();
           }}
           sx={{
