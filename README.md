@@ -109,6 +109,72 @@ Before you begin, ensure you have met the following requirements:
 
 - **Git**: Make sure you have Git installed to manage version control. Download it from the Git official website.
 
+## Installation
+
+1. Clone the Repository
+
+If you haven't already, fork and clone the repository as per the Git instructions below.
+
+2. Navigate to the Project Directory
+
+```bash
+cd <repository-name>
+```
+
+3. Install Dependencies
+
+Using `npm`:
+
+```bash
+npm install
+```
+
+Or using `yarn`:
+
+```bash
+yarn
+```
+
+## Launching the Project
+
+Launching the Project
+
+To start the development server, run:
+
+Using `npm`:
+
+```bash
+npm run dev
+```
+
+Using `yarn`:
+
+```bash
+yarn dev
+```
+
+This will start the Vite development server. Open your browser and navigate to `http://localhost:5173` to view the application.
+
+## Building for Production
+
+To build the application for production, run:
+
+Using `npm`:
+
+```bash
+npm run build
+```
+
+Using `yarn`:
+
+```bash
+yarn build
+```
+
+This will create an optimized build in the `dist` folder.
+
+---
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
