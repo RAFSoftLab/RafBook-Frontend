@@ -97,15 +97,17 @@ Currently, two official plugins are available:
 ## Installation Prerequisites
 Before you begin, ensure you have met the following requirements:
 
-    Node.js: Ensure that you have Node.js installed. You can download it from the Node.js official website. It's recommended to use the LTS version.
+- **Node.js**: Ensure that you have Node.js installed. You can download it from the Node.js official website. It's recommended to use the LTS version.
 
-    Package Manager: You can use npm (comes with Node.js) or yarn. Ensure you have one installed:
+- **Package Manager**: You can use `npm` (comes with Node.js) or `yarn`. Ensure you have one installed:
 
-        To install yarn, run:
+   - To install `yarn`, run:
 
-    npm install --global yarn
+   ```bash
+   npm install --global yarn
+   ```
 
-Git: Make sure you have Git installed to manage version control. Download it from the Git official website.
+- **Git**: Make sure you have Git installed to manage version control. Download it from the Git official website.
 
 ## Expanding the ESLint configuration
 
