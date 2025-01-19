@@ -1,21 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "target": "ESNext",
     "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "Bundler", // Consider changing to "node" if issues persist
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "strict": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["cypress", "node"],
+    "typeRoots": ["./node_modules/@types", "./cypress/support"],
+    "skipLibCheck": true,
+    "useDefineForClassFields": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "electron"]
+  "include": ["src", "electron", "cypress", "cypress/**/*.ts", "node_modules/cypress", "node_modules/@types"]
 }

@@ -10,7 +10,7 @@ import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
-import { Attachment } from '../types/global';
+// import { Attachment } from '../types/global';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
@@ -52,14 +52,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
   const otherAttachments = message.attachments?.filter(att => att.type !== 'image') || [];
 
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  // const [attachments, setAttachments] = useState<Attachment[]>([]);
 
-  useEffect(() => {
-    setAttachments(message.attachments || []);
-  }, [message.attachments]);
+  // useEffect(() => {
+  //   setAttachments(message.attachments || []);
+  // }, [message.attachments]);
 
-  const visibleImages = imageAttachments.slice(0, maxVisibleImages);
-  const excessImageCount = imageAttachments.length - maxVisibleImages;
+  // const visibleImages = imageAttachments.slice(0, maxVisibleImages);
+  // const excessImageCount = imageAttachments.length - maxVisibleImages;
 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);

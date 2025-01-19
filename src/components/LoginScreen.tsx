@@ -37,7 +37,7 @@ const LoginScreen: React.FC = () => {
     setLoading(true);
     setError('');
 
-    if (!username || !password) {
+    if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password.');
       setLoading(false);
       return;
@@ -54,7 +54,11 @@ const LoginScreen: React.FC = () => {
         setError('Invalid response from server.');
       }
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.');
+      if (err.response && err.response.status === 403) {
+        setError('Login failed. Please try again.');
+      } else {
+        setError(err.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -107,6 +111,7 @@ const LoginScreen: React.FC = () => {
             color: theme.palette.primary.main,
             mb: 2,
           }}
+          data-cy="lock-icon"
         />
 
         <Typography
@@ -116,41 +121,43 @@ const LoginScreen: React.FC = () => {
           sx={{
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
           }}
+          data-cy="sign-in-title"
         >
           Sign In
         </Typography>
 
         {/* Display error if any */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2 }} data-cy="error-message">
             {error}
           </Alert>
         )}
 
         <TextField
+          data-cy="username-input"
           label="Username"
           fullWidth
           variant="filled"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          required
           sx={{ mb: 3 }}
         />
 
         <TextField
+          data-cy="password-input"
           label="Password"
           type="password"
           fullWidth
           variant="filled"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
           sx={{ mb: 3 }}
         />
 
         <FormControlLabel
           control={
             <Checkbox
+              data-cy="remember-me-checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
               color="primary"
@@ -161,10 +168,11 @@ const LoginScreen: React.FC = () => {
         />
 
         <Button
+          data-cy="login-button"
           type="submit"
           variant="contained"
           fullWidth
-          disabled={loading}
+          disabled={loading || !username.trim() || !password.trim()}
           color="primary"
         >
           {loading ? (
@@ -178,6 +186,7 @@ const LoginScreen: React.FC = () => {
           <a
             href="/forgot-password"
             style={{ color: theme.palette.primary.main, textDecoration: 'none' }}
+            data-cy="forgot-password-link"
           >
             Forgot Password?
           </a>
