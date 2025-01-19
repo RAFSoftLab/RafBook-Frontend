@@ -9,8 +9,8 @@
 Cypress.Commands.add(
   'login',
   (username: string, password: string, rememberMe: boolean = false) => {
-    cy.get('[data-cy=username-input]').type(username);
-    cy.get('[data-cy=password-input]').type(password);
+    cy.get('[data-cy=username-input]').type(username, { delay: 100 });
+    cy.get('[data-cy=password-input]').type(password, { delay: 100 });
 
     if (rememberMe) {
       cy.get('[data-cy=remember-me-checkbox] input[type="checkbox"]').check();

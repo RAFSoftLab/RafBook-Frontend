@@ -8,7 +8,7 @@ export default defineConfig({
     },
     supportFile: 'cypress/support/e2e.ts',
     fixturesFolder: 'cypress/fixtures',
-    specPattern: 'cypress/e2e/**/*.spec.{js,jsx,ts,tsx}',
+    specPattern: 'cypress/e2e/**/*.{spec,cy}.{js,jsx,ts,tsx}',
     video: false,
     experimentalOriginDependencies: true,
   },

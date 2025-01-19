@@ -18,20 +18,20 @@ describe('Login Screen', () => {
   });
 
   it('should enable the Login button when input fields are filled', () => {
-    cy.get('[data-cy=username-input]').type('testuser');
-    cy.get('[data-cy=password-input]').type('password123');
+    cy.get('[data-cy=username-input]').type('testuser', { delay: 100 });
+    cy.get('[data-cy=password-input]').type('password123', { delay: 100 });
 
     cy.get('[data-cy=login-button]').should('not.be.disabled');
   });
 
   it('should disable the Login button when only username is filled', () => {
-    cy.get('[data-cy=username-input]').type('testuser');
+    cy.get('[data-cy=username-input]').type('testuser', { delay: 100 });
 
     cy.get('[data-cy=login-button]').should('be.disabled');
   });
 
   it('should disable the Login button when only password is filled', () => {
-    cy.get('[data-cy=password-input]').type('password123');
+    cy.get('[data-cy=password-input]').type('password123', { delay: 100 });
 
     cy.get('[data-cy=login-button]').should('be.disabled');
   });
