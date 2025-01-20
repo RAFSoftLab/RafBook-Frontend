@@ -1,22 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Drawer,
     Typography,
     Divider,
     Box,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    Collapse,
+    useTheme,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleMute, toggleDeafen } from '../store/voiceSlice';
-import SettingsModal from './SettingsModal'; 
-import ChannelList from './ChannelList';
-import UserControls from './UserControls';
+import SettingsModal from './SettingsModal';
 import { SidebarProps } from '../types/global';
+import UserControls from './UserControls';
+import ChannelList from './ChannelList';
 
 const Sidebar: React.FC<SidebarProps> = ({
-    channels,
-    selectedChannel,
+    studyLevels,
+    selectedStudyLevel,
+    selectedStudyProgram,
+    onSelectStudyLevel,
+    onSelectStudyProgram,
     onSelectChannel,
+    selectedChannelId,
     drawerWidth,
     mobileOpen,
     handleDrawerToggle,
@@ -26,8 +36,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     const user = useAppSelector((state) => state.user);
     const { isMuted, isDeafened } = useAppSelector((state) => state.voice);
-    
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+    const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+    const [openCategories, setOpenCategories] = React.useState<{ [key: number]: boolean }>({});
 
     const handleToggleMute = () => {
         dispatch(toggleMute());
@@ -45,6 +56,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsSettingsOpen(false);
     };
 
+    const handleToggleCategory = (categoryId: number) => {
+        setOpenCategories((prev) => ({
+            ...prev,
+            [categoryId]: !prev[categoryId],
+        }));
+    };
+
     const drawerContent = (
         <Box
             sx={{
@@ -56,21 +74,56 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Top Section: Channels Heading */}
             <Box sx={{ p: 2 }}>
                 <Typography variant="h6" noWrap component="div">
-                    Channels
+                    {selectedStudyProgram ? selectedStudyProgram.name : 'Channels'}
                 </Typography>
             </Box>
 
             {/* Divider */}
             <Divider />
 
-            {/* Channel List */}
-            <Box sx={{ p: 2 }}>
-                <ChannelList
-                    channels={channels}
-                    selectedChannel={selectedChannel}
-                    onSelectChannel={onSelectChannel}
-                />
-            </Box>
+            {/* Channel List based on selectedStudyProgram */}
+            {selectedStudyProgram ? (
+                <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
+                    {selectedStudyProgram.categories.map((category) => (
+                        <Box key={category.id} sx={{ mb: 1 }}>
+                            <ListItemButton onClick={() => handleToggleCategory(category.id)}>
+                                <ListItemText primary={category.name} />
+                                {openCategories[category.id] ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
+                            <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding>
+                                    {category.textChannels.map((channel) => (
+                                        <ChannelList
+                                            key={channel.id}
+                                            channels={[channel]}
+                                            selectedChannel={selectedChannelId}
+                                            onSelectChannel={(id) => {
+                                                onSelectStudyProgram(selectedStudyProgram);
+                                                onSelectChannel(id);
+                                            }}
+                                        />
+                                    ))}
+                                </List>
+                            </Collapse>
+                        </Box>
+                    ))}
+                </Box>
+            ) : (
+                <Box sx={{ p: 2 }}>
+                    <Typography variant="subtitle1" gutterBottom>
+                        Study Levels
+                    </Typography>
+                    <List>
+                        {studyLevels.map((studyLevel) => (
+                            <ListItem key={studyLevel.id} disablePadding>
+                                <ListItemButton onClick={() => onSelectStudyLevel(studyLevel)}>
+                                    <ListItemText primary={studyLevel.name} secondary={studyLevel.description} />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Box>
+            )}
 
             {/* Spacer to push user controls to the bottom */}
             <Box sx={{ flexGrow: 1 }} />

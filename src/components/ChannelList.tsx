@@ -14,7 +14,7 @@ const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, on
     return (
         <List>
             {channels.map((channel) => (
-                <ListItem key={channel.id} disablePadding sx={{ mb: 1 }}>
+                <ListItem key={channel.id} disablePadding>
                     <ListItemButton
                         onClick={() => onSelectChannel(channel.id)}
                         selected={selectedChannel === channel.id}

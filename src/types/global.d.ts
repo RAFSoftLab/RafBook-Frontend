@@ -2,6 +2,29 @@ export interface Channel {
     id: number;
     name: string;
     type: 'text' | 'voice';
+    description: string;
+    canWrite: boolean;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    description: string;
+    textChannels: Channel[];
+}
+
+export interface StudyProgram {
+    id: number;
+    name: string;
+    description: string;
+    categories: Category[];
+}
+
+export interface StudyLevel {
+    id: number;
+    name: string;
+    description: string;
+    studyPrograms: StudyProgram[];
 }
 
 export interface ChannelListProps {
@@ -23,7 +46,7 @@ export interface MessageInputProps {
     onSendGif: (gifUrl: string) => void;
     onSendAttachments: (newAttachments: Attachment[]) => void;
     onRemoveAttachment: (id: number) => void;
-  }
+}
 
 export interface Message {
     id: number;
@@ -69,13 +92,18 @@ export interface SettingsModalProps {
 }
 
 export interface SidebarProps {
-    channels: Channel[];
-    selectedChannel: number | null;
+    studyLevels: StudyLevel[];
+    selectedStudyLevel: StudyLevel | null;
+    selectedStudyProgram: StudyProgram | null;
+    onSelectStudyLevel: (StudyLevel: StudyLevel) => void;
+    onSelectStudyProgram: (studyProgram: StudyProgram) => void;
     onSelectChannel: (id: number) => void;
+    selectedChannelId: number | null;
     drawerWidth: number;
     mobileOpen: boolean;
     handleDrawerToggle: () => void;
 }
+
 
 export interface UserControlsProps {
     user: {
@@ -95,7 +123,11 @@ export interface VoiceChannelProps {
 
 export interface ChannelState {
     selectedChannelId: number | null;
-    channels: Channel[];
+    studyLevels: StudyLevel[];
+    selectedStudyLevel: StudyLevel | null;
+    selectedStudyProgram: StudyProgram | null;
+    loading: boolean;
+    error: string | null;
 }
 
 export interface ThemeState {
@@ -120,7 +152,7 @@ export interface EmojiPickerProps {
     onClose: () => void;
     onSelectEmoji: (emoji: EmojiData) => void;
     anchorEl: HTMLElement | null;
-  }
+}
 
 export interface EmojiData {
     id: string;
