@@ -1,16 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  Box,
-  Typography,
-  Avatar,
-  useTheme,
-  useMediaQuery,
+    Box,
+    Typography,
+    Avatar,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
 import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
-// import { Attachment } from '../types/global';
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
@@ -51,15 +50,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
   const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
   const otherAttachments = message.attachments?.filter(att => att.type !== 'image') || [];
-
-  // const [attachments, setAttachments] = useState<Attachment[]>([]);
-
-  // useEffect(() => {
-  //   setAttachments(message.attachments || []);
-  // }, [message.attachments]);
-
-  // const visibleImages = imageAttachments.slice(0, maxVisibleImages);
-  // const excessImageCount = imageAttachments.length - maxVisibleImages;
 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -117,6 +107,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         flexDirection: 'column',
         alignItems: 'flex-start',
       }}
+      data-cy={`message-${message.id}`}
     >
       {/* Timestamp */}
       <Typography
@@ -126,6 +117,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
           mb: 0.5,
           ml: timestampOffset,
         }}
+        data-cy={`message-timestamp-${message.id}`}
       >
         {message.sender} • {message.timestamp}
       </Typography>
@@ -147,6 +139,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             width: 40,
             height: 40,
           }}
+          data-cy={`message-avatar-${message.id}`}
         >
           {message.sender.charAt(0)}
         </Avatar>
@@ -162,6 +155,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
                 p: 1,
                 wordBreak: 'break-word',
               }}
+              data-cy={`message-content-${message.id}`}
             >
               <Typography variant="body1" component="span">
                 {message.content}
@@ -176,17 +170,19 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
                 maxWidth: '300px',
                 mt: 1,
               }}
+              data-cy={`message-gif-${message.id}`}
             >
               <img
                 src={message.gifUrl}
                 alt="GIF"
                 style={{ width: '100%', borderRadius: '8px' }}
+                data-cy={`gif-image-${message.id}`}
               />
             </Box>
           )}
           {/* Render Image Attachments */}
           {imageAttachments.length > 0 && (
-            <Box sx={{ mt: 1 }}>
+            <Box sx={{ mt: 1 }} data-cy={`message-images-${message.id}`}>
               <ImageGrid
                 imageAttachments={imageAttachments}
                 maxVisibleImages={maxVisibleImages}
@@ -199,6 +195,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             <FileList
               files={otherAttachments}
               canRemove={false}
+              data-cy={`message-files-${message.id}`}
             />
           )}
         </Box>
@@ -214,6 +211,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
           onPrev={handlePrevImage}
           onNext={handleNextImage}
           onThumbnailClick={handleThumbnailClick}
+          data-cy={`lightbox-${message.id}`}
         />
       )}
     </Box>

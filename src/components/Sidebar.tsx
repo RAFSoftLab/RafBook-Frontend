@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Drawer,
     Typography,
@@ -70,10 +70,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                 flexDirection: 'column',
                 height: '100%',
             }}
+            data-cy="sidebar"
         >
             {/* Top Section: Channels Heading */}
             <Box sx={{ p: 2 }}>
-                <Typography variant="h6" noWrap component="div">
+                <Typography variant="h6" noWrap component="div" data-cy="channels-heading">
                     {selectedStudyProgram ? selectedStudyProgram.name : 'Channels'}
                 </Typography>
             </Box>
@@ -83,10 +84,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Channel List based on selectedStudyProgram */}
             {selectedStudyProgram ? (
-                <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
+                <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }} data-cy="channel-list-container">
                     {selectedStudyProgram.categories.map((category) => (
-                        <Box key={category.id} sx={{ mb: 1 }}>
-                            <ListItemButton onClick={() => handleToggleCategory(category.id)}>
+                        <Box key={category.id} sx={{ mb: 0 }} data-cy={`category-${category.id}`}>
+                            <ListItemButton
+                                onClick={() => handleToggleCategory(category.id)}
+                                data-cy={`category-button-${category.id}`}
+                            >
                                 <ListItemText primary={category.name} />
                                 {openCategories[category.id] ? <ExpandLess /> : <ExpandMore />}
                             </ListItemButton>
@@ -98,7 +102,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             channels={[channel]}
                                             selectedChannel={selectedChannelId}
                                             onSelectChannel={(id) => {
-                                                onSelectStudyProgram(selectedStudyProgram);
                                                 onSelectChannel(id);
                                             }}
                                         />
@@ -109,14 +112,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                     ))}
                 </Box>
             ) : (
-                <Box sx={{ p: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom>
+                <Box sx={{ p: 2 }} data-cy="study-levels-container">
+                    <Typography variant="subtitle1" gutterBottom data-cy="study-levels-heading">
                         Study Levels
                     </Typography>
                     <List>
                         {studyLevels.map((studyLevel) => (
                             <ListItem key={studyLevel.id} disablePadding>
-                                <ListItemButton onClick={() => onSelectStudyLevel(studyLevel)}>
+                                <ListItemButton
+                                    onClick={() => onSelectStudyLevel(studyLevel)}
+                                    data-cy={`study-level-item-${studyLevel.id}`}
+                                >
                                     <ListItemText primary={studyLevel.name} secondary={studyLevel.description} />
                                 </ListItemButton>
                             </ListItem>
@@ -134,6 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     p: 2,
                     borderTop: `1px solid ${theme.palette.divider}`,
                 }}
+                data-cy="user-controls"
             >
                 <UserControls
                     user={user}
@@ -164,6 +171,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     display: { xs: 'block', sm: 'none' },
                     '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
                 }}
+                data-cy="mobile-drawer"
             >
                 {drawerContent}
             </Drawer>
@@ -176,6 +184,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
                 }}
                 open
+                data-cy="desktop-drawer"
             >
                 {drawerContent}
             </Drawer>

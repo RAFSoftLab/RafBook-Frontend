@@ -33,11 +33,14 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
         paddingRight: 2,
         pr: 2,
       }}
+      data-cy="message-list-container"
     >
       {messages.length === 0 ? (
-        <Typography variant="h6">No messages in this channel.</Typography>
+        <Typography variant="h6" data-cy="no-messages">
+          No messages in this channel.
+        </Typography>
       ) : (
-        <List>
+        <List data-cy="message-list">
           {messages.map((msg) => (
             <Box
               key={msg.id}
@@ -52,6 +55,7 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
                 paddingY: 0.5,
                 paddingX: 1,
               }}
+              data-cy={`message-item-${msg.id}`}
             >
               <MessageItem message={msg} />
             </Box>

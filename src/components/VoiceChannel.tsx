@@ -54,6 +54,7 @@ const VoiceChannel: React.FC<VoiceChannelProps> = ({ selectedChannel }) => {
 
   return (
     <Box
+      data-cy="voice-channel-component"
       sx={{
         flexGrow: 1,
         display: 'flex',
@@ -64,7 +65,7 @@ const VoiceChannel: React.FC<VoiceChannelProps> = ({ selectedChannel }) => {
         p: 2,
       }}
     >
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" gutterBottom data-cy="voice-channel-text">
         Voice Channel {selectedChannel}
       </Typography>
 

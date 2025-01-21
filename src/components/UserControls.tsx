@@ -41,6 +41,7 @@ const UserControls: React.FC<UserControlsProps> = ({
                         onClick={onToggleMute}
                         color={isMuted ? 'error' : 'default'}
                         aria-label={isMuted ? 'Unmute' : 'Mute'}
+                        data-cy="mute-button"
                     >
                         {isMuted ? <MicOffIcon /> : <MicIcon />}
                     </IconButton>
@@ -52,8 +53,9 @@ const UserControls: React.FC<UserControlsProps> = ({
                         onClick={onToggleDeafen}
                         color={isDeafened ? 'error' : 'default'}
                         aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
+                        data-cy="deafen-button"
                     >
-                        {isDeafened ? <HeadsetOffIcon /> : <HeadsetIcon />} {/* Corrected icon usage */}
+                        {isDeafened ? <HeadsetOffIcon /> : <HeadsetIcon />}
                     </IconButton>
                 </Tooltip>
 
@@ -63,6 +65,7 @@ const UserControls: React.FC<UserControlsProps> = ({
                         onClick={onOpenSettings}
                         color="default"
                         aria-label="Settings"
+                        data-cy="settings-button"
                     >
                         <SettingsIcon />
                     </IconButton>

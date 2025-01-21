@@ -41,11 +41,13 @@ const StudyProgramSelectorModal: React.FC<StudyProgramSelectorModalProps> = ({
     const [selectedStudyProgram, setSelectedStudyProgram] = useState<StudyProgram | null>(null);
 
     const handleStudyLevelSelect = (studyLevel: StudyLevel) => {
+        console.log('Selected Study Level:', studyLevel);
         setSelectedStudyLevel(studyLevel);
         setSelectedStudyProgram(null);
     };
 
     const handleStudyProgramSelect = (studyProgram: StudyProgram) => {
+        console.log('Selected Study Program:', studyProgram);
         setSelectedStudyProgram(studyProgram);
         onSelect(selectedStudyLevel!, studyProgram);
         onClose();
@@ -57,20 +59,24 @@ const StudyProgramSelectorModal: React.FC<StudyProgramSelectorModalProps> = ({
             onClose={onClose}
             aria-labelledby="select-study-program-modal"
             aria-describedby="select-study-level-and-study-program"
+            data-cy="study-program-selector-modal"
         >
             <Box sx={style}>
-                <Typography id="select-study-program-modal" variant="h6" component="h2" gutterBottom>
+                <Typography id="select-study-program-modal" variant="h6" component="h2" gutterBottom data-cy="modal-title">
                     Select Study Level and Study Program
                 </Typography>
                 {!selectedStudyLevel ? (
                     <>
-                        <Typography variant="subtitle1" gutterBottom>
+                        <Typography variant="subtitle1" gutterBottom data-cy="select-study-level-text">
                             Select a Study Level:
                         </Typography>
                         <List>
                             {studyLevels.map((studyLevel) => (
                                 <ListItem key={studyLevel.id} disablePadding>
-                                    <ListItemButton onClick={() => handleStudyLevelSelect(studyLevel)}>
+                                    <ListItemButton
+                                        onClick={() => handleStudyLevelSelect(studyLevel)}
+                                        data-cy={`select-study-level-${studyLevel.id}`}
+                                    >
                                         <ListItemText primary={studyLevel.name} secondary={studyLevel.description} />
                                     </ListItemButton>
                                 </ListItem>
@@ -79,17 +85,20 @@ const StudyProgramSelectorModal: React.FC<StudyProgramSelectorModalProps> = ({
                     </>
                 ) : (
                     <>
-                        <Typography variant="subtitle1" gutterBottom>
+                        <Typography variant="subtitle1" gutterBottom data-cy="selected-study-level-text">
                             Study Level: {selectedStudyLevel.name}
                         </Typography>
                         <Divider />
-                        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }} data-cy="select-study-program-text">
                             Select a Study Program:
                         </Typography>
                         <List>
                             {selectedStudyLevel.studyPrograms.map((program) => (
                                 <ListItem key={program.id} disablePadding>
-                                    <ListItemButton onClick={() => handleStudyProgramSelect(program)}>
+                                    <ListItemButton
+                                        onClick={() => handleStudyProgramSelect(program)}
+                                        data-cy={`select-study-program-${program.id}`}
+                                    >
                                         <ListItemText primary={program.name} secondary={program.description} />
                                     </ListItemButton>
                                 </ListItem>
@@ -102,6 +111,7 @@ const StudyProgramSelectorModal: React.FC<StudyProgramSelectorModalProps> = ({
                                 color="primary"
                                 onClick={() => setSelectedStudyLevel(null)}
                                 sx={{ cursor: 'pointer' }}
+                                data-cy="back-to-study-levels"
                             >
                                 Back to Study Levels
                             </Typography>

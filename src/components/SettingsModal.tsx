@@ -82,6 +82,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   onChange={handleThemeToggle}
                   name="themeToggle"
                   color="primary"
+                  data-cy='dark-mode-switch'
                 />
               }
               label="Dark Mode"

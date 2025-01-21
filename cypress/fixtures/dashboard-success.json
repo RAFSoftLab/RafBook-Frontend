@@ -1,0 +1,85 @@
+{
+    "studyLevels": [
+        {
+            "id": 1,
+            "name": "Undergraduate",
+            "description": "Undergraduate Study Programs",
+            "studyPrograms": [
+                {
+                    "id": 101,
+                    "name": "Computer Science",
+                    "description": "Bachelor of Science in Computer Science",
+                    "categories": [
+                        {
+                            "id": 1001,
+                            "name": "General",
+                            "description": "General Channels",
+                            "textChannels": [
+                                {
+                                    "id": 5001,
+                                    "name": "announcements",
+                                    "type": "text",
+                                    "description": "Official Announcements",
+                                    "canWrite": false,
+                                    "messageDTOList": [
+                                        {
+                                            "id": 10001,
+                                            "content": "Welcome to the announcements channel!",
+                                            "createdAt": "2025-01-20T23:06:47.096788",
+                                            "type": "TEXT",
+                                            "mediaUrl": null,
+                                            "sender": {
+                                                "id": 1,
+                                                "firstName": "Mara",
+                                                "lastName": "Arbutina",
+                                                "username": "mara",
+                                                "email": "mara@raf.rs",
+                                                "role": [
+                                                    "ADMIN"
+                                                ]
+                                            },
+                                            "reactions": [],
+                                            "parentMessage": null,
+                                            "deleted": false,
+                                            "edited": false
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": 5002,
+                                    "name": "general-chat",
+                                    "type": "text",
+                                    "description": "General Discussions",
+                                    "canWrite": true,
+                                    "messageDTOList": [
+                                        {
+                                            "id": 10002,
+                                            "content": "Hello everyone! Welcome to the general chat.",
+                                            "createdAt": "2025-01-20T23:06:48.123456",
+                                            "type": "TEXT",
+                                            "mediaUrl": null,
+                                            "sender": {
+                                                "id": 2,
+                                                "firstName": "John",
+                                                "lastName": "Doe",
+                                                "username": "johndoe",
+                                                "email": "john@raf.rs",
+                                                "role": [
+                                                    "USER"
+                                                ]
+                                            },
+                                            "reactions": [],
+                                            "parentMessage": null,
+                                            "deleted": false,
+                                            "edited": false
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

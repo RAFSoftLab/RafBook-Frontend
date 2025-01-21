@@ -8,19 +8,20 @@ const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, on
     const theme = useTheme();
 
     const getChannelIcon = (type: 'text' | 'voice') => {
-        return type === 'voice' ? <VolumeUpIcon /> : <TextsmsIcon />;
+        return type === 'voice' ? <VolumeUpIcon data-cy="voice-icon" /> : <TextsmsIcon data-cy="text-icon" />;
     };
 
     return (
         <List>
             {channels.map((channel) => (
-                <ListItem key={channel.id} disablePadding>
+                <ListItem key={channel.id} disablePadding sx={{ mb: 0.5 }}>
                     <ListItemButton
+                        data-cy={`channel-${channel.id}`}
                         onClick={() => onSelectChannel(channel.id)}
                         selected={selectedChannel === channel.id}
                         sx={{
                             borderRadius: 2,
-                            paddingY: 1,
+                            paddingY: 0.5,
                             paddingX: 2,
                             display: 'flex',
                             alignItems: 'center',
@@ -38,7 +39,10 @@ const ChannelList: React.FC<ChannelListProps> = ({ channels, selectedChannel, on
                         <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
                             {getChannelIcon(channel.type)}
                         </ListItemIcon>
-                        <ListItemText primary={channel.name} />
+                        <ListItemText
+                            primary={channel.name}
+                            data-cy={`channel-name-${channel.id}`}
+                        />
                     </ListItemButton>
                 </ListItem>
             ))}

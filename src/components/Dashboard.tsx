@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
       <Header
         drawerWidth={drawerWidth}
         handleDrawerToggle={handleDrawerToggle}
@@ -136,7 +136,7 @@ const Dashboard: React.FC = () => {
           dispatch(setSelectedStudyProgram(studyProgram));
         }}
         onSelectChannel={handleChannelSelect}
-        selectedChannelId={selectedChannelId} 
+        selectedChannelId={selectedChannelId}
         drawerWidth={drawerWidth}
         mobileOpen={mobileOpen}
         handleDrawerToggle={handleDrawerToggle}
@@ -152,6 +152,7 @@ const Dashboard: React.FC = () => {
           flexDirection: 'column',
           position: 'relative',
         }}
+        data-cy="dashboard-main"
       >
         {/* Spacer for the AppBar */}
         <Box sx={{ height: '64px' }} />
@@ -167,9 +168,10 @@ const Dashboard: React.FC = () => {
               textAlign: 'center',
               flexDirection: 'column',
             }}
+            data-cy="loading-indicator"
           >
-            <CircularProgress />
-            <Typography variant="h6" sx={{ mt: 2 }}>
+            <CircularProgress data-cy="loading-spinner" />
+            <Typography variant="h6" sx={{ mt: 2 }} data-cy="loading-text">
               Loading channels...
             </Typography>
           </Box>
@@ -182,18 +184,19 @@ const Dashboard: React.FC = () => {
               justifyContent: 'center',
               textAlign: 'center',
             }}
+            data-cy="error-indicator"
           >
-            <Alert severity="error">{error}</Alert>
+            <Alert severity="error" data-cy="error-message">{error}</Alert>
           </Box>
         ) : (
           <>
             {selectedChannel ? (
               selectedChannel.type === 'voice' ? (
-                <VoiceChannel selectedChannel={selectedChannel.id} />
+                <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
               ) : (
                 <>
                   {/* Message List */}
-                  <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
+                  <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
                     <MessageList selectedChannel={selectedChannel.id} />
                   </Box>
 
@@ -217,8 +220,9 @@ const Dashboard: React.FC = () => {
                   justifyContent: 'center',
                   textAlign: 'center',
                 }}
+                data-cy="no-channel-selected"
               >
-                <Typography variant="h6">
+                <Typography variant="h6" data-cy="no-channel-text">
                   Please select a channel to view content.
                 </Typography>
               </Box>
