@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -25,13 +25,6 @@ const LoginScreen: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -48,7 +41,11 @@ const LoginScreen: React.FC = () => {
       const token = response.token;
 
       if (token) {
-        localStorage.setItem('token', token);
+        if (rememberMe) {
+          localStorage.setItem('token', token);
+        } else {
+          sessionStorage.setItem('token', token);
+        }
         navigate('/dashboard');
       } else {
         setError('Invalid response from server.');
@@ -86,6 +83,7 @@ const LoginScreen: React.FC = () => {
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover',
       }}
+      data-cy="login-screen"
     >
       <Box
         component="form"
@@ -176,7 +174,7 @@ const LoginScreen: React.FC = () => {
           color="primary"
         >
           {loading ? (
-            <CircularProgress size={24} color="inherit" />
+            <CircularProgress size={24} color="inherit" data-cy="login-spinner" />
           ) : (
             'Login'
           )}

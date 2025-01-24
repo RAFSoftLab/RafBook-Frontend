@@ -9,9 +9,15 @@ const SplashScreen: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    
     const timer = setTimeout(() => {
-      navigate('/login');
-    }, 3000);
+      if (token) {
+        navigate('/dashboard');
+      } else {
+        navigate('/login');
+      }
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -30,6 +36,7 @@ const SplashScreen: React.FC = () => {
         justifyContent: 'center',
         height: '100vh',
       }}
+      data-cy="splash-screen"
     >
       <Box
         component="img"
@@ -40,8 +47,9 @@ const SplashScreen: React.FC = () => {
           maxWidth: 300,
           mb: 4,
         }}
+        data-cy="splash-logo"
       />
-      <CircularProgress color="primary" size={50} />
+      <CircularProgress color="primary" size={50} data-cy="splash-spinner" />
     </motion.div>
   );
 };
