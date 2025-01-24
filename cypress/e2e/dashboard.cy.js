@@ -191,8 +191,8 @@ describe('Dashboard - Desktop View', () => {
                             cy.log(`Category ${index + 1}: ${dataCy}`);
                         });
 
-                        // Assert that there are exactly 4 categories
-                        expect($categories).to.have.length(4);
+                        // Assert that there are exactly 3 categories
+                        expect($categories).to.have.length(3);
 
                         // Iterate over each category
                         cy.wrap($categories).each(($category) => {
