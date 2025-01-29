@@ -13,8 +13,8 @@ import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
 
-const isGif = (url: string): boolean => {
-    return url.toLowerCase().endsWith('.gif');
+const isGif = (url?: string): boolean => {
+    return url ? url.toLowerCase().includes('giphy') : false;
 };
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
@@ -56,6 +56,9 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
   const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
   const otherAttachments = message.attachments?.filter(att => att.type !== 'image') || [];
+
+  const firstAttachmentUrl = message.attachments?.[0]?.url;
+  const hasGifAttachment = isGif(firstAttachmentUrl);
 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -169,49 +172,28 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             </Box>
           )}
 
-          {/* Render 'image' type messages */}
-          {message.type === 'image' && message.mediaUrl && (
-            <>
-              {isGif(message.mediaUrl) ? (
-                <Box
-                  sx={{
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    maxWidth: '300px',
-                    mt: 1,
-                  }}
-                  data-cy={`message-gif-${message.id}`}
-                >
-                  <img
-                    src={message.mediaUrl}
-                    alt="GIF"
-                    style={{ width: '100%', borderRadius: '8px' }}
-                    data-cy={`gif-image-${message.id}`}
-                  />
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    maxWidth: '300px',
-                    mt: 1,
-                  }}
-                  data-cy={`message-image-${message.id}`}
-                >
-                  <img
-                    src={message.mediaUrl}
-                    alt="Image"
-                    style={{ width: '100%', borderRadius: '8px' }}
-                    data-cy={`image-${message.id}`}
-                  />
-                </Box>
-              )}
-            </>
+          {/* Render GIF if the first attachment URL contains 'giphy' */}
+          {hasGifAttachment && (
+            <Box
+              sx={{
+                borderRadius: 2,
+                overflow: 'hidden',
+                maxWidth: '300px',
+                mt: 1,
+              }}
+              data-cy={`message-gif-${message.id}`}
+            >
+              <img
+                src={firstAttachmentUrl}
+                alt="GIF"
+                style={{ width: '100%', borderRadius: '8px' }}
+                data-cy={`gif-image-${message.id}`}
+              />
+            </Box>
           )}
 
-          {/* Render Image Attachments */}
-          {imageAttachments.length > 0 && (
+          {/* Render Image Attachments if they are not GIFs */}
+          {!hasGifAttachment && imageAttachments.length > 0 && (
             <Box sx={{ mt: 1 }} data-cy={`message-images-${message.id}`}>
               <ImageGrid
                 imageAttachments={imageAttachments}
@@ -233,7 +215,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       </Box>
 
       {/* Lightbox Overlay */}
-      {imageAttachments.length > 0 && (
+      {!hasGifAttachment && imageAttachments.length > 0 && (
         <Lightbox
           open={lightboxOpen}
           onClose={handleCloseLightbox}
