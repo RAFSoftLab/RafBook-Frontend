@@ -3,6 +3,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
+import VideoIcon from '@mui/icons-material/VideoLibrary';
+import ZipIcon from '@mui/icons-material/Archive';
 
 /**
  * Returns an appropriate icon component based on the file extension.
@@ -21,11 +23,18 @@ export const getFileIcon = (fileName?: string) => {
       case 'mp3':
       case 'wav':
         return <AudiotrackIcon />;
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+        return <VideoIcon />;
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'gif':
         return <ImageIcon />;
+      case 'zip':
+      case 'rar':
+        return <ZipIcon />;
       default:
         return <InsertDriveFileIcon />;
     }

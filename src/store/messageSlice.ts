@@ -1,3 +1,5 @@
+// src/store/messageSlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message, MessageState, Attachment } from '../types/global';
 
@@ -5,47 +7,53 @@ const initialState: MessageState = {
   messages: {},
 };
 
-let nextMessageId = 1;
-let nextAttachmentId = 1;
-
 const messageSlice = createSlice({
   name: 'messages',
   initialState,
   reducers: {
-    sendMessage(
+    addMessages: (
       state,
-      action: PayloadAction<Omit<Message, 'id'> & { attachments?: Attachment[] }>
-    ) {
-      const { channelId, sender, type, content, gifUrl, timestamp, attachments } = action.payload;
-      const formattedAttachments = attachments
-        ? attachments.map((attachment) => ({
-            ...attachment,
-            id: nextAttachmentId++,
-          }))
-        : undefined;
-
-      const newMessage: Message = {
-        id: nextMessageId++,
-        channelId,
-        sender,
-        type,
-        content,
-        gifUrl,
-        timestamp,
-        attachments: formattedAttachments,
-      };
+      action: PayloadAction<{ channelId: number; messages: Message[] }>
+    ) => {
+      const { channelId, messages } = action.payload;
       if (!state.messages[channelId]) {
         state.messages[channelId] = [];
       }
-      state.messages[channelId].push(newMessage);
+      const existingMessageIds = new Set(state.messages[channelId].map((msg) => msg.id));
+      const newUniqueMessages = messages.filter((msg) => !existingMessageIds.has(msg.id));
+      state.messages[channelId] = [...state.messages[channelId], ...newUniqueMessages];
+      console.log(`Added ${newUniqueMessages.length} new messages to channel ${channelId}`);
     },
-    fetchMessages(state, action: PayloadAction<number>) {
-      // Implement fetching messages logic, possibly async
-      // For now, it's a placeholder
-      // e.g., state.messages[action.payload] = fetchedMessages;
+    sendMessage: (state, action: PayloadAction<Omit<Message, 'id'>>) => {
+      const message: Message = {
+        id: Date.now(),
+        ...action.payload,
+      };
+      if (!state.messages[message.channelId]) {
+        state.messages[message.channelId] = [];
+      }
+      state.messages[message.channelId].push(message);
+      console.log(`Sent message to channel ${message.channelId}:`, message);
     },
+    receiveMessage: (state, action: PayloadAction<Message>) => {
+      const message = action.payload;
+      if (!state.messages[message.channelId]?.some((msg) => msg.id === message.id)) {
+        if (!state.messages[message.channelId]) {
+          state.messages[message.channelId] = [];
+        }
+        state.messages[message.channelId].push(message);
+        console.log(`Received message in channel ${message.channelId}:`, message);
+      } else {
+        console.warn(`Duplicate message received in channel ${message.channelId}:`, message);
+      }
+    },
+    // Add other reducers like deleteMessage, editMessage, etc.
+  },
+  extraReducers: (builder) => {
+    // No extra reducers needed as fetchMessages is removed
   },
 });
 
-export const { sendMessage, fetchMessages } = messageSlice.actions;
+export const { addMessages, sendMessage, receiveMessage } = messageSlice.actions;
+
 export default messageSlice.reducer;

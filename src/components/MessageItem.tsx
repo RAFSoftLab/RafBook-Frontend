@@ -1,3 +1,5 @@
+// src/components/MessageItem.tsx
+
 import React, { useState, useCallback, useEffect } from 'react';
 import {
     Box,
@@ -10,6 +12,10 @@ import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
+
+const isGif = (url: string): boolean => {
+    return url.toLowerCase().endsWith('.gif');
+};
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
@@ -162,24 +168,48 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               </Typography>
             </Box>
           )}
-          {message.type === 'gif' && message.gifUrl && (
-            <Box
-              sx={{
-                borderRadius: 2,
-                overflow: 'hidden',
-                maxWidth: '300px',
-                mt: 1,
-              }}
-              data-cy={`message-gif-${message.id}`}
-            >
-              <img
-                src={message.gifUrl}
-                alt="GIF"
-                style={{ width: '100%', borderRadius: '8px' }}
-                data-cy={`gif-image-${message.id}`}
-              />
-            </Box>
+
+          {/* Render 'image' type messages */}
+          {message.type === 'image' && message.mediaUrl && (
+            <>
+              {isGif(message.mediaUrl) ? (
+                <Box
+                  sx={{
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    maxWidth: '300px',
+                    mt: 1,
+                  }}
+                  data-cy={`message-gif-${message.id}`}
+                >
+                  <img
+                    src={message.mediaUrl}
+                    alt="GIF"
+                    style={{ width: '100%', borderRadius: '8px' }}
+                    data-cy={`gif-image-${message.id}`}
+                  />
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    maxWidth: '300px',
+                    mt: 1,
+                  }}
+                  data-cy={`message-image-${message.id}`}
+                >
+                  <img
+                    src={message.mediaUrl}
+                    alt="Image"
+                    style={{ width: '100%', borderRadius: '8px' }}
+                    data-cy={`image-${message.id}`}
+                  />
+                </Box>
+              )}
+            </>
           )}
+
           {/* Render Image Attachments */}
           {imageAttachments.length > 0 && (
             <Box sx={{ mt: 1 }} data-cy={`message-images-${message.id}`}>
@@ -190,6 +220,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               />
             </Box>
           )}
+
           {/* Render Other Attachments */}
           {otherAttachments.length > 0 && (
             <FileList

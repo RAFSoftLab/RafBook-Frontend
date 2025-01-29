@@ -1,5 +1,7 @@
+// src/api/channelApi.ts
+
 import axiosInstance from './axiosConfig';
-import { StudyLevel, StudyProgram, Category, Channel } from '../types/global';
+import { StudyLevel } from '../types/global';
 
 const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
     return data.map((studyLevel: any) => ({
@@ -20,6 +22,7 @@ const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
                     type: 'text',
                     description: channel.description,
                     canWrite: channel.canWrite,
+                    messageDTOList: channel.messageDTOList,
                 })),
             })),
         })),

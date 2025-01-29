@@ -4,6 +4,17 @@ export interface Channel {
     type: 'text' | 'voice';
     description: string;
     canWrite: boolean;
+    messageDTOList: MessageDTO[];
+}
+
+export interface ChannelState {
+    selectedChannelId: number | null;
+    prevSelectedChannelId: number | null;
+    studyLevels: StudyLevel[];
+    selectedStudyLevel: StudyLevel | null;
+    selectedStudyProgram: StudyProgram | null;
+    loading: boolean;
+    error: string | null;
 }
 
 export interface Category {
@@ -48,22 +59,47 @@ export interface MessageInputProps {
     onRemoveAttachment: (id: number) => void;
 }
 
+
 export interface Message {
     id: number;
     channelId: number;
     sender: string;
-    type: 'text' | 'gif' | 'file';
+    type: 'text' | 'image' | 'video' | 'voice';
     content: string;
-    gifUrl?: string;
+    mediaUrl?: string;
     timestamp: string;
     attachments?: Attachment[];
 }
 
-export interface Attachment {
+export interface Sender {
     id: number;
-    type: 'image' | 'audio' | 'file';
-    url: string;
-    name?: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    role: string[];
+}
+
+export interface MessageDTO {
+    id: number;
+    content: string;
+    createdAt: string;
+    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
+    mediaUrl: string | null;
+    sender: Sender;
+    reactions: any[];
+    parentMessage: number | null;
+    deleted: boolean;
+    edited: boolean;
+}
+
+export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
+
+export interface Attachment {
+  id: number;
+  type: AttachmentType;
+  url: string;
+  name?: string;
 }
 
 export interface AttachmentPreviewProps {
@@ -82,10 +118,10 @@ export interface MessageListProps {
 
 export interface MessageState {
     messages: {
-        [channelId: number]: Message[];
+      [channelId: number]: Message[];
     };
-}
-
+  }
+  
 export interface SettingsModalProps {
     open: boolean;
     onClose: () => void;
@@ -119,15 +155,6 @@ export interface UserControlsProps {
 
 export interface VoiceChannelProps {
     selectedChannel: number;
-}
-
-export interface ChannelState {
-    selectedChannelId: number | null;
-    studyLevels: StudyLevel[];
-    selectedStudyLevel: StudyLevel | null;
-    selectedStudyProgram: StudyProgram | null;
-    loading: boolean;
-    error: string | null;
 }
 
 export interface ThemeState {

@@ -7,27 +7,22 @@ interface FileUploaderProps {
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelected }) => {
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      onFilesSelected(files);
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      onFilesSelected(e.target.files);
     }
   };
 
   return (
-    <Tooltip title="Attach File">
-      <IconButton
-        color="primary"
-        aria-label="Attach File"
-        component="label"
-      >
+    <Tooltip title="Attach Files">
+      <IconButton component="label" color="primary" aria-label="Attach File">
         <AttachFileIcon />
         <input
           type="file"
           hidden
           multiple
-          onChange={handleFileChange}
-          accept="image/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          accept="image/*,audio/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
+          onChange={handleChange}
         />
       </IconButton>
     </Tooltip>

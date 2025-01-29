@@ -1,15 +1,14 @@
+// src/components/MessageList.tsx
+
 import React, { useEffect, useRef } from 'react';
 import { Box, Typography, List } from '@mui/material';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { fetchMessages } from '../store/messageSlice';
+import { useAppSelector } from '../store/hooks';
 import MessageItem from './MessageItem';
 import { MessageListProps } from '../types/global';
 
 const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
-  const dispatch = useAppDispatch();
-  
   const messages = useAppSelector((state) => state.messages.messages[selectedChannel] || []);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -17,12 +16,11 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
   };
 
   useEffect(() => {
-    dispatch(fetchMessages(selectedChannel));
-  }, [dispatch, selectedChannel]);
-
-  useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+    if (messages.length > 0) {
+      console.log(`Loaded ${messages.length} messages for channel ${selectedChannel}:`, messages);
+    }
+  }, [messages, selectedChannel]);
 
   return (
     <Box
@@ -48,8 +46,7 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
                 borderRadius: 2,
                 transition: 'background-color 0.3s',
                 '&:hover': {
-                  backgroundColor: (theme) =>
-                    theme.palette.action.hover,
+                  backgroundColor: (theme) => theme.palette.action.hover,
                 },
                 mb: 1,
                 paddingY: 0.5,

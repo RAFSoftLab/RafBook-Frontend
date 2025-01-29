@@ -1,3 +1,5 @@
+// src/components/AttachmentItem.tsx
+
 import React from 'react';
 import { Box, Link, IconButton } from '@mui/material';
 import { Attachment } from '../types/global';
@@ -25,13 +27,22 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, onRemove })
             }}
           />
         );
-      case 'audio':
+      case 'voice':
         return (
           <Box sx={{ mt: 1 }}>
             <audio controls>
               <source src={attachment.url} />
               Your browser does not support the audio element.
             </audio>
+          </Box>
+        );
+      case 'video':
+        return (
+          <Box sx={{ mt: 1 }}>
+            <video controls style={{ width: '100%', borderRadius: '8px' }}>
+              <source src={attachment.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </Box>
         );
       case 'file':

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+// src/components/Dashboard.tsx
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -8,8 +10,14 @@ import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage } from '../store/messageSlice';
-import { setSelectedChannelId, getUserChannels, setSelectedStudyLevel, setSelectedStudyProgram } from '../store/channelSlice';
+import {
+  setSelectedChannelId,
+  fetchUserChannelsThunk,
+  setSelectedStudyLevel,
+  setSelectedStudyProgram,
+} from '../store/channelSlice';
 import { Channel, Message, Attachment, StudyLevel, StudyProgram } from '../types/global';
+import { useSocket } from '../context/SocketContext';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -24,16 +32,19 @@ const Dashboard: React.FC = () => {
   const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } = channelState;
 
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
+  const prevSelectedChannelId = useAppSelector((state) => state.channel.prevSelectedChannelId);
   const messages = useAppSelector((state) =>
-    selectedChannelId !== null
-      ? state.messages.messages[selectedChannelId] || []
-      : []
+    selectedChannelId !== null ? state.messages.messages[selectedChannelId] || [] : []
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { stompService } = useSocket();
+
+  const attachmentIdRef = useRef<number>(Date.now());
+
   useEffect(() => {
-    dispatch(getUserChannels());
+    dispatch(fetchUserChannelsThunk());
   }, [dispatch]);
 
   useEffect(() => {
@@ -67,8 +78,14 @@ const Dashboard: React.FC = () => {
   };
 
   const handleChannelSelect = (id: number) => {
+    if (prevSelectedChannelId !== null && stompService) {
+      stompService.unsubscribeFromChannel(prevSelectedChannelId);
+    }
+
     dispatch(setSelectedChannelId(id));
     setAttachments([]);
+
+    stompService?.subscribeToChannel(id);
   };
 
   const handleSendMessage = () => {
@@ -78,16 +95,25 @@ const Dashboard: React.FC = () => {
       return;
     }
 
+    let messageType: Message['type'] = 'text';
+    if (attachments.length > 0) {
+      const primaryAttachment = attachments[0];
+      messageType = primaryAttachment.type as Message['type'];
+    }
+
     const messagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: 'You',
-      type: newMessage.trim() !== '' ? 'text' : 'file',
+      type: messageType,
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       attachments: attachments.length > 0 ? attachments : undefined,
     };
 
     dispatch(sendMessage(messagePayload));
+
+    stompService?.sendMessage('/app/sendMessage', messagePayload);
+
     setNewMessage('');
     setAttachments([]);
   };
@@ -97,25 +123,53 @@ const Dashboard: React.FC = () => {
       return;
     }
 
+    const gifAttachment: Attachment = {
+      id: attachmentIdRef.current++,
+      type: 'image',
+      url: gifUrl,
+      name: 'GIF',
+    };
+
     const messagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: 'You',
-      type: 'gif',
-      content: '',
-      gifUrl: gifUrl,
+      type: 'image',
+      content: 'GIF',
+      mediaUrl: undefined,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      attachments: [gifAttachment],
     };
 
     dispatch(sendMessage(messagePayload));
+
+    stompService?.sendMessage('/app/sendMessage', messagePayload);
+
+    setAttachments([]);
   };
 
   const handleSendAttachments = (newAttachments: Attachment[]) => {
-    setAttachments((prev) => [...prev, ...newAttachments]);
+    const attachmentsWithNumericIds = newAttachments.map((att) => ({
+      ...att,
+      id: attachmentIdRef.current++,
+    }));
+    setAttachments((prev) => [...prev, ...attachmentsWithNumericIds]);
   };
 
   const handleRemoveAttachment = (id: number) => {
+    const attachmentToRemove = attachments.find((att) => att.id === id);
+    if (attachmentToRemove && attachmentToRemove.url.startsWith('blob:')) {
+      URL.revokeObjectURL(attachmentToRemove.url);
+    }
     setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
+
+  useEffect(() => {
+    return () => {
+      if (selectedChannelId !== null && stompService) {
+        stompService.unsubscribeFromChannel(selectedChannelId);
+      }
+    };
+  }, [selectedChannelId, stompService]);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
@@ -186,7 +240,9 @@ const Dashboard: React.FC = () => {
             }}
             data-cy="error-indicator"
           >
-            <Alert severity="error" data-cy="error-message">{error}</Alert>
+            <Alert severity="error" data-cy="error-message">
+              {error}
+            </Alert>
           </Box>
         ) : (
           <>
@@ -197,7 +253,7 @@ const Dashboard: React.FC = () => {
                 <>
                   {/* Message List */}
                   <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
-                    <MessageList selectedChannel={selectedChannel.id} />
+                    <MessageList selectedChannel={selectedChannel.id} key={selectedChannel.id} />
                   </Box>
 
                   {/* Message Input */}
@@ -240,6 +296,6 @@ const Dashboard: React.FC = () => {
       </Box>
     </Box>
   );
-}
+};
 
 export default Dashboard;
