@@ -90,60 +90,68 @@ const Dashboard: React.FC = () => {
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '' && attachments.length === 0) return;
-
-    if (!selectedChannel || selectedChannel.type !== 'text') {
-      return;
-    }
-
-    let messageType: Message['type'] = 'text';
+    if (!selectedChannel || selectedChannel.type !== 'text') return;
+  
+    let messageType: string = 'TEXT';
     if (attachments.length > 0) {
-      const primaryAttachment = attachments[0];
-      messageType = primaryAttachment.type as Message['type'];
+      messageType = attachments[0].type.toUpperCase();
     }
-
-    const messagePayload: Omit<Message, 'id'> = {
+  
+    const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: 'You',
-      type: messageType,
+      type: messageType.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       attachments: attachments.length > 0 ? attachments : undefined,
     };
-
-    dispatch(sendMessage(messagePayload));
-
-    stompService?.sendMessage('/app/sendMessage', messagePayload);
-
+  
+    dispatch(sendMessage(localMessagePayload));
+  
+    const newMessageDTO = {
+      content: newMessage.trim(),
+      type: messageType,
+      mediaUrl: attachments.map((att) => att.url),
+      parentMessage: null,
+      textChannel: selectedChannel.id,
+    };
+  
+    stompService?.sendMessage('/app/sendMessage', newMessageDTO);
+  
     setNewMessage('');
     setAttachments([]);
   };
 
   const handleSendGif = (gifUrl: string) => {
-    if (!selectedChannel || selectedChannel.type !== 'text') {
-      return;
-    }
-
+    if (!selectedChannel || selectedChannel.type !== 'text') return;
+  
     const gifAttachment: Attachment = {
       id: attachmentIdRef.current++,
       type: 'image',
       url: gifUrl,
       name: 'GIF',
     };
-
-    const messagePayload: Omit<Message, 'id'> = {
+  
+    const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: 'You',
       type: 'image',
       content: 'GIF',
-      mediaUrl: undefined,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       attachments: [gifAttachment],
     };
+  
+    dispatch(sendMessage(localMessagePayload));
+  
+    const newMessageDTO = {
+      content: 'GIF',
+      type: 'IMAGE',
+      mediaUrl: [gifUrl],
+      parentMessage: null,
+      textChannel: selectedChannel.id,
+    };
 
-    dispatch(sendMessage(messagePayload));
-
-    stompService?.sendMessage('/app/sendMessage', messagePayload);
-
+    stompService?.sendMessage('/app/sendMessage', newMessageDTO);
     setAttachments([]);
   };
 

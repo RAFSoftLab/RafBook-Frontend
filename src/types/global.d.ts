@@ -66,7 +66,6 @@ export interface Message {
     sender: string;
     type: 'text' | 'image' | 'video' | 'voice';
     content: string;
-    mediaUrl?: string;
     timestamp: string;
     attachments?: Attachment[];
 }
@@ -85,13 +84,14 @@ export interface MessageDTO {
     content: string;
     createdAt: string;
     type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
-    mediaUrl: string | null;
+    mediaUrl: string[]; 
     sender: Sender;
     reactions: any[];
     parentMessage: number | null;
     deleted: boolean;
     edited: boolean;
 }
+
 
 export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
 

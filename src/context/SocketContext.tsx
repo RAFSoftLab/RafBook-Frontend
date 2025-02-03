@@ -40,7 +40,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     onConnect: () => {
       console.log('Connected to STOMP');
 
-      const generalSubscription = stompClient.subscribe('/topic/messages', (message: IMessage) => {
+      const generalSubscription = stompClient.subscribe('/topic/channels', (message: IMessage) => {
         const msg = JSON.parse(message.body);
         console.log('Received general message:', msg);
         dispatch(receiveMessage(msg));
@@ -79,7 +79,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       return;
     }
 
-    const subscription = stompClient.subscribe(`/topic/channel/${channelId}`, (message: IMessage) => {
+    const subscription = stompClient.subscribe(`/topic/channels/${channelId}`, (message: IMessage) => {
       const msg = JSON.parse(message.body);
       console.log(`Received message in channel ${channelId}:`, msg);
       dispatch(receiveMessage(msg));

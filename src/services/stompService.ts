@@ -1,13 +1,13 @@
 // src/services/stompService.ts
 
 import { Client, IMessage, IFrame, StompSubscription } from '@stomp/stompjs';
-import { receiveMessage } from '../store/messageSlice'; // Correct import
+import { receiveMessage } from '../store/messageSlice';
 import { AppDispatch } from '../store';
 
 class StompService {
   private client: Client;
   private dispatch: AppDispatch;
-  private subscriptions: { [key: number]: StompSubscription } = {}; // Map channelId to subscription
+  private subscriptions: { [key: number]: StompSubscription } = {};
 
   constructor(dispatch: AppDispatch) {
     this.dispatch = dispatch;
@@ -91,7 +91,7 @@ class StompService {
    * @param channelId The ID of the channel to subscribe to.
    */
   public subscribeToChannel(channelId: number) {
-    const destination = `/topic/channel/${channelId}`;
+    const destination = `/topic/channels/${channelId}`;
 
     if (this.subscriptions[channelId]) {
       console.warn(`⚠️ Already subscribed to channel ${channelId}`);
@@ -112,10 +112,10 @@ class StompService {
   public unsubscribeFromChannel(channelId: number) {
     const subscription = this.subscriptions[channelId];
     if (subscription) {
-      console.log(`🔕 Unsubscribing from /topic/channel/${channelId}`);
+      console.log(`🔕 Unsubscribing from /topic/channels/${channelId}`);
       subscription.unsubscribe();
       delete this.subscriptions[channelId];
-      console.log(`✅ Unsubscribed from /topic/channel/${channelId}`);
+      console.log(`✅ Unsubscribed from /topic/channels/${channelId}`);
     } else {
       console.warn(`⚠️ No active subscription found for channel ${channelId}`);
     }

@@ -16,7 +16,6 @@ export const fetchUserChannelsThunk = createAsyncThunk<
     try {
       const studyLevels: StudyLevel[] = await fetchUserChannels();
 
-      // Extract and dispatch messages
       studyLevels.forEach((level) => {
         level.studyPrograms.forEach((program) => {
           program.categories.forEach((category) => {
@@ -42,38 +41,22 @@ export const fetchUserChannelsThunk = createAsyncThunk<
 
 const mapBackendMessagesToFrontend = (messages: MessageDTO[], channelId: number): Message[] => {
   return messages.map((msg: MessageDTO) => {
-    let attachment: Attachment | undefined;
-
-    switch (msg.type) {
-      case 'IMAGE':
-        attachment = {
-          id: msg.id,
-          type: 'image',
-          url: msg.mediaUrl || '',
-          name: msg.content,
-        };
-        break;
-      case 'VIDEO':
-        attachment = {
-          id: msg.id,
-          type: 'video',
-          url: msg.mediaUrl || '',
-          name: msg.content,
-        };
-        break;
-      case 'VOICE':
-        attachment = {
-          id: msg.id,
-          type: 'voice',
-          url: msg.mediaUrl || '',
-          name: msg.content,
-        };
-        break;
-      case 'TEXT':
-      default:
-        attachment = undefined;
-        break;
-    }
+    const attachments: Attachment[] =
+      msg.mediaUrl && msg.mediaUrl.length > 0
+        ? msg.mediaUrl.map((url: string, index: number) => ({
+            id: Number(`${msg.id}${index}`),
+            type: msg.type.toLowerCase() as 'image' | 'video' | 'voice' | 'file',
+            url,
+            name:
+              msg.type === 'IMAGE'
+                ? 'Image'
+                : msg.type === 'VIDEO'
+                ? 'Video'
+                : msg.type === 'VOICE'
+                ? 'Voice'
+                : 'File',
+          }))
+        : [];
 
     const message: Message = {
       id: msg.id,
@@ -81,12 +64,11 @@ const mapBackendMessagesToFrontend = (messages: MessageDTO[], channelId: number)
       sender: `${msg.sender.firstName} ${msg.sender.lastName}`,
       type: msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
       content: msg.content,
-      mediaUrl: msg.mediaUrl || undefined,
       timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
       }),
-      attachments: attachment ? [attachment] : undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
     };
 
     return message;
@@ -103,7 +85,6 @@ const initialState: ChannelState = {
   error: null,
 };
 
-// Slice
 const channelSlice = createSlice({
   name: 'channel',
   initialState,

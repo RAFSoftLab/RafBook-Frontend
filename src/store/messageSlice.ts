@@ -47,10 +47,8 @@ const messageSlice = createSlice({
         console.warn(`Duplicate message received in channel ${message.channelId}:`, message);
       }
     },
-    // Add other reducers like deleteMessage, editMessage, etc.
   },
   extraReducers: (builder) => {
-    // No extra reducers needed as fetchMessages is removed
   },
 });
 
