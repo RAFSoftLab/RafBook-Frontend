@@ -13,19 +13,24 @@ const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
             id: program.id,
             name: program.name,
             description: program.description,
-            categories: program.categories.map((category: any) => ({
-                id: category.id,
-                name: category.name,
-                description: category.description,
-                textChannels: category.textChannels.map((channel: any) => ({
-                    id: channel.id,
-                    name: channel.name,
-                    type: 'text',
-                    description: channel.description,
-                    canWrite: channel.canWrite,
-                    messageDTOList: channel.messageDTOList
+            categories: program.categories
+                .sort((a: any, b: any) => a.name.localeCompare(b.name))
+                .map((category: any) => ({
+                    id: category.id,
+                    name: category.name,
+                    description: category.description,
+                    textChannels: category.textChannels
+                        .sort((c1: any, c2: any) => c1.name.localeCompare(c2.name))
+                        .map((channel: any) => ({
+                            id: channel.id,
+                            name: channel.name,
+                            type: 'text',
+                            description: channel.description,
+                            canWrite: channel.canWrite,
+                            messageDTOList: channel.messageDTOList
+                                .reverse(),
+                        })),
                 })),
-            })),
         })),
     }));
 };

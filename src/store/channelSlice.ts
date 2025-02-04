@@ -27,7 +27,7 @@ export const fetchUserChannelsThunk = createAsyncThunk<
                 const messages: Message[] = mapBackendMessagesToFrontend(
                   channel.messageDTOList,
                   channel.id
-                ).reverse();
+                );
                 dispatch(addMessages({ channelId: channel.id, messages }));
               }
             });

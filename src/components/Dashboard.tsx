@@ -174,6 +174,7 @@ const Dashboard: React.FC = () => {
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       attachments: [gifAttachment],
+      status: 'pending',
     };
   
     dispatch(sendMessage(localMessagePayload));

@@ -48,9 +48,6 @@ const messageSlice = createSlice({
       }
     
       const channelMessages = state.messages[message.channelId] || [];
-
-      console.log('currentId:', currentId);
-      console.log('message:', message);
       
       if (
         message.sender &&
