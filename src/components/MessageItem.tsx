@@ -8,10 +8,11 @@ import {
     useTheme,
     useMediaQuery,
 } from '@mui/material';
-import { MessageItemProps } from '../types/global';
+import { MessageItemProps, Sender } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
+import { jwtDecode } from 'jwt-decode';
 
 const isGif = (url?: string): boolean => {
     return url ? url.toLowerCase().includes('giphy') : false;
@@ -36,7 +37,30 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     maxVisibleImages = 6;
   }
 
-  const isOwnMessage = message.sender === 'You';
+    const getCurrentUser = (): Sender => {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (token) {
+        const decoded: any = jwtDecode(token);
+        return {
+          id: decoded.id,
+          firstName: decoded.firstName,
+          lastName: decoded.lastName,
+          username: decoded.username,
+          email: decoded.email,
+          role: decoded.roles,
+        };
+      }
+      return {
+        id: 0,
+        firstName: 'You',
+        lastName: '',
+        username: 'You',
+        email: '',
+        role: [],
+      };
+    };
+
+  const isOwnMessage = message.sender.id === getCurrentUser().id; 
 
   const avatarColor = isOwnMessage
     ? theme.palette.primary.main
@@ -130,7 +154,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         }}
         data-cy={`message-timestamp-${message.id}`}
       >
-        {message.sender} • {message.timestamp}
+        {message.sender.firstName} {message.sender.lastName} • {message.timestamp}
       </Typography>
 
       {/* Message and Avatar Container */}
@@ -152,7 +176,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
           }}
           data-cy={`message-avatar-${message.id}`}
         >
-          {message.sender.charAt(0)}
+          {message.sender.firstName.charAt(0)}
         </Avatar>
 
         {/* Message Content */}

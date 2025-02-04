@@ -1,7 +1,7 @@
 // src/store/messageSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Message, MessageState, Attachment } from '../types/global';
+import { Message, MessageState, Sender } from '../types/global';
 import { transformBackendMessage } from '../utils';
 import {jwtDecode} from 'jwt-decode';
 
@@ -37,34 +37,38 @@ const messageSlice = createSlice({
       console.log(`Sent message to channel ${message.channelId}:`, message);
     },
     receiveMessage: (state, action: PayloadAction<Message | any>) => {
-      // Assume the payload is a MessageDTO object.
       const incomingDTO = action.payload;
-      // Transform the incoming message using the shared utility.
       const message: Message = transformBackendMessage(incomingDTO, incomingDTO.channelId);
     
-      let currentUsername = '';
-      const token = localStorage.getItem('token');
+      let currentId = -1;
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       if (token) {
         const decoded: any = jwtDecode(token);
-        currentUsername = decoded.username;
+        currentId = decoded.id;
       }
-
-      const channelMessages = state.messages[message.channelId] || [];
     
-      // If the message is from "You", try to match it to a pending message by comparing content.
-      if (message.sender === 'You') {
+      const channelMessages = state.messages[message.channelId] || [];
+
+      console.log('currentId:', currentId);
+      console.log('message:', message);
+      
+      if (
+        message.sender &&
+        message.sender.id === currentId
+      ) {
         const pendingIndex = channelMessages.findIndex(
-          (msg) => msg.status === 'pending' && msg.sender === 'You' && msg.content === message.content
+          (msg) =>
+            msg.status === 'pending' &&
+            msg.sender.id === currentId &&
+            msg.content === message.content
         );
         if (pendingIndex !== -1) {
-          // Replace the pending message with the confirmed one.
           state.messages[message.channelId][pendingIndex] = { ...message, status: 'sent' };
           console.log(`Updated pending message in channel ${message.channelId}:`, message);
           return;
         }
       }
     
-      // If no matching pending message is found and the message is not a duplicate, add it.
       if (!channelMessages.some((msg) => msg.id === message.id)) {
         state.messages[message.channelId].push({ ...message, status: 'sent' });
         console.log(`Received message in channel ${message.channelId}:`, message);
@@ -76,10 +80,19 @@ const messageSlice = createSlice({
       state,
       action: PayloadAction<{ channelId: number; content: string }>
     ) => {
+      let currentId = -1;
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded: any = jwtDecode(token);
+        currentId = decoded.id;
+      }
       const { channelId, content } = action.payload;
       const channelMessages = state.messages[channelId] || [];
       const index = channelMessages.findIndex(
-        (msg) => msg.status === 'pending' && msg.sender === 'You' && msg.content === content
+        (msg) =>
+          msg.status === 'pending' &&
+          msg.sender.id === currentId &&
+          msg.content === content
       );
       if (index !== -1) {
         state.messages[channelId][index].status = 'error';

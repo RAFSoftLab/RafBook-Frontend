@@ -64,10 +64,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
   return {
     id: msg.id,
     channelId: channelId,
-    // If sender is an object, convert to string.
-    sender: typeof msg.sender === 'object'
-      ? `${msg.sender.firstName} ${msg.sender.lastName}`
-      : msg.sender,
+    sender: msg.sender,
     type: msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
     content: msg.content,
     timestamp: new Date(msg.createdAt).toLocaleTimeString([], {

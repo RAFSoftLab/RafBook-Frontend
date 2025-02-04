@@ -63,13 +63,13 @@ export interface MessageInputProps {
 export interface Message {
     id: number;
     channelId: number;
-    sender: string;
+    sender: Sender;
     type: 'text' | 'image' | 'video' | 'voice';
     content: string;
     timestamp: string;
     attachments?: Attachment[];
     status?: 'pending' | 'sent' | 'error';
-    clientId?: number; // a temporary id generated on the client
+    clientId?: number;
 }
 
 export interface Sender {
