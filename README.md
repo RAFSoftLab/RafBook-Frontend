@@ -59,6 +59,9 @@ A web and desktop application for students to communicate via text, images, vide
    - **User Profile**: Allows users to update profile information.
    - **Logout**: Clears the JWT token and logs the user out, ensuring secure access.
 
+### 7. **Use Case Diagram**
+![RS_DYeD03C3n-pn5yEvX_T3Ruk9fOVUoMtiFOr1Xd2acGzktBu9YQ7lyJtuCISE2YyJP6RGI5kYO5cCYaqKcI7x2CFa4aA5hFuxdV_8z_18p3hHDisFwxQsBFS6N2Dfn9Y-yeVn0VtHnTv2mVxEJGXEqyeQKQf7h97Q44zq4sX6z9xUhwaMTmsJfcTN6h3T3cdwkD-h8TEGw2XsbZaf7RHhoVPpT0m00](https://github.com/user-attachments/assets/0c56db80-ae34-42f5-b6ff-d86604e45c32)
+
 ## Security
 
 - **JWT Authentication**: Ensures secure access to API endpoints, requiring users to authenticate and obtain a JWT token.
