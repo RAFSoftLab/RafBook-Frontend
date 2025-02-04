@@ -3,6 +3,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message, MessageState, Attachment } from '../types/global';
 import { transformBackendMessage } from '../utils';
+import {jwtDecode} from 'jwt-decode';
 
 const initialState: MessageState = {
   messages: {},
@@ -23,7 +24,6 @@ const messageSlice = createSlice({
       const existingMessageIds = new Set(state.messages[channelId].map((msg) => msg.id));
       const newUniqueMessages = messages.filter((msg) => !existingMessageIds.has(msg.id));
       state.messages[channelId] = [...state.messages[channelId], ...newUniqueMessages];
-      console.log(`Added ${newUniqueMessages.length} new messages to channel ${channelId}`);
     },
     sendMessage: (state, action: PayloadAction<Omit<Message, 'id'>>) => {
       const message: Message = {
@@ -37,31 +37,59 @@ const messageSlice = createSlice({
       console.log(`Sent message to channel ${message.channelId}:`, message);
     },
     receiveMessage: (state, action: PayloadAction<Message | any>) => {
-      // Check if sender is already a string; if not, transform the message.
-      const incoming = action.payload;
-      let message: Message;
-      if (typeof incoming.sender !== 'string') {
-        // Assume incoming is a MessageDTO with a channelId already added.
-        message = transformBackendMessage(incoming, incoming.channelId);
-      } else {
-        message = incoming;
+      // Assume the payload is a MessageDTO object.
+      const incomingDTO = action.payload;
+      // Transform the incoming message using the shared utility.
+      const message: Message = transformBackendMessage(incomingDTO, incomingDTO.channelId);
+    
+      let currentUsername = '';
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded: any = jwtDecode(token);
+        currentUsername = decoded.username;
       }
 
-      if (!state.messages[message.channelId]?.some((msg) => msg.id === message.id)) {
-        if (!state.messages[message.channelId]) {
-          state.messages[message.channelId] = [];
+      const channelMessages = state.messages[message.channelId] || [];
+    
+      // If the message is from "You", try to match it to a pending message by comparing content.
+      if (message.sender === 'You') {
+        const pendingIndex = channelMessages.findIndex(
+          (msg) => msg.status === 'pending' && msg.sender === 'You' && msg.content === message.content
+        );
+        if (pendingIndex !== -1) {
+          // Replace the pending message with the confirmed one.
+          state.messages[message.channelId][pendingIndex] = { ...message, status: 'sent' };
+          console.log(`Updated pending message in channel ${message.channelId}:`, message);
+          return;
         }
-        state.messages[message.channelId].push(message);
+      }
+    
+      // If no matching pending message is found and the message is not a duplicate, add it.
+      if (!channelMessages.some((msg) => msg.id === message.id)) {
+        state.messages[message.channelId].push({ ...message, status: 'sent' });
         console.log(`Received message in channel ${message.channelId}:`, message);
       } else {
         console.warn(`Duplicate message received in channel ${message.channelId}:`, message);
       }
     },
+    markMessageError: (
+      state,
+      action: PayloadAction<{ channelId: number; content: string }>
+    ) => {
+      const { channelId, content } = action.payload;
+      const channelMessages = state.messages[channelId] || [];
+      const index = channelMessages.findIndex(
+        (msg) => msg.status === 'pending' && msg.sender === 'You' && msg.content === content
+      );
+      if (index !== -1) {
+        state.messages[channelId][index].status = 'error';
+        console.log(`Marked message as error in channel ${channelId}:`, channelMessages[index]);
+      }
+    },    
   },
-  extraReducers: (builder) => {
-  },
+  extraReducers: (builder) => {},
 });
 
-export const { addMessages, sendMessage, receiveMessage } = messageSlice.actions;
+export const { addMessages, sendMessage, receiveMessage, markMessageError } = messageSlice.actions;
 
 export default messageSlice.reducer;

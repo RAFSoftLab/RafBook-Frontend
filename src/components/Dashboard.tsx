@@ -9,7 +9,7 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { sendMessage } from '../store/messageSlice';
+import { sendMessage, markMessageError } from '../store/messageSlice';
 import {
   setSelectedChannelId,
   fetchUserChannelsThunk,
@@ -98,6 +98,7 @@ const Dashboard: React.FC = () => {
       messageType = attachments[0].type.toUpperCase();
     }
   
+    // Build the local message payload with status "pending"
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: 'You',
@@ -105,10 +106,13 @@ const Dashboard: React.FC = () => {
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       attachments: attachments.length > 0 ? attachments : undefined,
+      status: 'pending',
     };
   
+    // Dispatch the local optimistic update.
     dispatch(sendMessage(localMessagePayload));
-
+  
+    // Prepare the backend payload (optionally include the clientId so the backend can echo it)
     const newMessageDTO: NewMessageDTO = {
       content: newMessage.trim(),
       type: messageType as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
@@ -117,11 +121,18 @@ const Dashboard: React.FC = () => {
       textChannel: selectedChannel.id,
     };
   
+    // Send the message to the backend.
     sendMessageBackend(newMessageDTO);
+  
+    // Set a timeout to mark the message as error if not confirmed within 5 seconds.
+    setTimeout(() => {
+      dispatch(markMessageError({ channelId: selectedChannel.id, content: newMessage.trim() }));
+    }, 5000);
   
     setNewMessage('');
     setAttachments([]);
   };
+  
 
   const handleSendGif = (gifUrl: string) => {
     if (!selectedChannel || selectedChannel.type !== 'text') return;

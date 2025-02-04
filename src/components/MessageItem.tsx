@@ -115,6 +115,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
+        opacity: message.status === 'pending' ? 0.5 : 1,
+        border: message.status === 'error' ? '1px solid red' : 'none',
       }}
       data-cy={`message-${message.id}`}
     >

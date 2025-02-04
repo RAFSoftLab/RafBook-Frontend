@@ -68,6 +68,8 @@ export interface Message {
     content: string;
     timestamp: string;
     attachments?: Attachment[];
+    status?: 'pending' | 'sent' | 'error';
+    clientId?: number; // a temporary id generated on the client
 }
 
 export interface Sender {
