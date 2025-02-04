@@ -16,8 +16,9 @@ import {
   setSelectedStudyLevel,
   setSelectedStudyProgram,
 } from '../store/channelSlice';
-import { Channel, Message, Attachment, StudyLevel, StudyProgram } from '../types/global';
+import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO } from '../types/global';
 import { useSocket } from '../context/SocketContext';
+import { sendMessage as sendMessageBackend } from '../api/channelApi';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -107,16 +108,16 @@ const Dashboard: React.FC = () => {
     };
   
     dispatch(sendMessage(localMessagePayload));
-  
-    const newMessageDTO = {
+
+    const newMessageDTO: NewMessageDTO = {
       content: newMessage.trim(),
-      type: messageType,
+      type: messageType as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
       mediaUrl: attachments.map((att) => att.url),
       parentMessage: null,
       textChannel: selectedChannel.id,
     };
   
-    stompService?.sendMessage('/app/sendMessage', newMessageDTO);
+    sendMessageBackend(newMessageDTO);
   
     setNewMessage('');
     setAttachments([]);
@@ -143,7 +144,7 @@ const Dashboard: React.FC = () => {
   
     dispatch(sendMessage(localMessagePayload));
   
-    const newMessageDTO = {
+    const newMessageDTO: NewMessageDTO = {
       content: 'GIF',
       type: 'IMAGE',
       mediaUrl: [gifUrl],
@@ -151,7 +152,7 @@ const Dashboard: React.FC = () => {
       textChannel: selectedChannel.id,
     };
 
-    stompService?.sendMessage('/app/sendMessage', newMessageDTO);
+    sendMessageBackend(newMessageDTO);
     setAttachments([]);
   };
 

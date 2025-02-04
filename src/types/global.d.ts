@@ -92,6 +92,13 @@ export interface MessageDTO {
     edited: boolean;
 }
 
+export interface NewMessageDTO {
+    content: string;
+    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
+    mediaUrl: string[];
+    parentMessage: number | null;
+    textChannel: number;
+}
 
 export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
 
