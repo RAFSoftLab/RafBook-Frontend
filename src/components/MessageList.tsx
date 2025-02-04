@@ -11,18 +11,11 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 150);
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-    if (messages.length > 0) {
-      console.log(`Loaded ${messages.length} messages for channel ${selectedChannel}:`, messages);
-    }
-  }, [messages, selectedChannel]);
+  });
 
   return (
     <Box

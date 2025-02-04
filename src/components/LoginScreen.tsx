@@ -15,6 +15,10 @@ import { slideUp } from '../animations/animations';
 import { useNavigate } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { login } from '../api/authApi';
+import { useAppDispatch } from '../store/hooks'; // <-- your typed hooks
+import { getCurrentUser } from '../utils';
+import { Sender } from '../types/global'; // or wherever your Sender type is
+import { setUser } from '../store/userSlice';
 
 const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -24,6 +28,7 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
+  const dispatch = useAppDispatch();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +51,20 @@ const LoginScreen: React.FC = () => {
         } else {
           sessionStorage.setItem('token', token);
         }
+
+        // Now grab user data from the token:
+        const currentUser: Sender = getCurrentUser();
+        // E.g. decode token or fetch user details from server
+        // Then convert `Sender` to your `UserState` shape
+
+        dispatch(
+          setUser({
+            name: `${currentUser.firstName} ${currentUser.lastName}`,
+            avatar: '',
+            // ...other fields if you have them in your store
+          })
+        );
+
         navigate('/dashboard');
       } else {
         setError('Invalid response from server.');
