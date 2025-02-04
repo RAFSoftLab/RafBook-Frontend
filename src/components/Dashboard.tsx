@@ -16,10 +16,10 @@ import {
   setSelectedStudyLevel,
   setSelectedStudyProgram,
 } from '../store/channelSlice';
-import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO, Sender } from '../types/global';
+import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO } from '../types/global';
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend } from '../api/channelApi';
-import { jwtDecode } from 'jwt-decode';
+import { getCurrentUser } from '../utils';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -44,6 +44,8 @@ const Dashboard: React.FC = () => {
   const { stompService } = useSocket();
 
   const attachmentIdRef = useRef<number>(Date.now());
+
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
     dispatch(fetchUserChannelsThunk());
@@ -95,29 +97,6 @@ const Dashboard: React.FC = () => {
    // stompService?.subscribeToChannel(id);
   };
 
-  const getCurrentUser = (): Sender => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (token) {
-      const decoded: any = jwtDecode(token);
-      return {
-        id: decoded.id,
-        firstName: decoded.firstName,
-        lastName: decoded.lastName,
-        username: decoded.username,
-        email: decoded.email,
-        role: decoded.roles,
-      };
-    }
-    return {
-      id: 0,
-      firstName: 'You',
-      lastName: '',
-      username: 'You',
-      email: '',
-      role: [],
-    };
-  };
-
   const handleSendMessage = () => {
     if (newMessage.trim() === '' && attachments.length === 0) return;
     if (!selectedChannel || selectedChannel.type !== 'text') return;
@@ -126,8 +105,6 @@ const Dashboard: React.FC = () => {
     if (attachments.length > 0) {
       messageType = attachments[0].type.toUpperCase();
     }
-
-    const currentUser = getCurrentUser();
   
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
@@ -169,8 +146,6 @@ const Dashboard: React.FC = () => {
       url: gifUrl,
       name: 'GIF',
     };
-
-    const currentUser = getCurrentUser();
   
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,

@@ -5,7 +5,8 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoIcon from '@mui/icons-material/VideoLibrary';
 import ZipIcon from '@mui/icons-material/Archive';
-import { Message, MessageDTO, Attachment } from './types/global';
+import { Message, MessageDTO, Attachment, Sender } from './types/global';
+import { jwtDecode } from 'jwt-decode';
 
 /**
  * Returns an appropriate icon component based on the file extension.
@@ -47,18 +48,18 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
   const attachments: Attachment[] =
     msg.mediaUrl && msg.mediaUrl.length > 0
       ? msg.mediaUrl.map((url: string, index: number) => ({
-          id: Number(`${msg.id}${index}`),
-          type: msg.type.toLowerCase() as 'image' | 'video' | 'voice' | 'file',
-          url,
-          name:
-            msg.type === 'IMAGE'
-              ? 'Image'
-              : msg.type === 'VIDEO'
+        id: Number(`${msg.id}${index}`),
+        type: msg.type.toLowerCase() as 'image' | 'video' | 'voice' | 'file',
+        url,
+        name:
+          msg.type === 'IMAGE'
+            ? 'Image'
+            : msg.type === 'VIDEO'
               ? 'Video'
               : msg.type === 'VOICE'
-              ? 'Voice'
-              : 'File',
-        }))
+                ? 'Voice'
+                : 'File',
+      }))
       : [];
 
   return {
@@ -72,5 +73,28 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
       minute: '2-digit',
     }),
     attachments: attachments.length > 0 ? attachments : undefined,
+  };
+};
+
+export const getCurrentUser = (): Sender => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (token) {
+    const decoded: any = jwtDecode(token);
+    return {
+      id: decoded.id,
+      firstName: decoded.firstName,
+      lastName: decoded.lastName,
+      username: decoded.username,
+      email: decoded.email,
+      role: decoded.roles,
+    };
+  }
+  return {
+    id: 0,
+    firstName: 'You',
+    lastName: '',
+    username: 'You',
+    email: '',
+    role: [],
   };
 };

@@ -1,7 +1,7 @@
 // src/store/channelSlice.ts
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { StudyLevel, ChannelState, StudyProgram, Message, MessageDTO, Attachment } from '../types/global';
+import { StudyLevel, ChannelState, StudyProgram, Message, MessageDTO } from '../types/global';
 import { fetchUserChannels } from '../api/channelApi';
 import { addMessages } from './messageSlice';
 import { AppDispatch } from './index';

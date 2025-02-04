@@ -8,11 +8,11 @@ import {
     useTheme,
     useMediaQuery,
 } from '@mui/material';
-import { MessageItemProps, Sender } from '../types/global';
+import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
-import { jwtDecode } from 'jwt-decode';
+import { getCurrentUser } from '../utils';
 
 const isGif = (url?: string): boolean => {
     return url ? url.toLowerCase().includes('giphy') : false;
@@ -36,29 +36,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   } else if (isLgUp) {
     maxVisibleImages = 6;
   }
-
-    const getCurrentUser = (): Sender => {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (token) {
-        const decoded: any = jwtDecode(token);
-        return {
-          id: decoded.id,
-          firstName: decoded.firstName,
-          lastName: decoded.lastName,
-          username: decoded.username,
-          email: decoded.email,
-          role: decoded.roles,
-        };
-      }
-      return {
-        id: 0,
-        firstName: 'You',
-        lastName: '',
-        username: 'You',
-        email: '',
-        role: [],
-      };
-    };
 
   const isOwnMessage = message.sender.id === getCurrentUser().id; 
 
