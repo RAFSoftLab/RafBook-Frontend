@@ -5,6 +5,7 @@ import { StudyLevel, ChannelState, StudyProgram, Message, MessageDTO, Attachment
 import { fetchUserChannels } from '../api/channelApi';
 import { addMessages } from './messageSlice';
 import { AppDispatch } from './index';
+import { transformBackendMessage } from '../utils';
 
 export const fetchUserChannelsThunk = createAsyncThunk<
   StudyLevel[],
@@ -26,7 +27,7 @@ export const fetchUserChannelsThunk = createAsyncThunk<
                 const messages: Message[] = mapBackendMessagesToFrontend(
                   channel.messageDTOList,
                   channel.id
-                );
+                ).reverse();
                 dispatch(addMessages({ channelId: channel.id, messages }));
               }
             });
@@ -42,39 +43,7 @@ export const fetchUserChannelsThunk = createAsyncThunk<
 );
 
 const mapBackendMessagesToFrontend = (messages: MessageDTO[], channelId: number): Message[] => {
-  return messages.map((msg: MessageDTO) => {
-    const attachments: Attachment[] =
-      msg.mediaUrl && msg.mediaUrl.length > 0
-        ? msg.mediaUrl.map((url: string, index: number) => ({
-            id: Number(`${msg.id}${index}`),
-            type: msg.type.toLowerCase() as 'image' | 'video' | 'voice' | 'file',
-            url,
-            name:
-              msg.type === 'IMAGE'
-                ? 'Image'
-                : msg.type === 'VIDEO'
-                ? 'Video'
-                : msg.type === 'VOICE'
-                ? 'Voice'
-                : 'File',
-          }))
-        : [];
-
-    const message: Message = {
-      id: msg.id,
-      channelId: channelId,
-      sender: `${msg.sender.firstName} ${msg.sender.lastName}`,
-      type: msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
-      content: msg.content,
-      timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      attachments: attachments.length > 0 ? attachments : undefined,
-    };
-
-    return message;
-  });
+  return messages.map((msg: MessageDTO) => transformBackendMessage(msg, channelId));
 };
 
 const initialState: ChannelState = {

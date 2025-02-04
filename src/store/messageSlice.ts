@@ -2,6 +2,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message, MessageState, Attachment } from '../types/global';
+import { transformBackendMessage } from '../utils';
 
 const initialState: MessageState = {
   messages: {},
@@ -35,8 +36,17 @@ const messageSlice = createSlice({
       state.messages[message.channelId].push(message);
       console.log(`Sent message to channel ${message.channelId}:`, message);
     },
-    receiveMessage: (state, action: PayloadAction<Message>) => {
-      const message = action.payload;
+    receiveMessage: (state, action: PayloadAction<Message | any>) => {
+      // Check if sender is already a string; if not, transform the message.
+      const incoming = action.payload;
+      let message: Message;
+      if (typeof incoming.sender !== 'string') {
+        // Assume incoming is a MessageDTO with a channelId already added.
+        message = transformBackendMessage(incoming, incoming.channelId);
+      } else {
+        message = incoming;
+      }
+
       if (!state.messages[message.channelId]?.some((msg) => msg.id === message.id)) {
         if (!state.messages[message.channelId]) {
           state.messages[message.channelId] = [];
