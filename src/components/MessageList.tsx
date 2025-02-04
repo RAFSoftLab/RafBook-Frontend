@@ -39,7 +39,7 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel }) => {
         </Typography>
       ) : (
         <List data-cy="message-list">
-          {messages.map((msg) => (
+          {messages.slice().reverse().map((msg) => (
             <Box
               key={msg.id}
               sx={{

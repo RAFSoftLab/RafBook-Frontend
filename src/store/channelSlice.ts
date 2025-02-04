@@ -16,6 +16,8 @@ export const fetchUserChannelsThunk = createAsyncThunk<
     try {
       const studyLevels: StudyLevel[] = await fetchUserChannels();
 
+      console.log('Fetched user channels:', studyLevels);
+
       studyLevels.forEach((level) => {
         level.studyPrograms.forEach((program) => {
           program.categories.forEach((category) => {

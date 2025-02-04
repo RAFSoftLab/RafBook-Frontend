@@ -23,36 +23,7 @@ const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
                     type: 'text',
                     description: channel.description,
                     canWrite: channel.canWrite,
-                    messageDTOList: channel.messageDTOList.map((msg: any) => {
-                        const attachments =
-                            msg.mediaUrl && msg.mediaUrl.length > 0
-                                ? msg.mediaUrl.map((url: string, index: number) => ({
-                                    id: Number(`${msg.id}${index}`),
-                                    type: msg.type.toLowerCase(),
-                                    url,
-                                    name:
-                                        msg.type === 'IMAGE'
-                                            ? 'Image'
-                                            : msg.type === 'VIDEO'
-                                                ? 'Video'
-                                                : msg.type === 'VOICE'
-                                                    ? 'Voice'
-                                                    : 'File',
-                                }))
-                                : [];
-                        return {
-                            id: msg.id,
-                            content: msg.content,
-                            createdAt: msg.createdAt,
-                            type: msg.type,
-                            attachments,
-                            sender: msg.sender,
-                            reactions: msg.reactions,
-                            parentMessage: msg.parentMessage,
-                            deleted: msg.deleted,
-                            edited: msg.edited,
-                        };
-                    }),
+                    messageDTOList: channel.messageDTOList
                 })),
             })),
         })),
