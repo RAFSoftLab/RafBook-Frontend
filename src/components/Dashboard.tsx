@@ -55,6 +55,16 @@ const Dashboard: React.FC = () => {
     }
   }, [loading, studyLevels, selectedStudyLevel]);
 
+  useEffect(() => {
+    if (!loading && selectedStudyProgram) {
+      selectedStudyProgram.categories.forEach((category) => {
+        category.textChannels.forEach((channel) => {
+          stompService?.subscribeToChannel(channel.id);
+        });
+      });
+    }
+  }, [loading, selectedStudyProgram, stompService]);
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -80,14 +90,9 @@ const Dashboard: React.FC = () => {
   };
 
   const handleChannelSelect = (id: number) => {
-    if (prevSelectedChannelId !== null && stompService) {
-      stompService.unsubscribeFromChannel(prevSelectedChannelId);
-    }
-
     dispatch(setSelectedChannelId(id));
     setAttachments([]);
-
-    stompService?.subscribeToChannel(id);
+   // stompService?.subscribeToChannel(id);
   };
 
   const getCurrentUser = (): Sender => {
@@ -206,14 +211,6 @@ const Dashboard: React.FC = () => {
     }
     setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
-
-  useEffect(() => {
-    return () => {
-      if (selectedChannelId !== null && stompService) {
-        stompService.unsubscribeFromChannel(selectedChannelId);
-      }
-    };
-  }, [selectedChannelId, stompService]);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">

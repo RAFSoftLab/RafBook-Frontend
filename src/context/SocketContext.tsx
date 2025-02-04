@@ -81,7 +81,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     const subscription = stompClient.subscribe(`/topic/channels/${channelId}`, (message: IMessage) => {
       const msg = JSON.parse(message.body);
-      // Transform sender if it's an object:
       const transformedMessage = {
         ...msg,
         channelId,
