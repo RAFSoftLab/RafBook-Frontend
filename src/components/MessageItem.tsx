@@ -50,12 +50,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
     ? theme.palette.primary.main
     : theme.palette.grey[500];
 
-  const messageBackground = isOwnMessage
-    ? theme.palette.primary.main
-    : theme.palette.mode === 'light'
-      ? theme.palette.grey[300]
-      : theme.palette.grey[700];
-
   const messageTextColor = isOwnMessage
     ? theme.palette.primary.contrastText
     : theme.palette.text.primary;
@@ -190,7 +184,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
             {message.type === 'text' && (
               <Box
                 sx={{
-                  backgroundColor: messageBackground,
                   color: messageTextColor,
                   borderRadius: 2,
                   p: 1,
@@ -200,8 +193,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
               >
                 {/* Render Markdown with custom container to reset margins */}
                 <MarkdownRenderer content={message.content} />
-
-                <Divider variant="middle" sx={{ marginTop: 1, marginBottom: 1 }} />
               </Box>
             )}
             {hasGifAttachment && (
@@ -245,6 +236,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
           />
         )}
       </Box>
+      <Divider  sx={{ marginTop: 1 }} />
       <Popover
         open={Boolean(contextMenu)}
         onClose={handleCloseContextMenu}

@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { Box, useTheme, Typography } from '@mui/material';
+import 'highlight.js/styles/github.css';
 
 interface MarkdownRendererProps {
   content: string;
@@ -38,14 +39,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
       return (
         <pre
           style={{
+            backgroundColor: theme.palette.grey[300],
             borderRadius: theme.shape.borderRadius,
             padding: theme.spacing(2),
             overflowX: 'auto',
           }}
-          {...props}
           className={className}
+          {...props}
         >
-          {children}
+          <code>{children}</code>
         </pre>
       );
     },

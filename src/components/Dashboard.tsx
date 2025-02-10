@@ -18,8 +18,7 @@ import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO }
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+
 import MarkdownRenderer from './MarkdownRenderer';
 
 const Dashboard: React.FC = () => {
