@@ -57,6 +57,8 @@ export interface MessageInputProps {
     onSendGif: (gifUrl: string) => void;
     onSendAttachments: (newAttachments: Attachment[]) => void;
     onRemoveAttachment: (id: number) => void;
+    previewMode: boolean;
+    setPreviewMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface Message {

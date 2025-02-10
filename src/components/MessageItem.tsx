@@ -1,4 +1,3 @@
-// MessageItem.tsx
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
@@ -15,6 +14,8 @@ import {
   ListItemText,
   Typography as MuiTypography,
 } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,6 +24,7 @@ import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
 import { useAppSelector } from '../store/hooks';
+import MarkdownRenderer from './MarkdownRenderer'; // the component we just created
 
 const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
@@ -73,7 +75,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
-  // State for managing the custom context menu using Popover
   const [contextMenu, setContextMenu] =
     useState<{ mouseX: number; mouseY: number } | null>(null);
 
@@ -89,7 +90,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
     setContextMenu(null);
   };
 
-  // Instead of prompting, call the onEditMessage callback
   const handleEdit = () => {
     handleCloseContextMenu();
     if (onEditMessage) {
@@ -160,7 +160,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
           sx={{ mb: 0.5, ml: timestampOffset }}
           data-cy={`message-timestamp-${message.id}`}
         >
-          {message.sender.firstName} {message.sender.lastName} • {new Date(message.timestamp).toLocaleTimeString([], {
+          {message.sender.firstName} {message.sender.lastName} •{' '}
+          {new Date(message.timestamp).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
           })}{' '}
@@ -189,9 +190,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
                 }}
                 data-cy={`message-content-${message.id}`}
               >
-                <Typography variant="body1" component="span">
-                  {message.content}
-                </Typography>
+                {/* Render Markdown with custom container to reset margins */}
+                <MarkdownRenderer content={message.content} />
               </Box>
             )}
             {hasGifAttachment && (

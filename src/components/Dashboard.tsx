@@ -1,5 +1,3 @@
-// src/components/Dashboard.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import Header from './Header';
@@ -20,6 +18,9 @@ import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO }
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import MarkdownRenderer from './MarkdownRenderer';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -28,6 +29,8 @@ const Dashboard: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  // Lift previewMode state here
+  const [previewMode, setPreviewMode] = useState(false);
 
   const dispatch = useAppDispatch();
 
@@ -35,7 +38,6 @@ const Dashboard: React.FC = () => {
   const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } = channelState;
 
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
-  const prevSelectedChannelId = useAppSelector((state) => state.channel.prevSelectedChannelId);
   const messages = useAppSelector((state) =>
     selectedChannelId !== null ? state.messages.messages[selectedChannelId] || [] : []
   );
@@ -73,6 +75,7 @@ const Dashboard: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  // Called from MessageItem when the user clicks "Edit"
   const handleEditMessage = (message: Message) => {
     setEditingMessage(message);
     setNewMessage(message.content);
@@ -117,14 +120,15 @@ const Dashboard: React.FC = () => {
         mediaUrl: attachments.length > 0 ? attachments.map((att) => att.url) : [],
         sender: editingMessage.sender,
         reactions: editingMessage.reactions,
-        parentMessage: Array.isArray(editingMessage.parentMessage) &&
-                       editingMessage.parentMessage.length === 0
-                        ? null
-                        : editingMessage.parentMessage,
+        parentMessage:
+          Array.isArray(editingMessage.parentMessage) && editingMessage.parentMessage.length === 0
+            ? null
+            : editingMessage.parentMessage,
         isDeleted: false,
         isEdited: true,
       };
-    
+
+      // Update the Message type in Redux.
       const updatedMessage: Message = {
         ...editingMessage,
         content: newMessage.trim(),
@@ -132,25 +136,25 @@ const Dashboard: React.FC = () => {
         edited: true,
         status: 'pending',
       };
-    
+
       dispatch(updateMessage(updatedMessage));
       editMessage(editingMessage.id, updatedMessageDTO);
-    
-      // Clear the editing state.
+
+      // Clear editing state.
       setEditingMessage(null);
       setNewMessage('');
       setAttachments([]);
       return;
     }
-  
+
     let messageType: string = 'TEXT';
     if (attachments.length > 0) {
       messageType = attachments[0].type.toUpperCase();
     }
-  
+
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
-      sender: sender, 
+      sender: sender,
       type: messageType.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -161,9 +165,9 @@ const Dashboard: React.FC = () => {
       attachments: attachments.length > 0 ? attachments : undefined,
       status: 'pending',
     };
-  
+
     dispatch(sendMessage(localMessagePayload));
-  
+
     const newMessageDTO: NewMessageDTO = {
       content: newMessage.trim(),
       type: messageType as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
@@ -171,31 +175,30 @@ const Dashboard: React.FC = () => {
       parentMessage: null,
       textChannel: selectedChannel.id,
     };
-  
+
     sendMessageBackend(newMessageDTO);
-  
+
     setTimeout(() => {
       dispatch(markMessageError({ channelId: selectedChannel.id, content: newMessage.trim(), currentId: currentUser.id }));
     }, 5000);
-  
+
     setNewMessage('');
     setAttachments([]);
   };
-  
 
   const handleSendGif = (gifUrl: string) => {
     if (!selectedChannel || selectedChannel.type !== 'text') return;
-  
+
     const gifAttachment: Attachment = {
       id: attachmentIdRef.current++,
       type: 'image',
       url: gifUrl,
       name: 'GIF',
     };
-  
+
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
-      sender: sender, 
+      sender: sender,
       type: 'image',
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -206,9 +209,9 @@ const Dashboard: React.FC = () => {
       attachments: [gifAttachment],
       status: 'pending',
     };
-  
+
     dispatch(sendMessage(localMessagePayload));
-  
+
     const newMessageDTO: NewMessageDTO = {
       content: 'GIF',
       type: 'IMAGE',
@@ -274,10 +277,7 @@ const Dashboard: React.FC = () => {
         }}
         data-cy="dashboard-main"
       >
-        {/* Spacer for the AppBar */}
         <Box sx={{ height: '64px' }} />
-
-        {/* Conditional Rendering Based on Channel Type and Selection */}
         {loading ? (
           <Box
             sx={{
@@ -317,12 +317,24 @@ const Dashboard: React.FC = () => {
                 <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
               ) : (
                 <>
-                  {/* Message List */}
-                  <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
-                    <MessageList selectedChannel={selectedChannel.id} key={selectedChannel.id} onEditMessage={handleEditMessage} />
-                  </Box>
+                  {/* Conditionally render preview mode or the MessageList */}
+                  {previewMode ? (
+                    <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
+                      <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
+                        <MarkdownRenderer content={newMessage} />
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
+                      <MessageList
+                        selectedChannel={selectedChannel.id}
+                        key={selectedChannel.id}
+                        onEditMessage={handleEditMessage}
+                      />
+                    </Box>
+                  )}
 
-                  {/* Message Input */}
+                  {/* Message Input receives previewMode state and its setter */}
                   <MessageInput
                     newMessage={newMessage}
                     setNewMessage={setNewMessage}
@@ -330,6 +342,8 @@ const Dashboard: React.FC = () => {
                     onSendGif={handleSendGif}
                     onSendAttachments={handleSendAttachments}
                     onRemoveAttachment={handleRemoveAttachment}
+                    previewMode={previewMode}
+                    setPreviewMode={setPreviewMode}
                   />
                 </>
               )
@@ -351,8 +365,6 @@ const Dashboard: React.FC = () => {
             )}
           </>
         )}
-
-        {/* Selection Modal */}
         <StudyProgramSelectorModal
           open={isModalOpen}
           studyLevels={studyLevels}
