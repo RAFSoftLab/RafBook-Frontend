@@ -62,3 +62,12 @@ export const editMessage = async (messageId: number, messageDto: any): Promise<v
         console.error('Error editing message:', error);
     }
 }
+
+export const deleteMessageBackend = async (messageId: number): Promise<void> => {
+    try {
+        const response = await axiosInstance.delete(`/messages/${messageId}`);
+        console.log('Message deleted successfully:', response.data);
+    } catch (error) {
+        console.error('Error deleting message:', error);
+    }
+}

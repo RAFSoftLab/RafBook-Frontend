@@ -84,7 +84,6 @@ const messageSlice = createSlice({
       }
     },
     updateMessage: (state, action: PayloadAction<Message>) => {
-      // This action updates an existing message in the store.
       const updated = action.payload;
       const channelMessages = state.messages[updated.channelId] || [];
       const index = channelMessages.findIndex((msg) => msg.id === updated.id);
@@ -92,11 +91,16 @@ const messageSlice = createSlice({
         state.messages[updated.channelId][index] = { ...updated, status: 'sent' };
         console.log(`Updated message in channel ${updated.channelId}:`, updated);
       }
-    },    
+    },
+    deleteMessage: (state, action: PayloadAction<{ channelId: number; messageId: number }>) => {
+      const { channelId, messageId } = action.payload;
+      state.messages[channelId] = state.messages[channelId].filter((msg) => msg.id !== messageId);
+      console.log(`Deleted message ${messageId} in channel ${channelId}`);
+    }    
   },
   extraReducers: (builder) => {},
 });
 
-export const { addMessages, sendMessage, receiveMessage, markMessageError, updateMessage } = messageSlice.actions;
+export const { addMessages, sendMessage, receiveMessage, markMessageError, updateMessage, deleteMessage } = messageSlice.actions;
 
 export default messageSlice.reducer;

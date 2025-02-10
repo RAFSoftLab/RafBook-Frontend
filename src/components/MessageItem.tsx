@@ -14,8 +14,6 @@ import {
   ListItemText,
   Typography as MuiTypography,
 } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,8 +21,10 @@ import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
-import { useAppSelector } from '../store/hooks';
-import MarkdownRenderer from './MarkdownRenderer'; // the component we just created
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import MarkdownRenderer from './MarkdownRenderer';
+import { deleteMessage } from '../store/messageSlice';
+import { deleteMessageBackend } from '../api/channelApi';
 
 const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
@@ -62,6 +62,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
 
   const timestampOffset = theme.spacing(6);
 
+  const dispatch = useAppDispatch();
+
   const imageAttachments = message.attachments?.filter(
     (att) => att.type === 'image'
   ) || [];
@@ -96,6 +98,12 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
       onEditMessage(message);
     }
   };
+
+  const handleDelete = () => {
+    handleCloseContextMenu();
+    dispatch(deleteMessage({channelId: message.channelId, messageId: message.id}));
+    deleteMessageBackend(message.id);
+  }
 
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
@@ -192,6 +200,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
               >
                 {/* Render Markdown with custom container to reset margins */}
                 <MarkdownRenderer content={message.content} />
+
+                <Divider variant="middle" sx={{ marginTop: 1, marginBottom: 1 }} />
               </Box>
             )}
             {hasGifAttachment && (
@@ -251,7 +261,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
               </ListItemIcon>
               <ListItemText primary="Edit" />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
-                Ctrl + E
+                Edit Message
               </MuiTypography>
             </MenuItem>
             <MenuItem>
@@ -260,11 +270,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
               </ListItemIcon>
               <ListItemText primary="Reply" />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
-                Ctrl + R
+                Reply to Message
               </MuiTypography>
             </MenuItem>
             <Divider variant="middle" />
-            <MenuItem sx={{ color: theme.palette.error.main }}>
+            <MenuItem sx={{ color: theme.palette.error.main }} onClick={handleDelete}>
               <ListItemIcon>
                 <DeleteIcon fontSize="small" sx={{ color: theme.palette.error.main }} />
               </ListItemIcon>

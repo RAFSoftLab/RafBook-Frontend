@@ -1,5 +1,3 @@
-// src/components/MessageList.tsx
-
 import React, { useEffect, useRef } from 'react';
 import { Box, Typography, List } from '@mui/material';
 import { useAppSelector } from '../store/hooks';
@@ -22,7 +20,7 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessag
       sx={{
         flexGrow: 1,
         overflowY: 'auto',
-        mb: 2,
+        // mb: 2,
         paddingRight: 2,
         pr: 2,
       }}
