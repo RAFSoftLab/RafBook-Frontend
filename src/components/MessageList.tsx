@@ -6,21 +6,21 @@ import { MessageListProps } from '../types/global';
 
 const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessage }) => {
   const messages = useAppSelector((state) => state.messages.messages[selectedChannel] || []);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setTimeout(() => {
+    // Only scroll when messages change
+    const timeout = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 150);
-  });
+    return () => clearTimeout(timeout);
+  }, [messages]); // Dependency array includes messages
 
   return (
     <Box
       sx={{
         flexGrow: 1,
         overflowY: 'auto',
-        // mb: 2,
         paddingRight: 2,
         pr: 2,
       }}
@@ -42,8 +42,8 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessag
                   backgroundColor: (theme) => theme.palette.action.hover,
                 },
                 mb: 1,
-                paddingY: 0.5,
-                paddingX: 1,
+                py: 0.5,
+                px: 1,
               }}
               data-cy={`message-item-${msg.id}`}
             >

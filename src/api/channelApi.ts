@@ -1,7 +1,5 @@
-// src/api/channelApi.ts
-
 import axiosInstance from './axiosConfig';
-import { MessageDTO, StudyLevel } from '../types/global';
+import { StudyLevel } from '../types/global';
 import { NewMessageDTO } from '../types/global';
 
 const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {

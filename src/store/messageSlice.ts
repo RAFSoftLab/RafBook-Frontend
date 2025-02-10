@@ -1,9 +1,8 @@
 // src/store/messageSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Message, MessageDTO, MessageState } from '../types/global';
+import { Message, MessageState } from '../types/global';
 import { transformBackendMessage } from '../utils';
-import { useAppSelector } from './hooks';
 
 const initialState: MessageState = {
   messages: {},
@@ -102,7 +101,7 @@ const messageSlice = createSlice({
       }
     }    
   },
-  extraReducers: (builder) => {},
+  extraReducers: () => {},
 });
 
 export const { addMessages, sendMessage, receiveMessage, markMessageError, updateMessage, deleteMessage } = messageSlice.actions;

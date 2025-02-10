@@ -9,8 +9,6 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import SendIcon from '@mui/icons-material/Send';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import GifIcon from '@mui/icons-material/Gif';

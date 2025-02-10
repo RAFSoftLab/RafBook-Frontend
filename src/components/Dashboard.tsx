@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Box, Typography, CircularProgress, Alert, Paper, IconButton, Divider } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MessageList from './MessageList';
@@ -18,34 +18,27 @@ import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO }
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
-
 import MarkdownRenderer from './MarkdownRenderer';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
-
   const dispatch = useAppDispatch();
 
   const channelState = useAppSelector((state) => state.channel);
   const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } = channelState;
-
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
   const messages = useAppSelector((state) =>
     selectedChannelId !== null ? state.messages.messages[selectedChannelId] || [] : []
   );
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const { stompService } = useSocket();
-
   const attachmentIdRef = useRef<number>(Date.now());
-
   const currentUser = useAppSelector((state) => state.user);
   const sender = getSenderFromUser(currentUser);
 
@@ -73,10 +66,10 @@ const Dashboard: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleEditMessage = (message: Message) => {
+  const handleEditMessage = useCallback((message: Message) => {
     setEditingMessage(message);
     setNewMessage(message.content);
-  };
+  }, []);
 
   const handleSelection = (studyLevel: StudyLevel, studyProgram: StudyProgram) => {
     dispatch(setSelectedStudyLevel(studyLevel));
@@ -234,6 +227,13 @@ const Dashboard: React.FC = () => {
     setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
 
+  // Memoize preview content so it does not re-render on every keystroke.
+  const previewContent = useMemo(() => (
+    <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
+      <MarkdownRenderer content={newMessage} />
+    </Box>
+  ), [newMessage]);
+
   return (
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
       <Header
@@ -313,9 +313,7 @@ const Dashboard: React.FC = () => {
                 <>
                   {previewMode ? (
                     <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
-                      <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
-                        <MarkdownRenderer content={newMessage} />
-                      </Box>
+                      {previewContent}
                     </Box>
                   ) : (
                     <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
@@ -324,6 +322,39 @@ const Dashboard: React.FC = () => {
                         key={selectedChannel.id}
                         onEditMessage={handleEditMessage}
                       />
+                    </Box>
+                  )}
+                  {editingMessage && (
+                    <Box sx={{ mb: 1 }}>
+                      <Paper
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          p: 1,
+                          backgroundColor: 'background.paper',
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Editing: {editingMessage.content}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(editingMessage.timestamp).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          onClick={() => {
+                            setEditingMessage(null);
+                            setNewMessage('');
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Paper>
                     </Box>
                   )}
                   <MessageInput
