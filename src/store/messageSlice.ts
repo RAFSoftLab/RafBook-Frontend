@@ -3,7 +3,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message, MessageState } from '../types/global';
 import { transformBackendMessage } from '../utils';
-import { getCurrentUser } from '../utils';
+import { useAppSelector } from './hooks';
 
 const initialState: MessageState = {
   messages: {},
@@ -40,7 +40,7 @@ const messageSlice = createSlice({
       const incomingDTO = action.payload;
       const message: Message = transformBackendMessage(incomingDTO, incomingDTO.channelId);
     
-      let currentId = getCurrentUser().id;
+      let currentId = useAppSelector((state) => state.user).id;
     
       const channelMessages = state.messages[message.channelId] || [];
 
@@ -72,7 +72,7 @@ const messageSlice = createSlice({
       state,
       action: PayloadAction<{ channelId: number; content: string }>
     ) => {
-      let currentId = getCurrentUser().id;
+      let currentId = useAppSelector((state) => state.user).id;
       const { channelId, content } = action.payload;
       const channelMessages = state.messages[channelId] || [];
       const index = channelMessages.findIndex(

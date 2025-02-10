@@ -19,7 +19,7 @@ import {
 import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO } from '../types/global';
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend } from '../api/channelApi';
-import { getCurrentUser } from '../utils';
+import { getSenderFromUser } from '../utils';
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -45,7 +45,8 @@ const Dashboard: React.FC = () => {
 
   const attachmentIdRef = useRef<number>(Date.now());
 
-  const currentUser = getCurrentUser();
+  const currentUser = useAppSelector((state) => state.user);
+  const sender = getSenderFromUser(currentUser);
 
   useEffect(() => {
     dispatch(fetchUserChannelsThunk());
@@ -108,12 +109,12 @@ const Dashboard: React.FC = () => {
   
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
-      sender: currentUser, 
+      sender: sender, 
       type: messageType.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       reactions: [],
-      parentMessage: null,
+      parentMessage: [],
       edited: false,
       deleted: false,
       attachments: attachments.length > 0 ? attachments : undefined,
@@ -153,12 +154,12 @@ const Dashboard: React.FC = () => {
   
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
-      sender: currentUser, 
+      sender: sender, 
       type: 'image',
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       reactions: [],
-      parentMessage: null,
+      parentMessage: [],
       edited: false,
       deleted: false,
       attachments: [gifAttachment],

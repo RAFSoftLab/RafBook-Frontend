@@ -4,6 +4,10 @@ import { UserState } from '../types/global';
 const initialState: UserState = {
   name: '',
   avatar: '',
+  email: '',
+  id: -1,
+  role: [],
+  username: '',
 };
 
 const userSlice = createSlice({

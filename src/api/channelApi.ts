@@ -1,7 +1,7 @@
 // src/api/channelApi.ts
 
 import axiosInstance from './axiosConfig';
-import { StudyLevel } from '../types/global';
+import { MessageDTO, StudyLevel } from '../types/global';
 import { NewMessageDTO } from '../types/global';
 
 const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
@@ -51,5 +51,14 @@ export const sendMessage = async (newMessageDTO: NewMessageDTO): Promise<void> =
         console.log('Message posted successfully:', response.data);
     } catch (error) {
         console.error('Error posting message:', error);
+    }
+}
+
+export const editMessage = async (messageId: number, messageDto: MessageDTO): Promise<void> => {
+    try {
+        const response = await axiosInstance.put(`/messages/${messageId}`, messageDto);
+        console.log('Message edited successfully:', response.data);
+    } catch (error) {
+        console.error('Error editing message:', error);
     }
 }

@@ -12,7 +12,7 @@ import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
-import { getCurrentUser } from '../utils';
+import { useAppSelector } from '../store/hooks';
 
 const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
@@ -37,7 +37,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     maxVisibleImages = 6;
   }
 
-  const isOwnMessage = message.sender.id === getCurrentUser().id;
+  const isOwnMessage = message.sender.id === useAppSelector((state) => state.user).id;
 
   const avatarColor = isOwnMessage
     ? theme.palette.primary.main

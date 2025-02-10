@@ -52,16 +52,16 @@ const LoginScreen: React.FC = () => {
           sessionStorage.setItem('token', token);
         }
 
-        // Now grab user data from the token:
         const currentUser: Sender = getCurrentUser();
-        // E.g. decode token or fetch user details from server
-        // Then convert `Sender` to your `UserState` shape
 
         dispatch(
           setUser({
+            id: currentUser.id,
             name: `${currentUser.firstName} ${currentUser.lastName}`,
             avatar: '',
-            // ...other fields if you have them in your store
+            email: currentUser.email,
+            role: currentUser.role,
+            username: currentUser.username,
           })
         );
 

@@ -5,7 +5,7 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoIcon from '@mui/icons-material/VideoLibrary';
 import ZipIcon from '@mui/icons-material/Archive';
-import { Message, MessageDTO, Attachment, Sender } from './types/global';
+import { Message, MessageDTO, Attachment, Sender, UserState } from './types/global';
 import { jwtDecode } from 'jwt-decode';
 
 /**
@@ -73,7 +73,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
       minute: '2-digit',
     }),
     reactions: msg.reactions,
-    parentMessage: msg.parentMessage?.id,
+    parentMessage: msg.parentMessage || [],
     deleted: msg.deleted,
     edited: msg.edited,
     attachments: attachments.length > 0 ? attachments : undefined,
@@ -100,5 +100,18 @@ export const getCurrentUser = (): Sender => {
     username: 'You',
     email: '',
     role: [],
+  };
+};
+
+export const getSenderFromUser = (user: UserState): Sender => {
+  const [firstName, ...lastNameParts] = user.name.split(' ');
+  const lastName = lastNameParts.join(' ') || ''; // In case there's only one name
+  return {
+    id: user.id,
+    firstName,
+    lastName,
+    username: user.username,
+    email: user.email,
+    role: user.role,
   };
 };

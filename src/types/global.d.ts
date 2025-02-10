@@ -59,7 +59,6 @@ export interface MessageInputProps {
     onRemoveAttachment: (id: number) => void;
 }
 
-
 export interface Message {
     id: number;
     channelId: number;
@@ -68,7 +67,7 @@ export interface Message {
     content: string;
     timestamp: string;
     reactions: any[];
-    parentMessage: number | undefined | null;
+    parentMessage: MessageDTO | [];
     deleted: boolean;
     edited: boolean;
     attachments?: Attachment[];
@@ -92,7 +91,7 @@ export interface MessageDTO {
     mediaUrl: string[];
     sender: Sender;
     reactions: any[];
-    parentMessage: MessageDTO | null;
+    parentMessage: MessageDTO | [];
     deleted: boolean;
     edited: boolean;
 }
@@ -173,9 +172,23 @@ export interface ThemeState {
 }
 
 export interface UserState {
+    id: number;
     name: string;
     avatar: string;
+    role: string[];
+    username: string;
+    email: string;
 }
+
+
+// export interface Sender {
+//     id: number;
+//     firstName: string;
+//     lastName: string;
+//     username: string;
+//     email: string;
+//     role: string[];
+// }
 
 export interface VoiceState {
     isMuted: boolean;
