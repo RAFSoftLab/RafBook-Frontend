@@ -72,6 +72,10 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
       hour: '2-digit',
       minute: '2-digit',
     }),
+    reactions: msg.reactions,
+    parentMessage: msg.parentMessage?.id,
+    deleted: msg.deleted,
+    edited: msg.edited,
     attachments: attachments.length > 0 ? attachments : undefined,
   };
 };

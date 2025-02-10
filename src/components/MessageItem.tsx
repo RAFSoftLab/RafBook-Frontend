@@ -2,11 +2,11 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-    Box,
-    Typography,
-    Avatar,
-    useTheme,
-    useMediaQuery,
+  Box,
+  Typography,
+  Avatar,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { MessageItemProps } from '../types/global';
 import ImageGrid from './ImageGrid';
@@ -15,12 +15,12 @@ import FileList from './FileList';
 import { getCurrentUser } from '../utils';
 
 const isGif = (url?: string): boolean => {
-    return url ? url.toLowerCase().includes('giphy') : false;
+  return url ? url.toLowerCase().includes('giphy') : false;
 };
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const theme = useTheme();
-  
+
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
@@ -37,7 +37,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     maxVisibleImages = 6;
   }
 
-  const isOwnMessage = message.sender.id === getCurrentUser().id; 
+  const isOwnMessage = message.sender.id === getCurrentUser().id;
 
   const avatarColor = isOwnMessage
     ? theme.palette.primary.main
@@ -46,8 +46,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const messageBackground = isOwnMessage
     ? theme.palette.primary.main
     : theme.palette.mode === 'light'
-    ? theme.palette.grey[300]
-    : theme.palette.grey[700];
+      ? theme.palette.grey[300]
+      : theme.palette.grey[700];
 
   const messageTextColor = isOwnMessage
     ? theme.palette.primary.contrastText
@@ -131,7 +131,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         }}
         data-cy={`message-timestamp-${message.id}`}
       >
-        {message.sender.firstName} {message.sender.lastName} • {message.timestamp}
+        {message.sender.firstName} {message.sender.lastName} • {message.timestamp} {message.edited && (
+          <span style={{ fontSize: '0.75rem', fontStyle: 'italic', marginLeft: 4 }}>
+            (edited)
+          </span>
+        )}
       </Typography>
 
       {/* Message and Avatar Container */}

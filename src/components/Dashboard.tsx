@@ -112,6 +112,10 @@ const Dashboard: React.FC = () => {
       type: messageType.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      reactions: [],
+      parentMessage: null,
+      edited: false,
+      deleted: false,
       attachments: attachments.length > 0 ? attachments : undefined,
       status: 'pending',
     };
@@ -153,6 +157,10 @@ const Dashboard: React.FC = () => {
       type: 'image',
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      reactions: [],
+      parentMessage: null,
+      edited: false,
+      deleted: false,
       attachments: [gifAttachment],
       status: 'pending',
     };

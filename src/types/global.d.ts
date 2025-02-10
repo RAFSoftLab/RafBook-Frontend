@@ -67,9 +67,12 @@ export interface Message {
     type: 'text' | 'image' | 'video' | 'voice';
     content: string;
     timestamp: string;
+    reactions: any[];
+    parentMessage: number | undefined | null;
+    deleted: boolean;
+    edited: boolean;
     attachments?: Attachment[];
     status?: 'pending' | 'sent' | 'error';
-    clientId?: number;
 }
 
 export interface Sender {
@@ -86,10 +89,10 @@ export interface MessageDTO {
     content: string;
     createdAt: string;
     type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
-    mediaUrl: string[]; 
+    mediaUrl: string[];
     sender: Sender;
     reactions: any[];
-    parentMessage: number | null;
+    parentMessage: MessageDTO | null;
     deleted: boolean;
     edited: boolean;
 }
@@ -105,10 +108,10 @@ export interface NewMessageDTO {
 export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
 
 export interface Attachment {
-  id: number;
-  type: AttachmentType;
-  url: string;
-  name?: string;
+    id: number;
+    type: AttachmentType;
+    url: string;
+    name?: string;
 }
 
 export interface AttachmentPreviewProps {
@@ -127,10 +130,10 @@ export interface MessageListProps {
 
 export interface MessageState {
     messages: {
-      [channelId: number]: Message[];
+        [channelId: number]: Message[];
     };
-  }
-  
+}
+
 export interface SettingsModalProps {
     open: boolean;
     onClose: () => void;
@@ -148,7 +151,6 @@ export interface SidebarProps {
     mobileOpen: boolean;
     handleDrawerToggle: () => void;
 }
-
 
 export interface UserControlsProps {
     user: {
