@@ -21,6 +21,19 @@ import { getSenderFromUser } from '../utils';
 import MarkdownRenderer from './MarkdownRenderer';
 import CloseIcon from '@mui/icons-material/Close';
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -227,12 +240,16 @@ const Dashboard: React.FC = () => {
     setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
 
-  // Memoize preview content so it does not re-render on every keystroke.
-  const previewContent = useMemo(() => (
-    <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
-      <MarkdownRenderer content={newMessage} />
-    </Box>
-  ), [newMessage]);
+  const debouncedMessage = useDebounce(newMessage, 200);
+
+  const previewContent = useMemo(() => {
+    if (!previewMode) return null;
+    return (
+      <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
+        <MarkdownRenderer content={debouncedMessage} />
+      </Box>
+    );
+  }, [debouncedMessage, previewMode]);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
@@ -311,21 +328,43 @@ const Dashboard: React.FC = () => {
                 <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
               ) : (
                 <>
-                  {previewMode ? (
-                    <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
-                      {previewContent}
-                    </Box>
-                  ) : (
-                    <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
-                      <MessageList
-                        selectedChannel={selectedChannel.id}
-                        key={selectedChannel.id}
-                        onEditMessage={handleEditMessage}
-                      />
-                    </Box>
-                  )}
+                  {/* MessageList is always mounted but hidden when previewMode is true */}
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      overflowY: 'auto',
+                      mb: 2,
+                      display: previewMode ? 'none' : 'block',
+                    }}
+                    data-cy="message-list-container"
+                  >
+                    <MessageList
+                      selectedChannel={selectedChannel.id}
+                      key={selectedChannel.id}
+                      onEditMessage={handleEditMessage}
+                    />
+                  </Box>
+                  {/* Preview content is rendered in its own container */}
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      overflowY: 'auto',
+                      mb: 2,
+                      display: previewMode ? 'block' : 'none',
+                    }}
+                  >
+                    {previewContent}
+                  </Box>
                   {editingMessage && (
-                    <Box sx={{ mb: 1 }}>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        right: 8,
+                        zIndex: 10,
+                      }}
+                    >
                       <Paper
                         sx={{
                           display: 'flex',
@@ -333,6 +372,7 @@ const Dashboard: React.FC = () => {
                           justifyContent: 'space-between',
                           p: 1,
                           backgroundColor: 'background.paper',
+                          boxShadow: 3,
                         }}
                       >
                         <Box>
