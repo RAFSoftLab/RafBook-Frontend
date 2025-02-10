@@ -2,7 +2,8 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, Typography } from '@mui/material';
+// Import a CSS file for syntax highlighting (choose your favorite theme)
 import 'highlight.js/styles/github.css';
 
 interface MarkdownRendererProps {
@@ -12,16 +13,19 @@ interface MarkdownRendererProps {
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   const theme = useTheme();
 
+  // Use your theme settings to calculate code background and text colors.
+  const codeBackground =
+    theme.palette.mode === 'light' ? theme.palette.grey[300] : theme.palette.grey[700];
+
   const components = {
     code({ inline, className, children, ...props }: any) {
       if (!className) {
         return (
           <code
             style={{
-              backgroundColor: theme.palette.action.hover,
+              backgroundColor: codeBackground,
               borderRadius: theme.shape.borderRadius,
               padding: theme.spacing(0.25, 0.5),
-              fontFamily: theme.typography.fontFamily,
             }}
             {...props}
           >
@@ -29,18 +33,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           </code>
         );
       }
+      // For block code, we override the entire <pre> element.
       return (
         <pre
           style={{
-            backgroundColor: theme.palette.background.paper,
             borderRadius: theme.shape.borderRadius,
             padding: theme.spacing(2),
             overflowX: 'auto',
-            fontFamily: theme.typography.fontFamily,
           }}
           {...props}
+          className={className}
         >
-          <code className={className}>{children}</code>
+          {children}
         </pre>
       );
     },
@@ -49,8 +53,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   return (
     <Box
       sx={{
-        // Reset margins on all descendants.
-        '& *': { margin: 0 },
+        // Apply bottom margin to all direct children except the last one.
+        '& > *:not(:last-child)': {
+          marginBottom: theme.spacing(1.5),
+        },
+        // Also, apply bottom margin to all li elements in ul and ol.
+        '& ul li:not(:last-child), & ol li:not(:last-child)': {
+          marginBottom: theme.spacing(1.5),
+        },
+        // Override default highlight.js styles for dark mode support.
       }}
     >
       <ReactMarkdown
