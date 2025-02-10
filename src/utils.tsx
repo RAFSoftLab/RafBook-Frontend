@@ -68,10 +68,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
     sender: msg.sender,
     type: msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
     content: msg.content,
-    timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
+    timestamp: msg.createdAt,
     reactions: msg.reactions,
     parentMessage: msg.parentMessage || [],
     deleted: msg.deleted,

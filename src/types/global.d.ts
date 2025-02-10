@@ -121,10 +121,12 @@ export interface AttachmentPreviewProps {
 
 export interface MessageItemProps {
     message: Message;
+    onEditMessage?: (message: Message) => void;
 }
 
 export interface MessageListProps {
     selectedChannel: number;
+    onEditMessage?: (message: Message) => void 
 }
 
 export interface MessageState {
@@ -179,16 +181,6 @@ export interface UserState {
     username: string;
     email: string;
 }
-
-
-// export interface Sender {
-//     id: number;
-//     firstName: string;
-//     lastName: string;
-//     username: string;
-//     email: string;
-//     role: string[];
-// }
 
 export interface VoiceState {
     isMuted: boolean;

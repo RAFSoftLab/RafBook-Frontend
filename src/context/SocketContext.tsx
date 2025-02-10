@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
-import { useAppDispatch } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { receiveMessage } from '../store/messageSlice';
 
 interface StompService {
@@ -56,6 +56,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   const subscriptions = React.useRef<Map<number, StompSubscription>>(new Map());
 
+  const currentUser = useAppSelector((state) => state.user);
+
   useEffect(() => {
     stompClient.activate();
 
@@ -86,7 +88,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         channelId,
       };
       console.log(`Received message in channel ${channelId}:`, transformedMessage);
-      dispatch(receiveMessage(transformedMessage));
+      dispatch(receiveMessage({ message: transformedMessage, currentId: currentUser.id }));
     });
 
     subscriptions.current.set(channelId, subscription);

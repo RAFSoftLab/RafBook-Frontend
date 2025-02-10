@@ -9,7 +9,7 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { sendMessage, markMessageError } from '../store/messageSlice';
+import { sendMessage, markMessageError, updateMessage } from '../store/messageSlice';
 import {
   setSelectedChannelId,
   fetchUserChannelsThunk,
@@ -18,7 +18,7 @@ import {
 } from '../store/channelSlice';
 import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO } from '../types/global';
 import { useSocket } from '../context/SocketContext';
-import { sendMessage as sendMessageBackend } from '../api/channelApi';
+import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
 
 const Dashboard: React.FC = () => {
@@ -27,6 +27,7 @@ const Dashboard: React.FC = () => {
 
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
 
   const dispatch = useAppDispatch();
 
@@ -72,6 +73,11 @@ const Dashboard: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  const handleEditMessage = (message: Message) => {
+    setEditingMessage(message);
+    setNewMessage(message.content);
+  };
+
   const handleSelection = (studyLevel: StudyLevel, studyProgram: StudyProgram) => {
     dispatch(setSelectedStudyLevel(studyLevel));
     dispatch(setSelectedStudyProgram(studyProgram));
@@ -95,12 +101,47 @@ const Dashboard: React.FC = () => {
   const handleChannelSelect = (id: number) => {
     dispatch(setSelectedChannelId(id));
     setAttachments([]);
-   // stompService?.subscribeToChannel(id);
   };
 
   const handleSendMessage = () => {
     if (newMessage.trim() === '' && attachments.length === 0) return;
     if (!selectedChannel || selectedChannel.type !== 'text') return;
+
+    if (editingMessage) {
+      // Build the updated message DTO for the API call.
+      const updatedMessageDTO = {
+        id: editingMessage.id,
+        content: newMessage.trim(),
+        createdAt: editingMessage.timestamp,
+        type: editingMessage.type.toUpperCase() as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
+        mediaUrl: attachments.length > 0 ? attachments.map((att) => att.url) : [],
+        sender: editingMessage.sender,
+        reactions: editingMessage.reactions,
+        parentMessage: Array.isArray(editingMessage.parentMessage) &&
+                       editingMessage.parentMessage.length === 0
+                        ? null
+                        : editingMessage.parentMessage,
+        isDeleted: false,
+        isEdited: true,
+      };
+    
+      const updatedMessage: Message = {
+        ...editingMessage,
+        content: newMessage.trim(),
+        attachments: attachments.length > 0 ? attachments : editingMessage.attachments,
+        edited: true,
+        status: 'pending',
+      };
+    
+      dispatch(updateMessage(updatedMessage));
+      editMessage(editingMessage.id, updatedMessageDTO);
+    
+      // Clear the editing state.
+      setEditingMessage(null);
+      setNewMessage('');
+      setAttachments([]);
+      return;
+    }
   
     let messageType: string = 'TEXT';
     if (attachments.length > 0) {
@@ -134,7 +175,7 @@ const Dashboard: React.FC = () => {
     sendMessageBackend(newMessageDTO);
   
     setTimeout(() => {
-      dispatch(markMessageError({ channelId: selectedChannel.id, content: newMessage.trim() }));
+      dispatch(markMessageError({ channelId: selectedChannel.id, content: newMessage.trim(), currentId: currentUser.id }));
     }, 5000);
   
     setNewMessage('');
@@ -278,7 +319,7 @@ const Dashboard: React.FC = () => {
                 <>
                   {/* Message List */}
                   <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }} data-cy="message-list-container">
-                    <MessageList selectedChannel={selectedChannel.id} key={selectedChannel.id} />
+                    <MessageList selectedChannel={selectedChannel.id} key={selectedChannel.id} onEditMessage={handleEditMessage} />
                   </Box>
 
                   {/* Message Input */}

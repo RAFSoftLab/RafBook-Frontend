@@ -54,7 +54,7 @@ export const sendMessage = async (newMessageDTO: NewMessageDTO): Promise<void> =
     }
 }
 
-export const editMessage = async (messageId: number, messageDto: MessageDTO): Promise<void> => {
+export const editMessage = async (messageId: number, messageDto: any): Promise<void> => {
     try {
         const response = await axiosInstance.put(`/messages/${messageId}`, messageDto);
         console.log('Message edited successfully:', response.data);
