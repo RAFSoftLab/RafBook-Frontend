@@ -28,7 +28,6 @@ const Dashboard: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-  // Lift previewMode state here
   const [previewMode, setPreviewMode] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -74,7 +73,6 @@ const Dashboard: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  // Called from MessageItem when the user clicks "Edit"
   const handleEditMessage = (message: Message) => {
     setEditingMessage(message);
     setNewMessage(message.content);
@@ -110,7 +108,6 @@ const Dashboard: React.FC = () => {
     if (!selectedChannel || selectedChannel.type !== 'text') return;
 
     if (editingMessage) {
-      // Build the updated message DTO for the API call.
       const updatedMessageDTO = {
         id: editingMessage.id,
         content: newMessage.trim(),
@@ -127,7 +124,6 @@ const Dashboard: React.FC = () => {
         isEdited: true,
       };
 
-      // Update the Message type in Redux.
       const updatedMessage: Message = {
         ...editingMessage,
         content: newMessage.trim(),
@@ -139,7 +135,6 @@ const Dashboard: React.FC = () => {
       dispatch(updateMessage(updatedMessage));
       editMessage(editingMessage.id, updatedMessageDTO);
 
-      // Clear editing state.
       setEditingMessage(null);
       setNewMessage('');
       setAttachments([]);
@@ -268,6 +263,7 @@ const Dashboard: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: 3,
+          pt: '64px',
           ml: { sm: `${drawerWidth}px` },
           backgroundColor: 'background.default',
           display: 'flex',
@@ -276,7 +272,6 @@ const Dashboard: React.FC = () => {
         }}
         data-cy="dashboard-main"
       >
-        <Box sx={{ height: '64px' }} />
         {loading ? (
           <Box
             sx={{
@@ -316,7 +311,6 @@ const Dashboard: React.FC = () => {
                 <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
               ) : (
                 <>
-                  {/* Conditionally render preview mode or the MessageList */}
                   {previewMode ? (
                     <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
                       <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
@@ -332,8 +326,6 @@ const Dashboard: React.FC = () => {
                       />
                     </Box>
                   )}
-
-                  {/* Message Input receives previewMode state and its setter */}
                   <MessageInput
                     newMessage={newMessage}
                     setNewMessage={setNewMessage}

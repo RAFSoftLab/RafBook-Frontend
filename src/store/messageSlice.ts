@@ -94,8 +94,12 @@ const messageSlice = createSlice({
     },
     deleteMessage: (state, action: PayloadAction<{ channelId: number; messageId: number }>) => {
       const { channelId, messageId } = action.payload;
-      state.messages[channelId] = state.messages[channelId].filter((msg) => msg.id !== messageId);
-      console.log(`Deleted message ${messageId} in channel ${channelId}`);
+      const message = state.messages[channelId].find((msg) => msg.id === messageId);
+      if (message) {
+        message.attachments = [];
+        message.content = "user deleted message";
+        console.log(`Marked message ${messageId} as deleted in channel ${channelId}`);
+      }
     }    
   },
   extraReducers: (builder) => {},
