@@ -95,9 +95,9 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
 
   const handleDelete = () => {
     handleCloseContextMenu();
-    dispatch(deleteMessage({channelId: message.channelId, messageId: message.id}));
+    dispatch(deleteMessage({ channelId: message.channelId, messageId: message.id }));
     deleteMessageBackend(message.id);
-  }
+  };
 
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
@@ -191,7 +191,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
                 }}
                 data-cy={`message-content-${message.id}`}
               >
-                {/* Render Markdown with custom container to reset margins */}
                 <MarkdownRenderer content={message.content} />
               </Box>
             )}
@@ -236,7 +235,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
           />
         )}
       </Box>
-      <Divider  sx={{ marginTop: 1 }} />
+      <Divider sx={{ marginTop: 1 }} />
       <Popover
         open={Boolean(contextMenu)}
         onClose={handleCloseContextMenu}
@@ -247,16 +246,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
       >
         <Paper sx={{ width: 320, maxWidth: '100%' }}>
           <MenuList>
-            <MenuItem onClick={handleEdit}>
-              <ListItemIcon>
-                <EditIcon fontSize="small" />
+            <MenuItem onClick={handleEdit} disabled={!isOwnMessage}>
+              <ListItemIcon >
+                <EditIcon fontSize="small" sx={{ color: isOwnMessage ? 'inherit' : theme.palette.text.disabled }} />
               </ListItemIcon>
               <ListItemText primary="Edit" />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
                 Edit Message
               </MuiTypography>
             </MenuItem>
-            <MenuItem>
+            <MenuItem >
               <ListItemIcon>
                 <ReplyIcon fontSize="small" />
               </ListItemIcon>
@@ -266,11 +265,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
               </MuiTypography>
             </MenuItem>
             <Divider variant="middle" />
-            <MenuItem sx={{ color: theme.palette.error.main }} onClick={handleDelete}>
+            <MenuItem onClick={handleDelete} disabled={!isOwnMessage} sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }}>
               <ListItemIcon>
-                <DeleteIcon fontSize="small" sx={{ color: theme.palette.error.main }} />
+                <DeleteIcon fontSize="small" sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }} />
               </ListItemIcon>
-              <ListItemText primary="Delete" sx={{ color: theme.palette.error.main }} />
+              <ListItemText primary="Delete" sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }} />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
                 Del
               </MuiTypography>
