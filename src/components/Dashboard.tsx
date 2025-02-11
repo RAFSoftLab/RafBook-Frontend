@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Box, Typography, CircularProgress, Alert, Paper, IconButton, Divider } from '@mui/material';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Paper,
+  IconButton,
+  Divider,
+} from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MessageList from './MessageList';
@@ -179,7 +187,13 @@ const Dashboard: React.FC = () => {
     sendMessageBackend(newMessageDTO);
 
     setTimeout(() => {
-      dispatch(markMessageError({ channelId: selectedChannel.id, content: newMessage.trim(), currentId: currentUser.id }));
+      dispatch(
+        markMessageError({
+          channelId: selectedChannel.id,
+          content: newMessage.trim(),
+          currentId: currentUser.id,
+        })
+      );
     }, 5000);
 
     setNewMessage('');
@@ -329,7 +343,7 @@ const Dashboard: React.FC = () => {
                 <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
               ) : (
                 <>
-                  {/* MessageList is always mounted but hidden when previewMode is true */}
+                  {/* Message list */}
                   <Box
                     sx={{
                       flexGrow: 1,
@@ -345,7 +359,7 @@ const Dashboard: React.FC = () => {
                       onEditMessage={handleEditMessage}
                     />
                   </Box>
-                  {/* Preview content is rendered in its own container */}
+                  {/* Preview mode */}
                   <Box
                     sx={{
                       flexGrow: 1,
@@ -356,11 +370,12 @@ const Dashboard: React.FC = () => {
                   >
                     {previewContent}
                   </Box>
+                  {/* Editing message popup positioned above the MessageInput */}
                   {editingMessage && (
                     <Box
                       sx={{
                         position: 'absolute',
-                        top: 8,
+                        bottom: 110,
                         left: 8,
                         right: 8,
                         zIndex: 10,
@@ -398,6 +413,7 @@ const Dashboard: React.FC = () => {
                       </Paper>
                     </Box>
                   )}
+                  {/* Message input */}
                   <MessageInput
                     newMessage={newMessage}
                     setNewMessage={setNewMessage}
