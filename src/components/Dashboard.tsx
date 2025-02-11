@@ -298,6 +298,7 @@ const Dashboard: React.FC = () => {
               justifyContent: 'center',
               textAlign: 'center',
               flexDirection: 'column',
+              minWidth: 0,
             }}
             data-cy="loading-indicator"
           >
