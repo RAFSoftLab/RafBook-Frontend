@@ -29,15 +29,59 @@ import { getSenderFromUser } from '../utils';
 import MarkdownRenderer from './MarkdownRenderer';
 import CloseIcon from '@mui/icons-material/Close';
 
+interface MessageActionPopupProps {
+  actionLabel: string;
+  message: Message;
+  onCancel: () => void;
+}
+
+const MessageActionPopup: React.FC<MessageActionPopupProps> = ({ actionLabel, message, onCancel }) => {
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        bottom: 110,
+        left: 8,
+        right: 8,
+        zIndex: 10,
+      }}
+    >
+      <Paper
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          p: 1,
+          backgroundColor: 'background.paper',
+          boxShadow: 3,
+        }}
+      >
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            {actionLabel}: {message.content}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })} • {message.sender.firstName} {message.sender.lastName}
+          </Typography>
+        </Box>
+        <IconButton onClick={onCancel}>
+          <CloseIcon />
+        </IconButton>
+      </Paper>
+    </Box>
+  );
+};
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [value, delay]);
   return debouncedValue;
 }
@@ -48,6 +92,7 @@ const Dashboard: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [replyingMessage, setReplyingMessage] = useState<Message | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -90,6 +135,14 @@ const Dashboard: React.FC = () => {
   const handleEditMessage = useCallback((message: Message) => {
     setEditingMessage(message);
     setNewMessage(message.content);
+    setReplyingMessage(null);
+  }, []);
+
+  const handleReplyMessage = useCallback((message: Message) => {
+    setReplyingMessage(message);
+    console.log('Replying to message:', message);
+    setNewMessage('');
+    setEditingMessage(null);
   }, []);
 
   const handleSelection = (studyLevel: StudyLevel, studyProgram: StudyProgram) => {
@@ -120,6 +173,10 @@ const Dashboard: React.FC = () => {
   const handleSendMessage = () => {
     if (newMessage.trim() === '' && attachments.length === 0) return;
     if (!selectedChannel || selectedChannel.type !== 'text') return;
+
+    let parentMessageValue: Message | null = replyingMessage;
+    console.log('parentMessageValue:', parentMessageValue);
+    console.log('replyingMessage:', replyingMessage);
 
     if (editingMessage) {
       const updatedMessageDTO = {
@@ -167,7 +224,7 @@ const Dashboard: React.FC = () => {
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       reactions: [],
-      parentMessage: [],
+      parentMessage: parentMessageValue === null ? [] : parentMessageValue,
       edited: false,
       deleted: false,
       attachments: attachments.length > 0 ? attachments : undefined,
@@ -180,7 +237,7 @@ const Dashboard: React.FC = () => {
       content: newMessage.trim(),
       type: messageType as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
       mediaUrl: attachments.map((att) => att.url),
-      parentMessage: null,
+      parentMessage: parentMessageValue ? parentMessageValue.id : null,
       textChannel: selectedChannel.id,
     };
 
@@ -198,6 +255,7 @@ const Dashboard: React.FC = () => {
 
     setNewMessage('');
     setAttachments([]);
+    setReplyingMessage(null);
   };
 
   const handleSendGif = (gifUrl: string) => {
@@ -312,7 +370,6 @@ const Dashboard: React.FC = () => {
               justifyContent: 'center',
               textAlign: 'center',
               flexDirection: 'column',
-              minWidth: 0,
             }}
             data-cy="loading-indicator"
           >
@@ -343,7 +400,6 @@ const Dashboard: React.FC = () => {
                 <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
               ) : (
                 <>
-                  {/* Message list */}
                   <Box
                     sx={{
                       flexGrow: 1,
@@ -357,9 +413,9 @@ const Dashboard: React.FC = () => {
                       selectedChannel={selectedChannel.id}
                       key={selectedChannel.id}
                       onEditMessage={handleEditMessage}
+                      onReplyMessage={handleReplyMessage}
                     />
                   </Box>
-                  {/* Preview mode */}
                   <Box
                     sx={{
                       flexGrow: 1,
@@ -370,50 +426,26 @@ const Dashboard: React.FC = () => {
                   >
                     {previewContent}
                   </Box>
-                  {/* Editing message popup positioned above the MessageInput */}
+                  {/* Display the popup for editing or replying */}
                   {editingMessage && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        bottom: 110,
-                        left: 8,
-                        right: 8,
-                        zIndex: 10,
+                    <MessageActionPopup
+                      actionLabel="Editing"
+                      message={editingMessage}
+                      onCancel={() => {
+                        setEditingMessage(null);
+                        setNewMessage('');
                       }}
-                    >
-                      <Paper
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          p: 1,
-                          backgroundColor: 'background.paper',
-                          boxShadow: 3,
-                        }}
-                      >
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Editing: {editingMessage.content}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {new Date(editingMessage.timestamp).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </Typography>
-                        </Box>
-                        <IconButton
-                          onClick={() => {
-                            setEditingMessage(null);
-                            setNewMessage('');
-                          }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Paper>
-                    </Box>
+                    />
                   )}
-                  {/* Message input */}
+                  {replyingMessage && (
+                    <MessageActionPopup
+                      actionLabel="Replying"
+                      message={replyingMessage}
+                      onCancel={() => {
+                        setReplyingMessage(null);
+                      }}
+                    />
+                  )}
                   <MessageInput
                     newMessage={newMessage}
                     setNewMessage={setNewMessage}

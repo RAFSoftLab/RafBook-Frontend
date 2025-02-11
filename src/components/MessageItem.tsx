@@ -30,7 +30,7 @@ const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
 };
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onReplyMessage }) => {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
@@ -90,6 +90,13 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
     handleCloseContextMenu();
     if (onEditMessage) {
       onEditMessage(message);
+    }
+  };
+
+  const handleReply = () => {
+    handleCloseContextMenu();
+    if (onReplyMessage) {
+      onReplyMessage(message);
     }
   };
 
@@ -181,6 +188,25 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
             {message.sender.firstName.charAt(0)}
           </Avatar>
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            {/* If the message is a reply, show a preview of the parent message */}
+            {!Array.isArray(message.parentMessage) && message.parentMessage && (
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.grey[200],
+                  borderLeft: `4px solid ${theme.palette.primary.main}`,
+                  p: 1,
+                  mb: 1,
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="caption" color="text.secondary">
+                  Replying to {message.parentMessage.sender.firstName} {message.parentMessage.sender.lastName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" noWrap>
+                  {message.parentMessage.content}
+                </Typography>
+              </Box>
+            )}
             {message.type === 'text' && (
               <Box
                 sx={{
@@ -247,7 +273,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
         <Paper sx={{ width: 320, maxWidth: '100%' }}>
           <MenuList>
             <MenuItem onClick={handleEdit} disabled={!isOwnMessage}>
-              <ListItemIcon >
+              <ListItemIcon>
                 <EditIcon fontSize="small" sx={{ color: isOwnMessage ? 'inherit' : theme.palette.text.disabled }} />
               </ListItemIcon>
               <ListItemText primary="Edit" />
@@ -255,7 +281,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
                 Edit Message
               </MuiTypography>
             </MenuItem>
-            <MenuItem >
+            <MenuItem onClick={handleReply}>
               <ListItemIcon>
                 <ReplyIcon fontSize="small" />
               </ListItemIcon>
@@ -271,7 +297,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage }) => 
               </ListItemIcon>
               <ListItemText primary="Delete" sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }} />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
-                Del
+                Delete Message
               </MuiTypography>
             </MenuItem>
           </MenuList>

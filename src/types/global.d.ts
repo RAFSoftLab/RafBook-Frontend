@@ -69,7 +69,7 @@ export interface Message {
     content: string;
     timestamp: string;
     reactions: any[];
-    parentMessage: MessageDTO | [];
+    parentMessage: Message | [];
     deleted: boolean;
     edited: boolean;
     attachments?: Attachment[];
@@ -87,15 +87,15 @@ export interface Sender {
 
 export interface MessageDTO {
     id: number;
+    sender: Sender;
+    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
     content: string;
     createdAt: string;
-    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
-    mediaUrl: string[];
-    sender: Sender;
     reactions: any[];
     parentMessage: MessageDTO | [];
     deleted: boolean;
     edited: boolean;
+    mediaUrl: string[];
 }
 
 export interface NewMessageDTO {
@@ -124,11 +124,13 @@ export interface AttachmentPreviewProps {
 export interface MessageItemProps {
     message: Message;
     onEditMessage?: (message: Message) => void;
+    onReplyMessage?: (message: Message) => void;
 }
 
 export interface MessageListProps {
     selectedChannel: number;
-    onEditMessage?: (message: Message) => void 
+    onEditMessage?: (message: Message) => void;
+    onReplyMessage?: (message: Message) => void;
 }
 
 export interface MessageState {

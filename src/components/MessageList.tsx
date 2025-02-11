@@ -4,7 +4,7 @@ import { useAppSelector } from '../store/hooks';
 import MessageItem from './MessageItem';
 import { MessageListProps } from '../types/global';
 
-const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessage }) => {
+const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessage, onReplyMessage }) => {
   const messages = useAppSelector((state) => state.messages.messages[selectedChannel] || []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +47,7 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessag
               }}
               data-cy={`message-item-${msg.id}`}
             >
-              <MessageItem message={msg} onEditMessage={onEditMessage} />
+              <MessageItem message={msg} onEditMessage={onEditMessage} onReplyMessage={onReplyMessage} />
             </Box>
           ))}
         </List>
