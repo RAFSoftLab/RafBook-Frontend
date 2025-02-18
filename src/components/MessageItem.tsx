@@ -45,6 +45,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
 
   const user = useAppSelector((state) => state.user);
   const isOwnMessage = message.sender.id === user.id;
+  const isStudent = user.role.find((role) => role === "STUDENT");
+  const canDelete = isOwnMessage || !isStudent;
 
   const avatarColor = isOwnMessage
     ? theme.palette.primary.main
@@ -185,7 +187,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
               })}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-                {parentMessageObj.content.length > 255 ? `${parentMessageObj.content.slice(0, 252)}...` : parentMessageObj.content}
+              {parentMessageObj.content.length > 255 ? `${parentMessageObj.content.slice(0, 252)}...` : parentMessageObj.content}
             </Typography>
           </Box>
         )}
@@ -299,11 +301,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
               </MuiTypography>
             </MenuItem>
             <Divider variant="middle" />
-            <MenuItem onClick={handleDelete} disabled={!isOwnMessage} sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }}>
+            <MenuItem onClick={handleDelete} disabled={!canDelete} sx={{ color: canDelete ? theme.palette.error.main : theme.palette.text.disabled }}>
               <ListItemIcon>
-                <DeleteIcon fontSize="small" sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }} />
+                <DeleteIcon fontSize="small" sx={{ color: canDelete ? theme.palette.error.main : theme.palette.text.disabled }} />
               </ListItemIcon>
-              <ListItemText primary="Delete" sx={{ color: isOwnMessage ? theme.palette.error.main : theme.palette.text.disabled }} />
+              <ListItemText primary="Delete" sx={{ color: canDelete ? theme.palette.error.main : theme.palette.text.disabled }} />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
                 Delete Message
               </MuiTypography>
