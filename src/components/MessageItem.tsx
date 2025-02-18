@@ -172,13 +172,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
               backgroundColor: theme.palette.background.paper,
               borderLeft: `4px solid ${theme.palette.primary.main}`,
               p: 1,
-              mb: 1,
+              mb: 0.5,
               ml: replyOffset,
               borderRadius: 1,
             }}
           >
             <Typography variant="caption" color="text.secondary">
-              Replying to {parentMessageObj.sender.firstName} {parentMessageObj.sender.lastName}
+              Replying to {parentMessageObj.sender.firstName} {parentMessageObj.sender.lastName} •{' '}
+              {new Date(parentMessageObj.timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
                 {parentMessageObj.content.length > 255 ? `${parentMessageObj.content.slice(0, 252)}...` : parentMessageObj.content}

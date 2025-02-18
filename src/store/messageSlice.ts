@@ -81,6 +81,7 @@ const messageSlice = createSlice({
       if (message) {
         message.attachments = [];
         message.content = "user deleted message";
+        message.type = "text";
         console.log(`Marked message ${messageId} as deleted in channel ${channelId}`);
       }
     },

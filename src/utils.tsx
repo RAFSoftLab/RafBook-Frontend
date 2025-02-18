@@ -62,16 +62,18 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
       }))
       : [];
 
+  const deleted = msg.deleted;
+
   return {
     id: msg.id,
     channelId: channelId,
     sender: msg.sender,
-    type: msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
+    type: deleted ? 'text' : (msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice'),
     content: msg.content,
     timestamp: msg.createdAt,
     reactions: msg.reactions,
     parentMessage: msg.parentMessage,
-    deleted: msg.deleted,
+    deleted: deleted,
     edited: msg.edited,
     attachments: attachments.length > 0 ? attachments : undefined,
   };
