@@ -1,9 +1,9 @@
-// src/context/SocketContext.tsx
+// In your SocketContext.tsx
 
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { receiveMessage } from '../store/messageSlice';
+import { receiveMessage, updateMessage, deleteMessage } from '../store/messageSlice';
 
 interface StompService {
   sendMessage: (destination: string, body: any) => void;
@@ -29,6 +29,13 @@ interface SocketProviderProps {
   children: ReactNode;
 }
 
+// Update subscriptions type to store multiple subscriptions per channel
+type ChannelSubscriptions = {
+  sendSubscription: StompSubscription;
+  editSubscription: StompSubscription;
+  deleteSubscription: StompSubscription;
+};
+
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const stompClient: Client = new Client({
@@ -40,13 +47,19 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     onConnect: () => {
       console.log('Connected to STOMP');
 
+      // General subscription can remain for global messages if needed.
       const generalSubscription = stompClient.subscribe('/topic/channels', (message: IMessage) => {
         const msg = JSON.parse(message.body);
         console.log('Received general message:', msg);
         dispatch(receiveMessage(msg));
       });
 
-      subscriptions.current.set(-1, generalSubscription);
+      // Store the general subscription using a special key, if desired.
+      subscriptions.current.set(-1, { 
+        sendSubscription: generalSubscription, 
+        editSubscription: generalSubscription, 
+        deleteSubscription: generalSubscription 
+      } as ChannelSubscriptions);
     },
     onStompError: (frame) => {
       console.error('Broker reported error: ' + frame.headers['message']);
@@ -54,7 +67,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     },
   });
 
-  const subscriptions = React.useRef<Map<number, StompSubscription>>(new Map());
+  const subscriptions = React.useRef<Map<number, ChannelSubscriptions>>(new Map());
 
   const currentUser = useAppSelector((state) => state.user);
 
@@ -81,24 +94,65 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       return;
     }
 
-    const subscription = stompClient.subscribe(`/topic/channels/${channelId}`, (message: IMessage) => {
-      const msg = JSON.parse(message.body);
-      const transformedMessage = {
-        ...msg,
-        channelId,
-      };
-      console.log(`Received message in channel ${channelId}:`, transformedMessage);
-      dispatch(receiveMessage({ message: transformedMessage, currentId: currentUser.id }));
-    });
+  // Subscribe to send messages
+  const sendSubscription = stompClient.subscribe(
+    `/topic/channels/send/${channelId}`,
+    (message: IMessage) => {
+      console.log(`[DEBUG] Received message on SEND topic for channel ${channelId}`);
+      try {
+        const msg = JSON.parse(message.body);
+        const transformedMessage = { ...msg, channelId };
+        console.log(`[DEBUG] SEND subscription - transformed message:`, transformedMessage);
+        dispatch(receiveMessage({ message: transformedMessage, currentId: currentUser.id }));
+      } catch (error) {
+        console.error(`[ERROR] Parsing SEND message for channel ${channelId}:`, error);
+      }
+    }
+  );
 
-    subscriptions.current.set(channelId, subscription);
-    console.log(`Subscribed to channel ${channelId}`);
+  // Subscribe to edit messages
+  const editSubscription = stompClient.subscribe(
+    `/topic/channels/edit/${channelId}`,
+    (message: IMessage) => {
+      console.log(`[DEBUG] Received message on EDIT topic for channel ${channelId}`);
+      try {
+        const msg = JSON.parse(message.body);
+        const transformedMessage = { ...msg, channelId };
+        console.log(`[DEBUG] EDIT subscription - transformed message:`, transformedMessage);
+        dispatch(updateMessage(transformedMessage));
+      } catch (error) {
+        console.error(`[ERROR] Parsing EDIT message for channel ${channelId}:`, error);
+      }
+    }
+  );
+
+  // Subscribe to delete messages
+  const deleteSubscription = stompClient.subscribe(
+    `/topic/channels/delete/${channelId}`,
+    (message: IMessage) => {
+      console.log(`[DEBUG] Received message on DELETE topic for channel ${channelId}`);
+      try {
+        const msg = JSON.parse(message.body);
+        const transformedMessage = { ...msg, channelId };
+        console.log(`[DEBUG] DELETE subscription - transformed message:`, transformedMessage);
+        // Assumes deleteMessage expects an object with channelId and messageId.
+        dispatch(deleteMessage({ channelId, messageId: transformedMessage.id }));
+      } catch (error) {
+        console.error(`[ERROR] Parsing DELETE message for channel ${channelId}:`, error);
+      }
+    }
+  );
+
+    subscriptions.current.set(channelId, { sendSubscription, editSubscription, deleteSubscription });
+    console.log(`Subscribed to channel ${channelId} for send, edit, and delete`);
   };
 
   const unsubscribeFromChannel = (channelId: number) => {
-    const subscription = subscriptions.current.get(channelId);
-    if (subscription) {
-      subscription.unsubscribe();
+    const subs = subscriptions.current.get(channelId);
+    if (subs) {
+      subs.sendSubscription.unsubscribe();
+      subs.editSubscription.unsubscribe();
+      subs.deleteSubscription.unsubscribe();
       subscriptions.current.delete(channelId);
       console.log(`Unsubscribed from channel ${channelId}`);
     } else {

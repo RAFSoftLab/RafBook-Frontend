@@ -65,6 +65,25 @@ const messageSlice = createSlice({
         console.warn(`Duplicate message received in channel ${message.channelId}:`, message);
       }
     },
+    updateMessage: (state, action: PayloadAction<Message>) => {
+      const updated = action.payload;
+      const channelMessages = state.messages[updated.channelId] || [];
+      const message = channelMessages.find((msg) => msg.id === updated.id);
+      if (message) {
+        message.content = updated.content;
+        message.edited = true;
+        console.log(`Updated message content in channel ${updated.channelId}:`, updated.content);
+      }
+    },
+    deleteMessage: (state, action: PayloadAction<{ channelId: number; messageId: number }>) => {
+      const { channelId, messageId } = action.payload;
+      const message = state.messages[channelId].find((msg) => msg.id === messageId);
+      if (message) {
+        message.attachments = [];
+        message.content = "user deleted message";
+        console.log(`Marked message ${messageId} as deleted in channel ${channelId}`);
+      }
+    },
     markMessageError: (
       state,
       action: PayloadAction<{ channelId: number; content: string; currentId: number }>
@@ -81,25 +100,7 @@ const messageSlice = createSlice({
         state.messages[channelId][index].status = 'error';
         console.log(`Marked message as error in channel ${channelId}:`, channelMessages[index]);
       }
-    },
-    updateMessage: (state, action: PayloadAction<Message>) => {
-      const updated = action.payload;
-      const channelMessages = state.messages[updated.channelId] || [];
-      const index = channelMessages.findIndex((msg) => msg.id === updated.id);
-      if (index !== -1) {
-        state.messages[updated.channelId][index] = { ...updated, status: 'sent' };
-        console.log(`Updated message in channel ${updated.channelId}:`, updated);
-      }
-    },
-    deleteMessage: (state, action: PayloadAction<{ channelId: number; messageId: number }>) => {
-      const { channelId, messageId } = action.payload;
-      const message = state.messages[channelId].find((msg) => msg.id === messageId);
-      if (message) {
-        message.attachments = [];
-        message.content = "user deleted message";
-        console.log(`Marked message ${messageId} as deleted in channel ${channelId}`);
-      }
-    }    
+    },    
   },
   extraReducers: () => {},
 });

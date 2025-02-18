@@ -59,6 +59,7 @@ export interface MessageInputProps {
     onRemoveAttachment: (id: number) => void;
     previewMode: boolean;
     setPreviewMode: React.Dispatch<React.SetStateAction<boolean>>;
+    inputRef?: React.Ref<HTMLInputElement>;
 }
 
 export interface Message {

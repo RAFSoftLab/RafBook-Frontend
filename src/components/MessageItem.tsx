@@ -50,9 +50,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
     ? theme.palette.primary.main
     : theme.palette.grey[500];
 
-  const messageTextColor = isOwnMessage
-    ? theme.palette.primary.contrastText
-    : theme.palette.text.primary;
+  const messageTextColor = theme.palette.text.primary;
 
   const timestampOffset = theme.spacing(6);
 

@@ -6,7 +6,6 @@ import {
   Alert,
   Paper,
   IconButton,
-  Divider,
 } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -175,8 +174,6 @@ const Dashboard: React.FC = () => {
     if (!selectedChannel || selectedChannel.type !== 'text') return;
 
     let parentMessageValue: Message | null = replyingMessage;
-    console.log('parentMessageValue:', parentMessageValue);
-    console.log('replyingMessage:', replyingMessage);
 
     if (editingMessage) {
       const updatedMessageDTO = {
@@ -240,6 +237,8 @@ const Dashboard: React.FC = () => {
       parentMessage: parentMessageValue ? parentMessageValue.id : null,
       textChannel: selectedChannel.id,
     };
+
+    console.log('newMessageDTO:', newMessageDTO);
 
     sendMessageBackend(newMessageDTO);
 
@@ -446,6 +445,7 @@ const Dashboard: React.FC = () => {
                       }}
                     />
                   )}
+                  {/* Pass the input ref to MessageInput for auto focus */}
                   <MessageInput
                     newMessage={newMessage}
                     setNewMessage={setNewMessage}
