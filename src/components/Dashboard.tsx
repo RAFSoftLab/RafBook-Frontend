@@ -173,7 +173,7 @@ const Dashboard: React.FC = () => {
     if (newMessage.trim() === '' && attachments.length === 0) return;
     if (!selectedChannel || selectedChannel.type !== 'text') return;
 
-    let parentMessageValue: Message | null = replyingMessage;
+    let parentMessageId: number | null = replyingMessage ? replyingMessage.id : null;
 
     if (editingMessage) {
       const updatedMessageDTO = {
@@ -221,7 +221,7 @@ const Dashboard: React.FC = () => {
       content: newMessage.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       reactions: [],
-      parentMessage: parentMessageValue === null ? [] : parentMessageValue,
+      parentMessage: parentMessageId,
       edited: false,
       deleted: false,
       attachments: attachments.length > 0 ? attachments : undefined,
@@ -234,7 +234,7 @@ const Dashboard: React.FC = () => {
       content: newMessage.trim(),
       type: messageType as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
       mediaUrl: attachments.map((att) => att.url),
-      parentMessage: parentMessageValue ? parentMessageValue.id : null,
+      parentMessage: parentMessageId,
       textChannel: selectedChannel.id,
     };
 
@@ -267,6 +267,8 @@ const Dashboard: React.FC = () => {
       name: 'GIF',
     };
 
+    let parentMessageId: number | null = replyingMessage ? replyingMessage.id : null;
+
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender: sender,
@@ -274,7 +276,7 @@ const Dashboard: React.FC = () => {
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       reactions: [],
-      parentMessage: [],
+      parentMessage: parentMessageId,
       edited: false,
       deleted: false,
       attachments: [gifAttachment],
@@ -287,12 +289,13 @@ const Dashboard: React.FC = () => {
       content: 'GIF',
       type: 'IMAGE',
       mediaUrl: [gifUrl],
-      parentMessage: null,
+      parentMessage: parentMessageId,
       textChannel: selectedChannel.id,
     };
 
     sendMessageBackend(newMessageDTO);
     setAttachments([]);
+    setReplyingMessage(null);
   };
 
   const handleSendAttachments = (newAttachments: Attachment[]) => {

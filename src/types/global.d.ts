@@ -70,7 +70,7 @@ export interface Message {
     content: string;
     timestamp: string;
     reactions: any[];
-    parentMessage: Message | [];
+    parentMessage: number | null;
     deleted: boolean;
     edited: boolean;
     attachments?: Attachment[];
@@ -93,7 +93,7 @@ export interface MessageDTO {
     content: string;
     createdAt: string;
     reactions: any[];
-    parentMessage: MessageDTO | [];
+    parentMessage: number | null;
     deleted: boolean;
     edited: boolean;
     mediaUrl: string[];

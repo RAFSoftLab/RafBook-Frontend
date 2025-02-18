@@ -51,9 +51,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
     : theme.palette.grey[500];
 
   const messageTextColor = theme.palette.text.primary;
-
-  const timestampOffset = theme.spacing(6);
-
+  const timestampOffset = theme.spacing(7);
+  const replyOffset = theme.spacing(5.5);
   const dispatch = useAppDispatch();
 
   const imageAttachments = message.attachments?.filter(
@@ -68,9 +67,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
 
-  const [contextMenu, setContextMenu] =
-    useState<{ mouseX: number; mouseY: number } | null>(null);
+  // Lookup the parent message based on the parent's ID stored in message.parentMessage
+  const parentMessageObj = useAppSelector((state) =>
+    state.messages.messages[message.channelId]?.find(
+      (msg) => msg.id === message.parentMessage
+    )
+  );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -161,6 +165,27 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
         }}
         data-cy={`message-${message.id}`}
       >
+        {/* Render reply preview if a parent message exists */}
+        {parentMessageObj && (
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderLeft: `4px solid ${theme.palette.primary.main}`,
+              p: 1,
+              mb: 1,
+              ml: replyOffset,
+              borderRadius: 1,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Replying to {parentMessageObj.sender.firstName} {parentMessageObj.sender.lastName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>
+                {parentMessageObj.content.length > 255 ? `${parentMessageObj.content.slice(0, 252)}...` : parentMessageObj.content}
+            </Typography>
+          </Box>
+        )}
+
         <Typography
           variant="subtitle2"
           color="text.secondary"
@@ -186,25 +211,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
             {message.sender.firstName.charAt(0)}
           </Avatar>
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            {/* If the message is a reply, show a preview of the parent message */}
-            {!Array.isArray(message.parentMessage) && message.parentMessage && (
-              <Box
-                sx={{
-                  backgroundColor: theme.palette.grey[200],
-                  borderLeft: `4px solid ${theme.palette.primary.main}`,
-                  p: 1,
-                  mb: 1,
-                  borderRadius: 1,
-                }}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Replying to {message.parentMessage.sender.firstName} {message.parentMessage.sender.lastName}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" noWrap>
-                  {message.parentMessage.content}
-                </Typography>
-              </Box>
-            )}
             {message.type === 'text' && (
               <Box
                 sx={{

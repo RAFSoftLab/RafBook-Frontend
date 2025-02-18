@@ -70,7 +70,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
     content: msg.content,
     timestamp: msg.createdAt,
     reactions: msg.reactions,
-    parentMessage: msg.parentMessage || [],
+    parentMessage: msg.parentMessage,
     deleted: msg.deleted,
     edited: msg.edited,
     attachments: attachments.length > 0 ? attachments : undefined,
