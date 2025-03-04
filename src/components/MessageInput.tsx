@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -12,8 +12,7 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import GifIcon from '@mui/icons-material/Gif';
-import { EmojiData } from '../types/global';
-import { MessageInputProps, Attachment, AttachmentType } from '../types/global';
+import { EmojiData, Attachment, AttachmentType } from '../types/global';
 import AttachmentPreview from './AttachmentPreview';
 import GifPicker from './GifPicker';
 import EmojiPicker from './EmojiPicker';
@@ -26,18 +25,22 @@ const getFileType = (file: File): AttachmentType => {
   return 'file';
 };
 
+interface MessageInputProps {
+  onSend: (message: string, attachments: Attachment[]) => void;
+  onSendGif: (gifUrl: string) => void;
+  onSendAttachments: (newAttachments: Attachment[]) => void;
+  onRemoveAttachment: (id: number) => void;
+  editingContent?: string;
+}
+
 const MessageInput: React.FC<MessageInputProps> = ({
-  newMessage,
-  setNewMessage,
   onSend,
   onSendGif,
   onSendAttachments,
   onRemoveAttachment,
-  previewMode,
-  setPreviewMode,
+  editingContent,
 }) => {
   const theme = useTheme();
-
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
@@ -49,10 +52,18 @@ const MessageInput: React.FC<MessageInputProps> = ({
   else if (isMd) maxVisibleImages = 4;
   else if (isLgUp) maxVisibleImages = 6;
 
+  const [message, setMessage] = useState('');
+  const [localAttachments, setLocalAttachments] = useState<Attachment[]>([]);
+  const [previewMode, setPreviewMode] = useState(false);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<HTMLElement | null>(null);
   const [gifAnchorEl, setGifAnchorEl] = useState<HTMLElement | null>(null);
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingContent !== undefined) {
+      setMessage(editingContent);
+    }
+  }, [editingContent]);
 
   const handleEmojiClick = (event: React.MouseEvent<HTMLElement>) => {
     setEmojiAnchorEl(event.currentTarget);
@@ -64,10 +75,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleSelectEmoji = useCallback(
     (emoji: EmojiData) => {
-      setNewMessage((prev) => prev + emoji.native);
+      setMessage((prev) => prev + emoji.native);
       handleEmojiClose();
     },
-    [setNewMessage]
+    []
   );
 
   const handleGifClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -91,16 +102,16 @@ const MessageInput: React.FC<MessageInputProps> = ({
       url: URL.createObjectURL(file),
       name: file.name,
     }));
-    setAttachments((prev) => [...prev, ...newAttachments]);
+    setLocalAttachments((prev) => [...prev, ...newAttachments]);
     onSendAttachments(newAttachments);
   };
 
   const handleRemoveAttachment = (id: number) => {
-    const attachmentToRemove = attachments.find((att) => att.id === id);
+    const attachmentToRemove = localAttachments.find((att) => att.id === id);
     if (attachmentToRemove && attachmentToRemove.url.startsWith('blob:')) {
       URL.revokeObjectURL(attachmentToRemove.url);
     }
-    setAttachments((prev) => prev.filter((att) => att.id !== id));
+    setLocalAttachments((prev) => prev.filter((att) => att.id !== id));
     onRemoveAttachment(id);
   };
 
@@ -109,8 +120,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   const handleSend = () => {
-    onSend();
-    setAttachments([]);
+    if (message.trim() === '' && localAttachments.length === 0) return;
+    onSend(message, localAttachments);
+    setMessage('');
+    setLocalAttachments([]);
   };
 
   return (
@@ -124,9 +137,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
       }}
       data-cy="message-input-container"
     >
-      {attachments.length > 0 && (
+      {localAttachments.length > 0 && (
         <AttachmentPreview
-          attachments={attachments}
+          attachments={localAttachments}
           onRemoveAttachment={handleRemoveAttachment}
           maxVisibleImages={maxVisibleImages}
           data-cy="attachment-preview-container"
@@ -136,8 +149,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
         label="Type a message"
         variant="outlined"
         fullWidth
-        value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
         onKeyPress={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -175,11 +188,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
                     <InsertEmoticonIcon />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={previewMode ? 'Hide Preview' : 'Show Preview'}>
-                  <Button onClick={togglePreview} variant="outlined" sx={{ ml: 1 }}>
-                    {previewMode ? 'Hide Preview' : 'Show Preview'}
-                  </Button>
-                </Tooltip>
               </Box>
             </InputAdornment>
           ),
@@ -193,7 +201,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             color="primary"
             aria-label="Send Message"
             onClick={handleSend}
-            disabled={newMessage.trim() === '' && attachments.length === 0}
+            disabled={message.trim() === '' && localAttachments.length === 0}
             sx={{ height: '56px' }}
             data-cy="send-message-button"
           >

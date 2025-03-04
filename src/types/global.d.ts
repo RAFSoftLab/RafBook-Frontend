@@ -96,13 +96,13 @@ export interface MessageDTO {
     parentMessage: number | null;
     deleted: boolean;
     edited: boolean;
-    mediaUrl: string[];
+    mediaUrl: string | null;
 }
 
 export interface NewMessageDTO {
     content: string;
     type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
-    mediaUrl: string[];
+    mediaUrl: string | null;
     parentMessage: number | null;
     textChannel: number;
 }
@@ -126,6 +126,7 @@ export interface MessageItemProps {
     message: Message;
     onEditMessage?: (message: Message) => void;
     onReplyMessage?: (message: Message) => void;
+    showMetadata?: boolean;
 }
 
 export interface MessageListProps {

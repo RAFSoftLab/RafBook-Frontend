@@ -45,12 +45,12 @@ export const getFileIcon = (fileName?: string) => {
 };
 
 export const transformBackendMessage = (msg: MessageDTO, channelId: number): Message => {
-  const attachments: Attachment[] =
-    msg.mediaUrl && msg.mediaUrl.length > 0
-      ? msg.mediaUrl.map((url: string, index: number) => ({
-        id: Number(`${msg.id}${index}`),
+  const attachment: Attachment | null =
+  msg.mediaUrl && msg.mediaUrl.length > 0
+    ? {
+        id: Number(msg.id),
         type: msg.type.toLowerCase() as 'image' | 'video' | 'voice' | 'file',
-        url,
+        url: msg.mediaUrl[0],
         name:
           msg.type === 'IMAGE'
             ? 'Image'
@@ -59,8 +59,8 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
               : msg.type === 'VOICE'
                 ? 'Voice'
                 : 'File',
-      }))
-      : [];
+      }
+    : null;
 
   const deleted = msg.deleted;
 
@@ -75,7 +75,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
     parentMessage: msg.parentMessage,
     deleted: deleted,
     edited: msg.edited,
-    attachments: attachments.length > 0 ? attachments : undefined,
+    attachments: attachment ? [attachment] : [],
   };
 };
 
@@ -114,3 +114,27 @@ export const getSenderFromUser = (user: UserState): Sender => {
     role: user.role,
   };
 };
+
+export const groupMessages = (messages: Message[]): Message[][] => {
+  if (!messages.length) return [];
+  const groups: Message[][] = [];
+  let currentGroup: Message[] = [messages[0]];
+
+  for (let i = 1; i < messages.length; i++) {
+    const message = messages[i];
+
+    const groupAnchorTime = new Date(currentGroup[0].timestamp).getTime();
+    const messageTime = new Date(message.timestamp).getTime();
+
+    if (message.sender.id === currentGroup[0].sender.id && messageTime - groupAnchorTime <= 7 * 60 * 1000) {
+      currentGroup.push(message);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = [message];
+    }
+  }
+  groups.push(currentGroup);
+  return groups;
+};
+
+

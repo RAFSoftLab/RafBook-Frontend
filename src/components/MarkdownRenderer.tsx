@@ -15,43 +15,47 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   const codeBackground =
     theme.palette.mode === 'light' ? theme.palette.grey[300] : theme.palette.grey[700];
 
-  const components = {
-    p: ({ node, children, ...props }: any) => (
-      <Typography variant="body1" {...props} sx={{ margin: 0 }}>
-        {children}
-      </Typography>
-    ),
-    code({ inline, className, children, ...props }: any) {
-      if (!className) {
+  const components = React.useMemo(
+    () => ({
+      p: ({ node, children, ...props }: any) => (
+        <Typography variant="body1" {...props} sx={{ margin: 0 }}>
+          {children}
+        </Typography>
+      ),
+      code({ inline, className, children, ...props }: any) {
+        if (!className) {
+          return (
+            <code
+              style={{
+                backgroundColor: codeBackground,
+                borderRadius: theme.shape.borderRadius,
+                padding: theme.spacing(0.25, 0.5),
+              }}
+              {...props}
+            >
+              {children}
+            </code>
+          );
+        }
         return (
-          <code
+          <pre
             style={{
-              backgroundColor: codeBackground,
+              backgroundColor: theme.palette.grey[300],
               borderRadius: theme.shape.borderRadius,
-              padding: theme.spacing(0.25, 0.5),
+              padding: theme.spacing(2),
+              overflowX: 'auto',
             }}
+            className={className}
             {...props}
           >
-            {children}
-          </code>
+            <code>{children}</code>
+          </pre>
         );
-      }
-      return (
-        <pre
-          style={{
-            backgroundColor: theme.palette.grey[300],
-            borderRadius: theme.shape.borderRadius,
-            padding: theme.spacing(2),
-            overflowX: 'auto',
-          }}
-          className={className}
-          {...props}
-        >
-          <code>{children}</code>
-        </pre>
-      );
-    },
-  };
+      },
+    }),
+    [theme, codeBackground]
+  );
+
 
   return (
     <Box
@@ -75,4 +79,4 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   );
 };
 
-export default MarkdownRenderer;
+export default React.memo(MarkdownRenderer);

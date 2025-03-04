@@ -1,12 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Paper,
-  IconButton,
-} from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, CircularProgress, Alert, Paper, IconButton } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MessageList from './MessageList';
@@ -15,13 +8,8 @@ import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage, markMessageError, updateMessage } from '../store/messageSlice';
-import {
-  setSelectedChannelId,
-  fetchUserChannelsThunk,
-  setSelectedStudyLevel,
-  setSelectedStudyProgram,
-} from '../store/channelSlice';
-import { Channel, Message, Attachment, StudyLevel, StudyProgram, NewMessageDTO } from '../types/global';
+import { setSelectedChannelId, fetchUserChannelsThunk, setSelectedStudyLevel, setSelectedStudyProgram } from '../store/channelSlice';
+import { Channel, Message, Attachment, NewMessageDTO } from '../types/global';
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
@@ -60,10 +48,7 @@ const MessageActionPopup: React.FC<MessageActionPopupProps> = ({ actionLabel, me
             {actionLabel}: {message.content}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {new Date(message.timestamp).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })} • {message.sender.firstName} {message.sender.lastName}
+            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {message.sender.firstName} {message.sender.lastName}
           </Typography>
         </Box>
         <IconButton onClick={onCancel}>
@@ -87,25 +72,15 @@ function useDebounce<T>(value: T, delay: number): T {
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [newMessage, setNewMessage] = useState('');
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-  const [replyingMessage, setReplyingMessage] = useState<Message | null>(null);
-  const [previewMode, setPreviewMode] = useState(false);
   const dispatch = useAppDispatch();
-
-  const channelState = useAppSelector((state) => state.channel);
-  const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } = channelState;
+  const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } = useAppSelector((state) => state.channel);
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
-  const messages = useAppSelector((state) =>
-    selectedChannelId !== null ? state.messages.messages[selectedChannelId] || [] : []
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { stompService } = useSocket();
-  const attachmentIdRef = useRef<number>(Date.now());
   const currentUser = useAppSelector((state) => state.user);
   const sender = getSenderFromUser(currentUser);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [replyingMessage, setReplyingMessage] = useState<Message | null>(null);
 
   useEffect(() => {
     dispatch(fetchUserChannelsThunk());
@@ -127,28 +102,6 @@ const Dashboard: React.FC = () => {
     }
   }, [loading, selectedStudyProgram, stompService]);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleEditMessage = useCallback((message: Message) => {
-    setEditingMessage(message);
-    setNewMessage(message.content);
-    setReplyingMessage(null);
-  }, []);
-
-  const handleReplyMessage = useCallback((message: Message) => {
-    setReplyingMessage(message);
-    console.log('Replying to message:', message);
-    setNewMessage('');
-    setEditingMessage(null);
-  }, []);
-
-  const handleSelection = (studyLevel: StudyLevel, studyProgram: StudyProgram) => {
-    dispatch(setSelectedStudyLevel(studyLevel));
-    dispatch(setSelectedStudyProgram(studyProgram));
-  };
-
   const getSelectedChannel = (): Channel | null => {
     if (!selectedStudyProgram) return null;
     for (const category of selectedStudyProgram.categories) {
@@ -160,25 +113,20 @@ const Dashboard: React.FC = () => {
 
   const selectedChannel = getSelectedChannel();
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
   const handleChannelSelect = (id: number) => {
     dispatch(setSelectedChannelId(id));
-    setAttachments([]);
   };
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === '' && attachments.length === 0) return;
+  const handleSendMessage = (content: string, attachments: Attachment[]) => {
+    if (content.trim() === '' && attachments.length === 0) return;
     if (!selectedChannel || selectedChannel.type !== 'text') return;
-
-    let parentMessageId: number | null = replyingMessage ? replyingMessage.id : null;
-
+  
+    const parentMessageId = replyingMessage ? replyingMessage.id : null;
+  
     if (editingMessage) {
       const updatedMessageDTO = {
         id: editingMessage.id,
-        content: newMessage.trim(),
+        content: content.trim(),
         createdAt: editingMessage.timestamp,
         type: editingMessage.type.toUpperCase() as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
         mediaUrl: attachments.length > 0 ? attachments.map((att) => att.url) : [],
@@ -191,87 +139,121 @@ const Dashboard: React.FC = () => {
         isDeleted: false,
         isEdited: true,
       };
-
+  
       const updatedMessage: Message = {
         ...editingMessage,
-        content: newMessage.trim(),
+        content: content.trim(),
         attachments: attachments.length > 0 ? attachments : editingMessage.attachments,
         edited: true,
         status: 'pending',
       };
-
+  
       dispatch(updateMessage(updatedMessage));
       editMessage(editingMessage.id, updatedMessageDTO);
-
+  
       setEditingMessage(null);
-      setNewMessage('');
-      setAttachments([]);
+      setReplyingMessage(null);
       return;
     }
-
-    let messageType: string = 'TEXT';
-    if (attachments.length > 0) {
-      messageType = attachments[0].type.toUpperCase();
+  
+    // --- SEND TEXT MESSAGE (if any) ---
+    if (content.trim() !== '') {
+      const textMessagePayload: Omit<Message, 'id'> = {
+        channelId: selectedChannel.id,
+        sender,
+        type: 'text',
+        content: content.trim(),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        reactions: [],
+        parentMessage: parentMessageId,
+        edited: false,
+        deleted: false,
+        attachments: undefined,
+        status: 'pending',
+      };
+  
+      dispatch(sendMessage(textMessagePayload));
+  
+      const newTextMessageDTO: NewMessageDTO = {
+        content: content.trim(),
+        type: 'TEXT',
+        mediaUrl: null,
+        parentMessage: parentMessageId,
+        textChannel: selectedChannel.id,
+      };
+  
+      sendMessageBackend(newTextMessageDTO);
+  
+      setTimeout(() => {
+        dispatch(
+          markMessageError({
+            channelId: selectedChannel.id,
+            content: content.trim(),
+            currentId: currentUser.id,
+          })
+        );
+      }, 5000);
     }
-
-    const localMessagePayload: Omit<Message, 'id'> = {
-      channelId: selectedChannel.id,
-      sender: sender,
-      type: messageType.toLowerCase() as 'text' | 'image' | 'video' | 'voice',
-      content: newMessage.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      reactions: [],
-      parentMessage: parentMessageId,
-      edited: false,
-      deleted: false,
-      attachments: attachments.length > 0 ? attachments : undefined,
-      status: 'pending',
-    };
-
-    dispatch(sendMessage(localMessagePayload));
-
-    const newMessageDTO: NewMessageDTO = {
-      content: newMessage.trim(),
-      type: messageType as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
-      mediaUrl: attachments.map((att) => att.url),
-      parentMessage: parentMessageId,
-      textChannel: selectedChannel.id,
-    };
-
-    console.log('newMessageDTO:', newMessageDTO);
-
-    sendMessageBackend(newMessageDTO);
-
-    setTimeout(() => {
-      dispatch(
-        markMessageError({
+  
+    // --- SEND EACH ATTACHMENT SEPARATELY ---
+    if (attachments.length > 0) {
+      attachments.forEach((attachment) => {
+        const attachmentMessagePayload: Omit<Message, 'id'> = {
           channelId: selectedChannel.id,
-          content: newMessage.trim(),
-          currentId: currentUser.id,
-        })
-      );
-    }, 5000);
-
-    setNewMessage('');
-    setAttachments([]);
+          sender,
+          type: attachment.type as 'text' | 'image' | 'video' | 'voice',
+          content: '',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          reactions: [],
+          parentMessage: parentMessageId,
+          edited: false,
+          deleted: false,
+          attachments: [attachment],
+          status: 'pending',
+        };
+  
+        dispatch(sendMessage(attachmentMessagePayload));
+  
+        const newAttachmentMessageDTO: NewMessageDTO = {
+          content: '',
+          type: attachment.type.toUpperCase() as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
+          mediaUrl: attachment.url,
+          parentMessage: parentMessageId,
+          textChannel: selectedChannel.id,
+        };
+  
+        sendMessageBackend(newAttachmentMessageDTO);
+  
+        setTimeout(() => {
+          dispatch(
+            markMessageError({
+              channelId: selectedChannel.id,
+              content: '',
+              currentId: currentUser.id,
+            })
+          );
+        }, 5000);
+      });
+    }
+  
     setReplyingMessage(null);
-  };
+  };  
 
   const handleSendGif = (gifUrl: string) => {
     if (!selectedChannel || selectedChannel.type !== 'text') return;
 
     const gifAttachment: Attachment = {
-      id: attachmentIdRef.current++,
+      id: Date.now(),
       type: 'image',
       url: gifUrl,
       name: 'GIF',
     };
 
-    let parentMessageId: number | null = replyingMessage ? replyingMessage.id : null;
+    const parentMessageId = replyingMessage ? replyingMessage.id : null;
 
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
-      sender: sender,
+      sender,
       type: 'image',
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -288,48 +270,38 @@ const Dashboard: React.FC = () => {
     const newMessageDTO: NewMessageDTO = {
       content: 'GIF',
       type: 'IMAGE',
-      mediaUrl: [gifUrl],
+      mediaUrl: gifUrl,
       parentMessage: parentMessageId,
       textChannel: selectedChannel.id,
     };
 
     sendMessageBackend(newMessageDTO);
-    setAttachments([]);
     setReplyingMessage(null);
   };
 
   const handleSendAttachments = (newAttachments: Attachment[]) => {
-    const attachmentsWithNumericIds = newAttachments.map((att) => ({
-      ...att,
-      id: attachmentIdRef.current++,
-    }));
-    setAttachments((prev) => [...prev, ...attachmentsWithNumericIds]);
+    // Optional: Dashboard may handle this if needed.
   };
 
   const handleRemoveAttachment = (id: number) => {
-    const attachmentToRemove = attachments.find((att) => att.id === id);
-    if (attachmentToRemove && attachmentToRemove.url.startsWith('blob:')) {
-      URL.revokeObjectURL(attachmentToRemove.url);
-    }
-    setAttachments((prev) => prev.filter((att) => att.id !== id));
+    // Optional: Dashboard may handle removal if needed.
   };
 
-  const debouncedMessage = useDebounce(newMessage, 200);
+  const handleEditMessage = useCallback((message: Message) => {
+    setEditingMessage(message);
+    setReplyingMessage(null);
+  }, []);
 
-  const previewContent = useMemo(() => {
-    if (!previewMode) return null;
-    return (
-      <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
-        <MarkdownRenderer content={debouncedMessage} />
-      </Box>
-    );
-  }, [debouncedMessage, previewMode]);
+  const handleReplyMessage = useCallback((message: Message) => {
+    setReplyingMessage(message);
+    setEditingMessage(null);
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
       <Header
         drawerWidth={drawerWidth}
-        handleDrawerToggle={handleDrawerToggle}
+        handleDrawerToggle={() => {}}
         channelName={selectedChannel ? selectedChannel.description : 'Channel Description'}
       />
       <Sidebar
@@ -346,8 +318,8 @@ const Dashboard: React.FC = () => {
         onSelectChannel={handleChannelSelect}
         selectedChannelId={selectedChannelId}
         drawerWidth={drawerWidth}
-        mobileOpen={mobileOpen}
-        handleDrawerToggle={handleDrawerToggle}
+        mobileOpen={false}
+        handleDrawerToggle={() => {}}
       />
       <Box
         component="main"
@@ -395,95 +367,64 @@ const Dashboard: React.FC = () => {
               {error}
             </Alert>
           </Box>
+        ) : selectedChannel ? (
+          selectedChannel.type === 'voice' ? (
+            <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
+          ) : (
+            <>
+              <MessageList
+                selectedChannel={selectedChannel.id}
+                key={selectedChannel.id}
+                onEditMessage={handleEditMessage}
+                onReplyMessage={handleReplyMessage}
+              />
+              {editingMessage && (
+                <MessageActionPopup
+                  actionLabel="Editing"
+                  message={editingMessage}
+                  onCancel={() => setEditingMessage(null)}
+                />
+              )}
+              {replyingMessage && (
+                <MessageActionPopup
+                  actionLabel="Replying"
+                  message={replyingMessage}
+                  onCancel={() => setReplyingMessage(null)}
+                />
+              )}
+              <MessageInput
+                editingContent={editingMessage ? editingMessage.content : undefined}
+                onSend={handleSendMessage}
+                onSendGif={handleSendGif}
+                onSendAttachments={handleSendAttachments}
+                onRemoveAttachment={handleRemoveAttachment}
+              />
+            </>
+          )
         ) : (
-          <>
-            {selectedChannel ? (
-              selectedChannel.type === 'voice' ? (
-                <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
-              ) : (
-                <>
-                  <Box
-                    sx={{
-                      flexGrow: 1,
-                      overflowY: 'auto',
-                      mb: 2,
-                      display: previewMode ? 'none' : 'block',
-                    }}
-                    data-cy="message-list-container"
-                  >
-                    <MessageList
-                      selectedChannel={selectedChannel.id}
-                      key={selectedChannel.id}
-                      onEditMessage={handleEditMessage}
-                      onReplyMessage={handleReplyMessage}
-                    />
-                  </Box>
-                  <Box
-                    sx={{
-                      flexGrow: 1,
-                      overflowY: 'auto',
-                      mb: 2,
-                      display: previewMode ? 'block' : 'none',
-                    }}
-                  >
-                    {previewContent}
-                  </Box>
-                  {/* Display the popup for editing or replying */}
-                  {editingMessage && (
-                    <MessageActionPopup
-                      actionLabel="Editing"
-                      message={editingMessage}
-                      onCancel={() => {
-                        setEditingMessage(null);
-                        setNewMessage('');
-                      }}
-                    />
-                  )}
-                  {replyingMessage && (
-                    <MessageActionPopup
-                      actionLabel="Replying"
-                      message={replyingMessage}
-                      onCancel={() => {
-                        setReplyingMessage(null);
-                      }}
-                    />
-                  )}
-                  {/* Pass the input ref to MessageInput for auto focus */}
-                  <MessageInput
-                    newMessage={newMessage}
-                    setNewMessage={setNewMessage}
-                    onSend={handleSendMessage}
-                    onSendGif={handleSendGif}
-                    onSendAttachments={handleSendAttachments}
-                    onRemoveAttachment={handleRemoveAttachment}
-                    previewMode={previewMode}
-                    setPreviewMode={setPreviewMode}
-                  />
-                </>
-              )
-            ) : (
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                }}
-                data-cy="no-channel-selected"
-              >
-                <Typography variant="h6" data-cy="no-channel-text">
-                  Please select a channel to view content.
-                </Typography>
-              </Box>
-            )}
-          </>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+            }}
+            data-cy="no-channel-selected"
+          >
+            <Typography variant="h6" data-cy="no-channel-text">
+              Please select a channel to view content.
+            </Typography>
+          </Box>
         )}
         <StudyProgramSelectorModal
           open={isModalOpen}
           studyLevels={studyLevels}
-          onClose={handleCloseModal}
-          onSelect={handleSelection}
+          onClose={() => setIsModalOpen(false)}
+          onSelect={(studyLevel, studyProgram) => {
+            dispatch(setSelectedStudyLevel(studyLevel));
+            dispatch(setSelectedStudyProgram(studyProgram));
+          }}
         />
       </Box>
     </Box>

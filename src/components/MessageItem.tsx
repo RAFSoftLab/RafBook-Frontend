@@ -30,7 +30,7 @@ const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
 };
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onReplyMessage }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onReplyMessage, showMetadata = true }) => {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
@@ -48,22 +48,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
   const isStudent = user.role.find((role) => role === "STUDENT");
   const canDelete = isOwnMessage || !isStudent;
 
-  const avatarColor = isOwnMessage
-    ? theme.palette.primary.main
-    : theme.palette.grey[500];
-
+  const avatarColor = isOwnMessage ? theme.palette.primary.main : theme.palette.grey[500];
   const messageTextColor = theme.palette.text.primary;
   const timestampOffset = theme.spacing(7);
   const replyOffset = theme.spacing(5.5);
   const dispatch = useAppDispatch();
 
-  const imageAttachments = message.attachments?.filter(
-    (att) => att.type === 'image'
-  ) || [];
-  const otherAttachments = message.attachments?.filter(
-    (att) => att.type !== 'image'
-  ) || [];
-
+  const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
+  const otherAttachments = message.attachments?.filter(att => att.type !== 'image') || [];
   const firstAttachmentUrl = message.attachments?.[0]?.url;
   const hasGifAttachment = isGif(firstAttachmentUrl);
 
@@ -71,11 +63,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
 
-  // Lookup the parent message based on the parent's ID stored in message.parentMessage
   const parentMessageObj = useAppSelector((state) =>
-    state.messages.messages[message.channelId]?.find(
-      (msg) => msg.id === message.parentMessage
-    )
+    state.messages.messages[message.channelId]?.find(msg => msg.id === message.parentMessage)
   );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -92,16 +81,12 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
 
   const handleEdit = () => {
     handleCloseContextMenu();
-    if (onEditMessage) {
-      onEditMessage(message);
-    }
+    onEditMessage && onEditMessage(message);
   };
 
   const handleReply = () => {
     handleCloseContextMenu();
-    if (onReplyMessage) {
-      onReplyMessage(message);
-    }
+    onReplyMessage && onReplyMessage(message);
   };
 
   const handleDelete = () => {
@@ -116,13 +101,13 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
   };
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex((prevIndex) =>
+    setCurrentImageIndex(prevIndex =>
       prevIndex === 0 ? imageAttachments.length - 1 : prevIndex - 1
     );
   }, [imageAttachments.length]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex((prevIndex) =>
+    setCurrentImageIndex(prevIndex =>
       prevIndex === imageAttachments.length - 1 ? 0 : prevIndex + 1
     );
   }, [imageAttachments.length]);
@@ -155,130 +140,118 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
 
   return (
     <>
+      {showMetadata && (
+        <>
+          {parentMessageObj && (
+            <Box
+              sx={{
+                backgroundColor: theme.palette.background.paper,
+                borderLeft: `4px solid ${theme.palette.primary.main}`,
+                p: 1,
+                mb: 0.5,
+                ml: replyOffset,
+                borderRadius: 1,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary">
+                Replying to {parentMessageObj.sender.firstName} {parentMessageObj.sender.lastName} •{' '}
+                {new Date(parentMessageObj.timestamp).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {parentMessageObj.content.length > 255
+                  ? `${parentMessageObj.content.slice(0, 252)}...`
+                  : parentMessageObj.content}
+              </Typography>
+            </Box>
+          )}
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ mb: 0.5, ml: timestampOffset }}
+            data-cy={`message-timestamp-${message.id}`}
+          >
+            {message.sender.firstName} {message.sender.lastName} •{' '}
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}{' '}
+            {message.edited && (
+              <span style={{ fontSize: '0.75rem', fontStyle: 'italic', marginLeft: 4 }}>
+                (edited)
+              </span>
+            )}
+          </Typography>
+        </>
+      )}
+
       <Box
         onContextMenu={handleContextMenu}
         sx={{
-          mb: 2,
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
           alignItems: 'flex-start',
-          opacity: message.status === 'pending' ? 0.5 : 1,
-          border: message.status === 'error' ? '1px solid red' : 'none',
+          maxWidth: '70%',
         }}
-        data-cy={`message-${message.id}`}
       >
-        {/* Render reply preview if a parent message exists */}
-        {parentMessageObj && (
-          <Box
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              p: 1,
-              mb: 0.5,
-              ml: replyOffset,
-              borderRadius: 1,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              Replying to {parentMessageObj.sender.firstName} {parentMessageObj.sender.lastName} •{' '}
-              {new Date(parentMessageObj.timestamp).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {parentMessageObj.content.length > 255 ? `${parentMessageObj.content.slice(0, 252)}...` : parentMessageObj.content}
-            </Typography>
-          </Box>
-        )}
-
-        <Typography
-          variant="subtitle2"
-          color="text.secondary"
-          sx={{ mb: 0.5, ml: timestampOffset }}
-          data-cy={`message-timestamp-${message.id}`}
-        >
-          {message.sender.firstName} {message.sender.lastName} •{' '}
-          {new Date(message.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}{' '}
-          {message.edited && (
-            <span style={{ fontSize: '0.75rem', fontStyle: 'italic', marginLeft: 4 }}>
-              (edited)
-            </span>
-          )}
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', maxWidth: '70%' }}>
+        {showMetadata && (
           <Avatar
             sx={{ bgcolor: avatarColor, mr: 1, width: 40, height: 40 }}
             data-cy={`message-avatar-${message.id}`}
           >
             {message.sender.firstName.charAt(0)}
           </Avatar>
-          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            {message.type === 'text' && (
-              <Box
-                sx={{
-                  color: messageTextColor,
-                  borderRadius: 2,
-                  p: 1,
-                  wordBreak: 'break-word',
-                }}
-                data-cy={`message-content-${message.id}`}
-              >
-                <MarkdownRenderer content={message.content} />
-              </Box>
-            )}
-            {hasGifAttachment && (
-              <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1 }} data-cy={`message-gif-${message.id}`}>
-                <img
-                  src={firstAttachmentUrl}
-                  alt="GIF"
-                  style={{ width: '100%', borderRadius: '8px' }}
-                  data-cy={`gif-image-${message.id}`}
-                />
-              </Box>
-            )}
-            {!hasGifAttachment && imageAttachments.length > 0 && (
-              <Box sx={{ mt: 1 }} data-cy={`message-images-${message.id}`}>
-                <ImageGrid
-                  imageAttachments={imageAttachments}
-                  maxVisibleImages={maxVisibleImages}
-                  onImageClick={handleImageClick}
-                />
-              </Box>
-            )}
-            {otherAttachments.length > 0 && (
-              <FileList
-                files={otherAttachments}
-                canRemove={false}
-                data-cy={`message-files-${message.id}`}
-              />
-            )}
-          </Box>
-        </Box>
-        {!hasGifAttachment && imageAttachments.length > 0 && (
-          <Lightbox
-            open={lightboxOpen}
-            onClose={handleCloseLightbox}
-            images={imageAttachments}
-            currentIndex={currentImageIndex}
-            onPrev={handlePrevImage}
-            onNext={handleNextImage}
-            onThumbnailClick={handleThumbnailClick}
-            data-cy={`lightbox-${message.id}`}
-          />
         )}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            ml: showMetadata ? 0 : theme.spacing(6),
+          }}
+        >
+          {message.type === 'text' && (
+            <Box
+              sx={{
+                color: messageTextColor,
+                borderRadius: 2,
+                p: 1,
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap',
+              }}
+              data-cy={`message-content-${message.id}`}
+            >
+              <MarkdownRenderer content={message.content} />
+            </Box>
+          )}
+          {hasGifAttachment && (
+            <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1 }} data-cy={`message-gif-${message.id}`}>
+              <img
+                src={firstAttachmentUrl}
+                alt="GIF"
+                style={{ width: '100%', borderRadius: '8px' }}
+                data-cy={`gif-image-${message.id}`}
+              />
+            </Box>
+          )}
+          {!hasGifAttachment && imageAttachments.length > 0 && (
+            <Box sx={{ mt: 1 }} data-cy={`message-images-${message.id}`}>
+              <ImageGrid imageAttachments={imageAttachments} maxVisibleImages={maxVisibleImages} onImageClick={handleImageClick} />
+            </Box>
+          )}
+          {otherAttachments.length > 0 && (
+            <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />
+          )}
+        </Box>
       </Box>
-      <Divider sx={{ marginTop: 1 }} />
+
       <Popover
         open={Boolean(contextMenu)}
         onClose={handleCloseContextMenu}
         anchorReference="anchorPosition"
-        anchorPosition={
-          contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
-        }
+        anchorPosition={contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
       >
         <Paper sx={{ width: 320, maxWidth: '100%' }}>
           <MenuList>
@@ -313,6 +286,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           </MenuList>
         </Paper>
       </Popover>
+      <Lightbox
+        open={lightboxOpen}
+        onClose={handleCloseLightbox}
+        images={imageAttachments}
+        currentIndex={currentImageIndex}
+        onPrev={handlePrevImage}
+        onNext={handleNextImage}
+        onThumbnailClick={handleThumbnailClick}
+        data-cy={`lightbox-${message.id}`}
+      />
     </>
   );
 };
