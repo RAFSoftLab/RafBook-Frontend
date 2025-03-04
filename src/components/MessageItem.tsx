@@ -218,6 +218,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
                 color: messageTextColor,
                 borderRadius: 2,
                 p: 0.5,
+                paddingLeft: 1,
                 wordBreak: 'break-word',
                 whiteSpace: 'pre-wrap',
               }}
@@ -227,7 +228,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
             </Box>
           )}
           {hasGifAttachment && (
-            <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1 }} data-cy={`message-gif-${message.id}`}>
+            <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1, pl: 1 }} data-cy={`message-gif-${message.id}`}>
               <img
                 src={firstAttachmentUrl}
                 alt="GIF"
@@ -237,12 +238,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
             </Box>
           )}
           {!hasGifAttachment && imageAttachments.length > 0 && (
-            <Box sx={{ mt: 1 }} data-cy={`message-images-${message.id}`}>
+            <Box sx={{ mt: 1, pl: 1 }} data-cy={`message-images-${message.id}`}>
               <ImageGrid imageAttachments={imageAttachments} maxVisibleImages={maxVisibleImages} onImageClick={handleImageClick} />
             </Box>
           )}
           {otherAttachments.length > 0 && (
-            <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />
+            <Box sx={{ p: 0.5, pl: 1 }}>
+              <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />
+            </Box>
           )}
         </Box>
       </Box>
