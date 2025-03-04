@@ -55,7 +55,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
   const dispatch = useAppDispatch();
 
   const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
-  const otherAttachments = message.attachments?.filter(att => att.type !== 'image') || [];
+  const otherAttachments = message.attachments?.filter(att => att.type === 'file') || [];
   const firstAttachmentUrl = message.attachments?.[0]?.url;
   const hasGifAttachment = isGif(firstAttachmentUrl);
 
@@ -212,13 +212,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
             ml: showMetadata ? 0 : theme.spacing(6),
           }}
         >
+          {/* Text Message */}
           {message.type === 'text' && (
             <Box
               sx={{
                 color: messageTextColor,
                 borderRadius: 2,
                 p: 0.5,
-                paddingLeft: 1,
+                pl: 1,
                 wordBreak: 'break-word',
                 whiteSpace: 'pre-wrap',
               }}
@@ -227,6 +228,28 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
               <MarkdownRenderer content={message.content} />
             </Box>
           )}
+
+          {/* Video Playback */}
+          {message.type === 'video' && message.attachments && message.attachments.length > 0 && (
+            <Box sx={{ mt: 1, pl: 1 }}>
+              <video controls style={{ maxWidth: '700px', borderRadius: '8px' }}>
+                <source src={message.attachments[0].url} />
+                Your browser does not support the video tag.
+              </video>
+            </Box>
+          )}
+
+          {/* Audio Playback */}
+          {message.type === 'voice' && message.attachments && message.attachments.length > 0 && (
+            <Box sx={{ mt: 1, pl: 1 }}>
+              <audio controls style={{ maxWidth: '700px' }}>
+                <source src={message.attachments[0].url} />
+                Your browser does not support the audio element.
+              </audio>
+            </Box>
+          )}
+
+          {/* GIF Image */}
           {hasGifAttachment && (
             <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1, pl: 1 }} data-cy={`message-gif-${message.id}`}>
               <img
@@ -237,11 +260,15 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
               />
             </Box>
           )}
+
+          {/* Image Grid */}
           {!hasGifAttachment && imageAttachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }} data-cy={`message-images-${message.id}`}>
               <ImageGrid imageAttachments={imageAttachments} maxVisibleImages={maxVisibleImages} onImageClick={handleImageClick} />
             </Box>
           )}
+
+          {/* Other Attachments */}
           {otherAttachments.length > 0 && (
             <Box sx={{ p: 0.5, pl: 1 }}>
               <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />
