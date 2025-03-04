@@ -122,19 +122,63 @@ export const groupMessages = (messages: Message[]): Message[][] => {
 
   for (let i = 1; i < messages.length; i++) {
     const message = messages[i];
-
     const groupAnchorTime = new Date(currentGroup[0].timestamp).getTime();
     const messageTime = new Date(message.timestamp).getTime();
 
-    if (message.sender.id === currentGroup[0].sender.id && messageTime - groupAnchorTime <= 7 * 60 * 1000) {
+    if (
+      message.sender.id === currentGroup[0].sender.id &&
+      messageTime - groupAnchorTime <= 7 * 60 * 1000
+    ) {
       currentGroup.push(message);
     } else {
-      groups.push(currentGroup);
+      groups.push(mergeImageMessages(currentGroup));
       currentGroup = [message];
     }
   }
-  groups.push(currentGroup);
+  groups.push(mergeImageMessages(currentGroup));
   return groups;
 };
+
+/**
+ * Processes a single message group and merges consecutive image messages.
+ * When an image message is encountered, it is merged with any preceding image
+ * messages into a single message with an attachments array.
+ * @param group - An array of messages from the same sender in a short time span.
+ * @returns A new array of messages where consecutive image messages have been merged.
+ */
+const mergeImageMessages = (group: Message[]): Message[] => {
+  const mergedGroup: Message[] = [];
+  let currentImageMessage: Message | null = null;
+
+  group.forEach((msg) => {
+    if (msg.type === 'image') {
+      if (currentImageMessage) {
+        // Append the current message's attachments (if any) to the merged image message.
+        currentImageMessage.attachments = currentImageMessage.attachments || [];
+        if (msg.attachments && msg.attachments.length > 0) {
+          currentImageMessage.attachments.push(...msg.attachments);
+        }
+      } else {
+        // Start a new merged image message. Clone the message to avoid mutating the original.
+        currentImageMessage = { ...msg, attachments: msg.attachments ? [...msg.attachments] : [] };
+      }
+    } else {
+      // Before processing a non-image message, push any accumulated image message.
+      if (currentImageMessage) {
+        mergedGroup.push(currentImageMessage);
+        currentImageMessage = null;
+      }
+      mergedGroup.push(msg);
+    }
+  });
+  
+  // If the group ends with an image message, push the merged image message.
+  if (currentImageMessage) {
+    mergedGroup.push(currentImageMessage);
+  }
+  
+  return mergedGroup;
+};
+
 
 

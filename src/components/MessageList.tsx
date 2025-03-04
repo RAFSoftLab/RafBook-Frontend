@@ -40,12 +40,12 @@ const MessageList: React.FC<MessageListProps> = ({ selectedChannel, onEditMessag
                 <Box
                   key={msg.id}
                   sx={{
-                    borderRadius: 2,
+                    // borderRadius: 2,
                     transition: 'background-color 0.3s',
                     '&:hover': {
                       backgroundColor: (theme) => theme.palette.action.hover,
                     },
-                    py: 0.5,
+                    // py: 0.5,
                     px: 1,
                     mb: 0.5,
                   }}

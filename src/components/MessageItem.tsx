@@ -198,7 +198,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
       >
         {showMetadata && (
           <Avatar
-            sx={{ bgcolor: avatarColor, mr: 1, width: 40, height: 40 }}
+            sx={{ bgcolor: avatarColor, mr: 1, width: 40, height: 40, mt: '-16px' }}
             data-cy={`message-avatar-${message.id}`}
           >
             {message.sender.firstName.charAt(0)}
@@ -217,7 +217,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
               sx={{
                 color: messageTextColor,
                 borderRadius: 2,
-                p: 1,
+                p: 0.5,
                 wordBreak: 'break-word',
                 whiteSpace: 'pre-wrap',
               }}
