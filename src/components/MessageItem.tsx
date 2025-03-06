@@ -232,7 +232,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           {/* Video Playback */}
           {message.type === 'video' && message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }}>
-              <video controls style={{ maxWidth: '700px', borderRadius: '8px' }}>
+              <video controls style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}>
                 <source src={message.attachments[0].url} />
                 Your browser does not support the video tag.
               </video>
@@ -242,7 +242,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           {/* Audio Playback */}
           {message.type === 'voice' && message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }}>
-              <audio controls style={{ maxWidth: '700px' }}>
+              <audio controls style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}>
                 <source src={message.attachments[0].url} />
                 Your browser does not support the audio element.
               </audio>
@@ -271,7 +271,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           {/* Other Attachments */}
           {otherAttachments.length > 0 && (
             <Box sx={{ p: 0.5, pl: 1 }}>
-              <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />
+              <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />111
             </Box>
           )}
         </Box>

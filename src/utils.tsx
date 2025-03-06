@@ -104,7 +104,7 @@ export const getCurrentUser = (): Sender => {
 
 export const getSenderFromUser = (user: UserState): Sender => {
   const [firstName, ...lastNameParts] = user.name.split(' ');
-  const lastName = lastNameParts.join(' ') || ''; // In case there's only one name
+  const lastName = lastNameParts.join(' ') || '';
   return {
     id: user.id,
     firstName,
@@ -122,6 +122,13 @@ export const groupMessages = (messages: Message[]): Message[][] => {
 
   for (let i = 1; i < messages.length; i++) {
     const message = messages[i];
+
+    if (message.parentMessage !== null) {
+      groups.push(mergeImageMessages(currentGroup));
+      currentGroup = [message];
+      continue;
+    }
+
     const groupAnchorTime = new Date(currentGroup[0].timestamp).getTime();
     const messageTime = new Date(message.timestamp).getTime();
 
@@ -153,17 +160,14 @@ const mergeImageMessages = (group: Message[]): Message[] => {
   group.forEach((msg) => {
     if (msg.type === 'image') {
       if (currentImageMessage) {
-        // Append the current message's attachments (if any) to the merged image message.
         currentImageMessage.attachments = currentImageMessage.attachments || [];
         if (msg.attachments && msg.attachments.length > 0) {
           currentImageMessage.attachments.push(...msg.attachments);
         }
       } else {
-        // Start a new merged image message. Clone the message to avoid mutating the original.
         currentImageMessage = { ...msg, attachments: msg.attachments ? [...msg.attachments] : [] };
       }
     } else {
-      // Before processing a non-image message, push any accumulated image message.
       if (currentImageMessage) {
         mergedGroup.push(currentImageMessage);
         currentImageMessage = null;
@@ -172,7 +176,6 @@ const mergeImageMessages = (group: Message[]): Message[] => {
     }
   });
   
-  // If the group ends with an image message, push the merged image message.
   if (currentImageMessage) {
     mergedGroup.push(currentImageMessage);
   }

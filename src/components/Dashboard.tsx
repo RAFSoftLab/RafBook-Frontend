@@ -13,7 +13,6 @@ import { Channel, Message, Attachment, NewMessageDTO } from '../types/global';
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
-import MarkdownRenderer from './MarkdownRenderer';
 import CloseIcon from '@mui/icons-material/Close';
 
 interface MessageActionPopupProps {
@@ -58,17 +57,6 @@ const MessageActionPopup: React.FC<MessageActionPopupProps> = ({ actionLabel, me
     </Box>
   );
 };
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-}
 
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
@@ -163,7 +151,7 @@ const Dashboard: React.FC = () => {
         sender,
         type: 'text',
         content: content.trim(),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toISOString(),
         reactions: [],
         parentMessage: parentMessageId,
         edited: false,
