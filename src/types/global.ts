@@ -62,11 +62,19 @@ export interface MessageInputProps {
     inputRef?: React.Ref<HTMLInputElement>;
 }
 
+export enum Type {
+    TEXT = 'TEXT',
+    IMAGE = 'IMAGE',
+    VIDEO = 'VIDEO',
+    VOICE = 'VOICE',
+    FILE = 'FILE',
+}
+
 export interface Message {
     id: number;
     channelId: number;
     sender: Sender;
-    type: 'text' | 'image' | 'video' | 'voice';
+    type: Type;
     content: string;
     timestamp: string;
     reactions: any[];
@@ -89,7 +97,7 @@ export interface Sender {
 export interface MessageDTO {
     id: number;
     sender: Sender;
-    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
+    type: Type;
     content: string;
     createdAt: string;
     reactions: any[];
@@ -101,17 +109,17 @@ export interface MessageDTO {
 
 export interface NewMessageDTO {
     content: string;
-    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE';
+    type: Type;
     mediaUrl: string | null;
     parentMessage: number | null;
     textChannel: number;
 }
 
-export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
+// export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
 
 export interface Attachment {
     id: number;
-    type: AttachmentType;
+    type: Type;
     url: string;
     name?: string;
 }

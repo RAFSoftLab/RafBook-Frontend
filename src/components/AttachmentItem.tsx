@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Link, IconButton } from '@mui/material';
-import { Attachment } from '../types/global';
+import { Attachment, Type } from '../types/global';
 import CloseIcon from '@mui/icons-material/Close';
 import { getFileIcon } from '../utils';
 
@@ -14,7 +14,7 @@ interface AttachmentItemProps {
 const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, onRemove }) => {
   const renderAttachment = () => {
     switch (attachment.type) {
-      case 'image':
+      case Type.IMAGE:
         return (
           <Box
             component="img"
@@ -27,7 +27,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, onRemove })
             }}
           />
         );
-      case 'voice':
+      case Type.VOICE:
         return (
           <Box sx={{ mt: 1 }}>
             <audio controls>
@@ -36,7 +36,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, onRemove })
             </audio>
           </Box>
         );
-      case 'video':
+      case Type.VIDEO:
         return (
           <Box sx={{ mt: 1 }}>
             <video controls style={{ width: '100%', borderRadius: '8px' }}>
@@ -45,7 +45,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, onRemove })
             </video>
           </Box>
         );
-      case 'file':
+      case Type.FILE:
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
             {getFileIcon(attachment.name)}

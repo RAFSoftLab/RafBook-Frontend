@@ -4,17 +4,17 @@ import React from 'react';
 import { Box, Typography, IconButton, Link } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { getFileIcon } from '../utils';
-import { AttachmentPreviewProps } from '../types/global';
+import { AttachmentPreviewProps, Type } from '../types/global';
 
 const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
   attachments,
   onRemoveAttachment,
   maxVisibleImages,
 }) => {
-  const imageAttachments = attachments.filter(att => att.type === 'image');
-  const videoAttachments = attachments.filter(att => att.type === 'video');
-  const voiceAttachments = attachments.filter(att => att.type === 'voice');
-  const fileAttachments = attachments.filter(att => att.type === 'file');
+  const imageAttachments = attachments.filter(att => att.type === Type.IMAGE);
+  const videoAttachments = attachments.filter(att => att.type === Type.VIDEO);
+  const voiceAttachments = attachments.filter(att => att.type === Type.VOICE);
+  const fileAttachments = attachments.filter(att => att.type === Type.FILE);
 
   const visibleImages = imageAttachments.slice(0, maxVisibleImages);
   const excessImageCount = imageAttachments.length - maxVisibleImages;

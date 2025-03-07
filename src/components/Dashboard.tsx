@@ -9,7 +9,7 @@ import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage, markMessageError, updateMessage } from '../store/messageSlice';
 import { setSelectedChannelId, fetchUserChannelsThunk, setSelectedStudyLevel, setSelectedStudyProgram } from '../store/channelSlice';
-import { Channel, Message, Attachment, NewMessageDTO } from '../types/global';
+import { Channel, Message, Attachment, NewMessageDTO, Type } from '../types/global';
 import { useSocket } from '../context/SocketContext';
 import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
@@ -116,7 +116,7 @@ const Dashboard: React.FC = () => {
         id: editingMessage.id,
         content: content.trim(),
         createdAt: editingMessage.timestamp,
-        type: editingMessage.type.toUpperCase() as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
+        type: editingMessage.type.toUpperCase() as Type,
         mediaUrl: attachments.length > 0 ? attachments.map((att) => att.url) : [],
         sender: editingMessage.sender,
         reactions: editingMessage.reactions,
@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
       const textMessagePayload: Omit<Message, 'id'> = {
         channelId: selectedChannel.id,
         sender,
-        type: 'text',
+        type: Type.TEXT,
         content: content.trim(),
         timestamp: new Date().toISOString(),
         reactions: [],
@@ -164,7 +164,7 @@ const Dashboard: React.FC = () => {
   
       const newTextMessageDTO: NewMessageDTO = {
         content: content.trim(),
-        type: 'TEXT',
+        type: Type.TEXT,
         mediaUrl: null,
         parentMessage: parentMessageId,
         textChannel: selectedChannel.id,
@@ -189,7 +189,7 @@ const Dashboard: React.FC = () => {
         const attachmentMessagePayload: Omit<Message, 'id'> = {
           channelId: selectedChannel.id,
           sender,
-          type: attachment.type as 'text' | 'image' | 'video' | 'voice',
+          type: attachment.type as Type,
           content: '',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           reactions: [],
@@ -204,7 +204,7 @@ const Dashboard: React.FC = () => {
   
         const newAttachmentMessageDTO: NewMessageDTO = {
           content: '',
-          type: attachment.type.toUpperCase() as 'TEXT' | 'IMAGE' | 'VIDEO' | 'VOICE',
+          type: attachment.type.toUpperCase() as Type,
           mediaUrl: attachment.url,
           parentMessage: parentMessageId,
           textChannel: selectedChannel.id,
@@ -232,7 +232,7 @@ const Dashboard: React.FC = () => {
 
     const gifAttachment: Attachment = {
       id: Date.now(),
-      type: 'image',
+      type: Type.IMAGE,
       url: gifUrl,
       name: 'GIF',
     };
@@ -242,7 +242,7 @@ const Dashboard: React.FC = () => {
     const localMessagePayload: Omit<Message, 'id'> = {
       channelId: selectedChannel.id,
       sender,
-      type: 'image',
+      type: Type.IMAGE,
       content: 'GIF',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       reactions: [],
@@ -257,7 +257,7 @@ const Dashboard: React.FC = () => {
 
     const newMessageDTO: NewMessageDTO = {
       content: 'GIF',
-      type: 'IMAGE',
+      type: Type.IMAGE,
       mediaUrl: gifUrl,
       parentMessage: parentMessageId,
       textChannel: selectedChannel.id,
@@ -362,7 +362,6 @@ const Dashboard: React.FC = () => {
             <>
               <MessageList
                 selectedChannel={selectedChannel.id}
-                key={selectedChannel.id}
                 onEditMessage={handleEditMessage}
                 onReplyMessage={handleReplyMessage}
               />

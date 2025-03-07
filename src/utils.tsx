@@ -6,6 +6,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import VideoIcon from '@mui/icons-material/VideoLibrary';
 import ZipIcon from '@mui/icons-material/Archive';
 import { Message, MessageDTO, Attachment, Sender, UserState } from './types/global';
+import { Type } from './types/global';
 import { jwtDecode } from 'jwt-decode';
 
 /**
@@ -49,7 +50,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
   msg.mediaUrl && msg.mediaUrl.length > 0
     ? {
         id: Number(msg.id),
-        type: msg.type.toLowerCase() as 'image' | 'video' | 'voice' | 'file',
+        type: msg.type.toLowerCase() as Type,
         url: msg.mediaUrl,
         name:
           msg.type === 'IMAGE'
@@ -68,7 +69,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
     id: msg.id,
     channelId: channelId,
     sender: msg.sender,
-    type: deleted ? 'text' : (msg.type.toLowerCase() as 'text' | 'image' | 'video' | 'voice'),
+    type: deleted ? Type.TEXT : (msg.type as Type),
     content: msg.content,
     timestamp: msg.createdAt,
     reactions: msg.reactions,
@@ -158,7 +159,7 @@ const mergeImageMessages = (group: Message[]): Message[] => {
   let currentImageMessage: Message | null = null;
 
   group.forEach((msg) => {
-    if (msg.type === 'image') {
+    if (msg.type === Type.IMAGE) {
       if (currentImageMessage) {
         currentImageMessage.attachments = currentImageMessage.attachments || [];
         if (msg.attachments && msg.attachments.length > 0) {

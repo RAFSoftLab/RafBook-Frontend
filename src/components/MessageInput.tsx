@@ -12,17 +12,17 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import GifIcon from '@mui/icons-material/Gif';
-import { EmojiData, Attachment, AttachmentType } from '../types/global';
+import { EmojiData, Attachment, Type } from '../types/global';
 import AttachmentPreview from './AttachmentPreview';
 import GifPicker from './GifPicker';
 import EmojiPicker from './EmojiPicker';
 import FileUploader from './FileUploader';
 
-const getFileType = (file: File): AttachmentType => {
-  if (file.type.startsWith('image/')) return 'image';
-  if (file.type.startsWith('audio/')) return 'voice';
-  if (file.type.startsWith('video/')) return 'video';
-  return 'file';
+const getFileType = (file: File): Type => {
+  if (file.type.startsWith('image/')) return Type.IMAGE;
+  if (file.type.startsWith('audio/')) return Type.VOICE;
+  if (file.type.startsWith('video/')) return Type.VIDEO;
+  return Type.FILE;
 };
 
 interface MessageInputProps {

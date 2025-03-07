@@ -17,7 +17,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { MessageItemProps } from '../types/global';
+import { MessageItemProps, Type } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
 import FileList from './FileList';
@@ -54,8 +54,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
   const replyOffset = theme.spacing(5.5);
   const dispatch = useAppDispatch();
 
-  const imageAttachments = message.attachments?.filter(att => att.type === 'image') || [];
-  const otherAttachments = message.attachments?.filter(att => att.type === 'file') || [];
+  const imageAttachments = message.attachments?.filter(att => att.type === Type.IMAGE) || [];
+  const otherAttachments = message.attachments?.filter(att => att.type === Type.FILE) || [];
   const firstAttachmentUrl = message.attachments?.[0]?.url;
   const hasGifAttachment = isGif(firstAttachmentUrl);
 
@@ -213,7 +213,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           }}
         >
           {/* Text Message */}
-          {message.type === 'text' && (
+          {message.type === Type.TEXT && (
             <Box
               sx={{
                 color: messageTextColor,
@@ -230,7 +230,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           )}
 
           {/* Video Playback */}
-          {message.type === 'video' && message.attachments && message.attachments.length > 0 && (
+          {message.type === Type.VIDEO && message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }}>
               <video controls style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}>
                 <source src={message.attachments[0].url} />
@@ -240,7 +240,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           )}
 
           {/* Audio Playback */}
-          {message.type === 'voice' && message.attachments && message.attachments.length > 0 && (
+          {message.type === Type.VOICE && message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }}>
               <audio controls style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}>
                 <source src={message.attachments[0].url} />

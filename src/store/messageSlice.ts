@@ -1,7 +1,7 @@
 // src/store/messageSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Message, MessageState } from '../types/global';
+import { Message, MessageState, Type } from '../types/global';
 import { transformBackendMessage } from '../utils';
 
 const initialState: MessageState = {
@@ -81,7 +81,7 @@ const messageSlice = createSlice({
       if (message) {
         message.attachments = [];
         message.content = "user deleted message";
-        message.type = "text";
+        message.type = Type.TEXT;
         console.log(`Marked message ${messageId} as deleted in channel ${channelId}`);
       }
     },
