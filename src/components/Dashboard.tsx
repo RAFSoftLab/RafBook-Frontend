@@ -385,6 +385,7 @@ const Dashboard: React.FC = () => {
                 onSendGif={handleSendGif}
                 onSendAttachments={handleSendAttachments}
                 onRemoveAttachment={handleRemoveAttachment}
+                autoFocus={Boolean(editingMessage || replyingMessage)}
               />
             </>
           )

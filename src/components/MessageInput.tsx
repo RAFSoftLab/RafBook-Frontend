@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -31,6 +31,7 @@ interface MessageInputProps {
   onSendAttachments: (newAttachments: Attachment[]) => void;
   onRemoveAttachment: (id: number) => void;
   editingContent?: string;
+  autoFocus?: boolean;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
@@ -39,6 +40,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   onSendAttachments,
   onRemoveAttachment,
   editingContent,
+  autoFocus,
 }) => {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
@@ -58,12 +60,21 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<HTMLElement | null>(null);
   const [gifAnchorEl, setGifAnchorEl] = useState<HTMLElement | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingContent !== undefined) {
       setMessage(editingContent);
+    } else {
+      setMessage('');
     }
   }, [editingContent]);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
 
   const handleEmojiClick = (event: React.MouseEvent<HTMLElement>) => {
     setEmojiAnchorEl(event.currentTarget);
@@ -146,6 +157,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         />
       )}
       <TextField
+        inputRef={inputRef}
         label="Type a message"
         variant="outlined"
         fullWidth
