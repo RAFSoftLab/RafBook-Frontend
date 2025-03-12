@@ -17,6 +17,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import { MessageItemProps, Type } from '../types/global';
 import ImageGrid from './ImageGrid';
 import Lightbox from './Lightbox';
@@ -25,12 +26,18 @@ import { useAppSelector, useAppDispatch } from '../store/hooks';
 import MarkdownRenderer from './MarkdownRenderer';
 import { deleteMessage } from '../store/messageSlice';
 import { deleteMessageBackend } from '../api/channelApi';
+import EmojiPicker from './EmojiPicker';
 
 const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
 };
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onReplyMessage, showMetadata = true }) => {
+const MessageItem: React.FC<MessageItemProps> = ({
+  message,
+  onEditMessage,
+  onReplyMessage,
+  showMetadata = true,
+}) => {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
@@ -54,17 +61,19 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
   const replyOffset = theme.spacing(5.5);
   const dispatch = useAppDispatch();
 
-  const imageAttachments = message.attachments?.filter(att => att.type === Type.IMAGE) || [];
-  const otherAttachments = message.attachments?.filter(att => att.type === Type.FILE) || [];
+  const imageAttachments = message.attachments?.filter((att) => att.type === Type.IMAGE) || [];
+  const otherAttachments = message.attachments?.filter((att) => att.type === Type.FILE) || [];
   const firstAttachmentUrl = message.attachments?.[0]?.url;
   const hasGifAttachment = isGif(firstAttachmentUrl);
 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
+  const [reactionAnchorEl, setReactionAnchorEl] = useState<HTMLElement | null>(null);
+  const [reactions, setReactions] = useState<Array<{ emoji: string; count: number }>>([]);
 
   const parentMessageObj = useAppSelector((state) =>
-    state.messages.messages[message.channelId]?.find(msg => msg.id === message.parentMessage)
+    state.messages.messages[message.channelId]?.find((msg) => msg.id === message.parentMessage)
   );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -95,19 +104,39 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
     deleteMessageBackend(message.id);
   };
 
+  const handleReact = (event: React.MouseEvent<HTMLLIElement>) => {
+    setReactionAnchorEl(event.currentTarget);
+    handleCloseContextMenu();
+  };
+
+  const handleEmojiSelect = (emoji: any) => {
+    console.log('Selected emoji reaction:', emoji);
+    setReactions((prev) => {
+      const existing = prev.find((r) => r.emoji === emoji.native);
+      if (existing) {
+        return prev.map((r) =>
+          r.emoji === emoji.native ? { ...r, count: r.count + 1 } : r
+        );
+      } else {
+        return [...prev, { emoji: emoji.native, count: 1 }];
+      }
+    });
+    setReactionAnchorEl(null);
+  };
+
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
     setLightboxOpen(true);
   };
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex(prevIndex =>
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? imageAttachments.length - 1 : prevIndex - 1
     );
   }, [imageAttachments.length]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex(prevIndex =>
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === imageAttachments.length - 1 ? 0 : prevIndex + 1
     );
   }, [imageAttachments.length]);
@@ -212,7 +241,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
             ml: showMetadata ? 0 : theme.spacing(6),
           }}
         >
-          {/* Text Message */}
+          {/* Message Content */}
           {message.type === Type.TEXT && (
             <Box
               sx={{
@@ -232,7 +261,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           {/* Video Playback */}
           {message.type === Type.VIDEO && message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }}>
-              <video controls style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}>
+              <video
+                controls
+                style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}
+              >
                 <source src={message.attachments[0].url} />
                 Your browser does not support the video tag.
               </video>
@@ -242,7 +274,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           {/* Audio Playback */}
           {message.type === Type.VOICE && message.attachments && message.attachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }}>
-              <audio controls style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}>
+              <audio
+                controls
+                style={{ maxWidth: '400px', maxHeight: '600px', borderRadius: '8px' }}
+              >
                 <source src={message.attachments[0].url} />
                 Your browser does not support the audio element.
               </audio>
@@ -251,7 +286,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
 
           {/* GIF Image */}
           {hasGifAttachment && (
-            <Box sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1, pl: 1 }} data-cy={`message-gif-${message.id}`}>
+            <Box
+              sx={{ borderRadius: 2, overflow: 'hidden', maxWidth: '300px', mt: 1, pl: 1 }}
+              data-cy={`message-gif-${message.id}`}
+            >
               <img
                 src={firstAttachmentUrl}
                 alt="GIF"
@@ -264,30 +302,76 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           {/* Image Grid */}
           {!hasGifAttachment && imageAttachments.length > 0 && (
             <Box sx={{ mt: 1, pl: 1 }} data-cy={`message-images-${message.id}`}>
-              <ImageGrid imageAttachments={imageAttachments} maxVisibleImages={maxVisibleImages} onImageClick={handleImageClick} />
+              <ImageGrid
+                imageAttachments={imageAttachments}
+                maxVisibleImages={maxVisibleImages}
+                onImageClick={handleImageClick}
+              />
             </Box>
           )}
 
           {/* Other Attachments */}
           {otherAttachments.length > 0 && (
             <Box sx={{ p: 0.5, pl: 1 }}>
-              <FileList files={otherAttachments} canRemove={false} data-cy={`message-files-${message.id}`} />111
+              <FileList
+                files={otherAttachments}
+                canRemove={false}
+                data-cy={`message-files-${message.id}`}
+              />
+            </Box>
+          )}
+
+          {/* Reaction Bar */}
+          {reactions.length > 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
+              {reactions.map((reaction, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    backgroundColor: theme.palette.action.selected,
+                    borderRadius: '16px',
+                    px: 1,
+                    py: 0.25,
+                    mr: 0.5,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Typography variant="body2" sx={{ mr: 0.5 }}>
+                    {reaction.emoji}
+                  </Typography>
+                  <Typography variant="caption">{reaction.count}</Typography>
+                </Box>
+              ))}
             </Box>
           )}
         </Box>
       </Box>
 
+      {/* Context Menu */}
       <Popover
         open={Boolean(contextMenu)}
         onClose={handleCloseContextMenu}
         anchorReference="anchorPosition"
-        anchorPosition={contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        anchorPosition={
+          contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+        }
       >
         <Paper sx={{ width: 320, maxWidth: '100%' }}>
           <MenuList>
             <MenuItem onClick={handleEdit} disabled={!isOwnMessage}>
               <ListItemIcon>
-                <EditIcon fontSize="small" sx={{ color: isOwnMessage ? 'inherit' : theme.palette.text.disabled }} />
+                <EditIcon
+                  fontSize="small"
+                  sx={{ color: isOwnMessage ? 'inherit' : theme.palette.text.disabled }}
+                />
               </ListItemIcon>
               <ListItemText primary="Edit" />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -303,12 +387,37 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
                 Reply to Message
               </MuiTypography>
             </MenuItem>
-            <Divider variant="middle" />
-            <MenuItem onClick={handleDelete} disabled={!canDelete} sx={{ color: canDelete ? theme.palette.error.main : theme.palette.text.disabled }}>
+            <MenuItem onClick={handleReact}>
               <ListItemIcon>
-                <DeleteIcon fontSize="small" sx={{ color: canDelete ? theme.palette.error.main : theme.palette.text.disabled }} />
+                <EmojiEmotionsIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText primary="Delete" sx={{ color: canDelete ? theme.palette.error.main : theme.palette.text.disabled }} />
+              <ListItemText primary="React" />
+              <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
+                Add Reaction
+              </MuiTypography>
+            </MenuItem>
+            <Divider variant="middle" />
+            <MenuItem
+              onClick={handleDelete}
+              disabled={!canDelete}
+              sx={{
+                color: canDelete ? theme.palette.error.main : theme.palette.text.disabled,
+              }}
+            >
+              <ListItemIcon>
+                <DeleteIcon
+                  fontSize="small"
+                  sx={{
+                    color: canDelete ? theme.palette.error.main : theme.palette.text.disabled,
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Delete"
+                sx={{
+                  color: canDelete ? theme.palette.error.main : theme.palette.text.disabled,
+                }}
+              />
               <MuiTypography variant="body2" sx={{ color: 'text.secondary' }}>
                 Delete Message
               </MuiTypography>
@@ -316,6 +425,15 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEditMessage, onRep
           </MenuList>
         </Paper>
       </Popover>
+
+      {/* EmojiPicker Popover */}
+      <EmojiPicker
+        open={Boolean(reactionAnchorEl)}
+        anchorEl={reactionAnchorEl}
+        onClose={() => setReactionAnchorEl(null)}
+        onSelectEmoji={handleEmojiSelect}
+      />
+
       <Lightbox
         open={lightboxOpen}
         onClose={handleCloseLightbox}

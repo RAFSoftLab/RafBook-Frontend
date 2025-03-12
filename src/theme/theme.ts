@@ -53,12 +53,12 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
         main: mode === 'light' ? green[600] : green[400],
       },
       background: {
-        default: mode === 'light' ? grey[100] : grey[900],
-        paper: mode === 'light' ? '#ffffff' : grey[800],
+        default: mode === 'light' ? grey[50] : grey[900],
+        paper: mode === 'light' ? grey[100] : grey[800],
       },
       text: {
-        primary: mode === 'light' ? grey[900] : grey[100],
-        secondary: mode === 'light' ? grey[700] : grey[300],
+        primary: mode === 'light' ? grey[900] : grey[50],
+        secondary: mode === 'light' ? grey[600] : grey[400],
       },
       avatar: {
         ownMessage: mode === 'light' ? deepPurple[500] : pink[500],

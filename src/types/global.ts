@@ -115,8 +115,6 @@ export interface NewMessageDTO {
     textChannel: number;
 }
 
-// export type AttachmentType = 'image' | 'video' | 'voice' | 'file';
-
 export interface Attachment {
     id: number;
     type: Type;
