@@ -38,6 +38,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [openCategories, setOpenCategories] = React.useState<{ [key: number]: boolean }>({});
 
+  React.useEffect(() => {
+    if (selectedStudyProgram) {
+      const initialOpen: { [key: number]: boolean } = {};
+      selectedStudyProgram.categories.forEach((category) => {
+        initialOpen[category.id] = true;
+      });
+      setOpenCategories(initialOpen);
+    }
+  }, [selectedStudyProgram]);
+
   const handleToggleMute = () => {
     dispatch(toggleMute());
   };
@@ -60,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       [categoryId]: !prev[categoryId],
     }));
   };
+
 
   const categoryTextColor =
     theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[500];
@@ -140,13 +151,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                       disableRipple
                       key={channel.id}
                       sx={{
-                        pl: 2,
+                        ml: 1,
+                        mr: 1,
+                        mb: 0.33,
                         py: 0.5,
                         color: categoryTextColor,
                         backgroundColor: 'transparent',
+                        borderRadius: '4px',
                         '&:hover': {
                           color: hoverTextColor,
-                          backgroundColor: 'transparent',
+                          backgroundColor: theme.palette.action.hover,
                         },
                         ...(selectedChannelId === channel.id && {
                           color: hoverTextColor,
@@ -184,10 +198,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => onSelectStudyLevel(studyLevel)}
                   data-cy={`study-level-item-${studyLevel.id}`}
                 >
-                  <ListItemText
-                    primary={studyLevel.name}
-                    secondary={studyLevel.description}
-                  />
+                  <ListItemText primary={studyLevel.name} secondary={studyLevel.description} />
                 </ListItemButton>
               </Box>
             ))}
