@@ -54,7 +54,7 @@ const getTheme = (mode: 'light' | 'dark'): Theme =>
       },
       background: {
         default: mode === 'light' ? grey[50] : grey[900],
-        paper: mode === 'light' ? grey[100] : grey[800],
+        paper: mode === 'light' ? grey[300] : grey[800],
       },
       text: {
         primary: mode === 'light' ? grey[900] : grey[50],

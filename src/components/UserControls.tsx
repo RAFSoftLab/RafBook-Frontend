@@ -14,65 +14,66 @@ const UserControls: React.FC<UserControlsProps> = ({
     onToggleMute,
     onToggleDeafen,
     onOpenSettings,
-}) => {
+  }) => {
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-            }}
-        >
-            {/* User Info */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar src={user.avatar} alt={user.name}>
-                    {user.avatar === '' && user.name.charAt(0)}
-                </Avatar>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                    {user.name}
-                </Typography>
-            </Box>
-
-            {/* Voice Controls */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {/* Mute/Unmute Button */}
-                <Tooltip title={isMuted ? 'Unmute' : 'Mute'}>
-                    <IconButton
-                        onClick={onToggleMute}
-                        color={isMuted ? 'error' : 'default'}
-                        aria-label={isMuted ? 'Unmute' : 'Mute'}
-                        data-cy="mute-button"
-                    >
-                        {isMuted ? <MicOffIcon /> : <MicIcon />}
-                    </IconButton>
-                </Tooltip>
-
-                {/* Deafen/Undeafen Button */}
-                <Tooltip title={isDeafened ? 'Undeafen' : 'Deafen'}>
-                    <IconButton
-                        onClick={onToggleDeafen}
-                        color={isDeafened ? 'error' : 'default'}
-                        aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
-                        data-cy="deafen-button"
-                    >
-                        {isDeafened ? <HeadsetOffIcon /> : <HeadsetIcon />}
-                    </IconButton>
-                </Tooltip>
-
-                {/* Settings Button */}
-                <Tooltip title="Settings">
-                    <IconButton
-                        onClick={onOpenSettings}
-                        color="default"
-                        aria-label="Settings"
-                        data-cy="settings-button"
-                    >
-                        <SettingsIcon />
-                    </IconButton>
-                </Tooltip>
-            </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+        }}
+      >
+        {/* User Info at the "top" */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar src={user.avatar} alt={user.name}>
+            {user.avatar === '' && user.name.charAt(0)}
+          </Avatar>
+          <Typography variant="body1" sx={{ ml: 1 }}>
+            {user.name}
+          </Typography>
         </Box>
+  
+        {/* Flexible spacer pushes controls to the bottom */}
+        <Box sx={{ flexGrow: 1 }} />
+  
+        {/* Voice Controls row at the "bottom" */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+          <Tooltip title={isMuted ? 'Unmute' : 'Mute'}>
+            <IconButton
+              onClick={onToggleMute}
+              color={isMuted ? 'error' : 'default'}
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+              data-cy="mute-button"
+            >
+              {isMuted ? <MicOffIcon /> : <MicIcon />}
+            </IconButton>
+          </Tooltip>
+  
+          <Tooltip title={isDeafened ? 'Undeafen' : 'Deafen'}>
+            <IconButton
+              onClick={onToggleDeafen}
+              color={isDeafened ? 'error' : 'default'}
+              aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
+              data-cy="deafen-button"
+            >
+              {isDeafened ? <HeadsetOffIcon /> : <HeadsetIcon />}
+            </IconButton>
+          </Tooltip>
+  
+          <Tooltip title="Settings">
+            <IconButton
+              onClick={onOpenSettings}
+              color="default"
+              aria-label="Settings"
+              data-cy="settings-button"
+            >
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
     );
-};
-
-export default UserControls;
+  };
+  
+  export default UserControls;
+  

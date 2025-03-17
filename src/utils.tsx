@@ -50,7 +50,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
   msg.mediaUrl && msg.mediaUrl.length > 0
     ? {
         id: Number(msg.id),
-        type: msg.type.toLowerCase() as Type,
+        type: msg.type as Type,
         url: msg.mediaUrl,
         name:
           msg.type === 'IMAGE'

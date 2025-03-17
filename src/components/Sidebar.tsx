@@ -19,10 +19,8 @@ import UserControls from './UserControls';
 
 const Sidebar: React.FC<SidebarProps> = ({
   studyLevels,
-  selectedStudyLevel,
   selectedStudyProgram,
   onSelectStudyLevel,
-  onSelectStudyProgram,
   onSelectChannel,
   selectedChannelId,
   drawerWidth,
@@ -73,11 +71,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 
   const categoryTextColor =
-    theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[500];
+    theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[600];
   const hoverTextColor =
     theme.palette.mode === 'dark'
-      ? theme.palette.common.white
-      : theme.palette.common.black;
+      ? theme.palette.grey[300]
+      : theme.palette.grey[700];
 
   const drawerContent = (
     <Box
@@ -85,6 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        backgroundColor: theme.palette.background.default,
       }}
       data-cy="sidebar"
     >
@@ -102,11 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {selectedStudyProgram ? (
         <Box sx={{ flexGrow: 1, overflowY: 'auto' }} data-cy="channel-list-container">
           {selectedStudyProgram.categories.map((category, index) => (
-            <Box
-              key={category.id}
-              sx={{ pt: index === 0 ? 4 : 0, mb: 2 }}
-              data-cy={`category-${category.id}`}
-            >
+            <Box key={category.id} sx={{ pt: index === 0 ? 4 : 0, mb: 2 }} data-cy={`category-${category.id}`}>
               {/* Category Header */}
               <ListItemButton
                 disableRipple
@@ -206,31 +201,47 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Box>
       )}
 
-      {/* Spacer to push user controls to the bottom */}
+      {/* This pushes the bottom user controls to the bottom */}
       <Box sx={{ flexGrow: 1 }} />
 
       {/* Bottom Section: User Controls */}
       <Box
         sx={{
-          p: 2,
-          borderTop: `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          justifyContent: 'center',
         }}
         data-cy="user-controls"
       >
-        <UserControls
-          user={user}
-          isMuted={isMuted}
-          isDeafened={isDeafened}
-          onToggleMute={handleToggleMute}
-          onToggleDeafen={handleToggleDeafen}
-          onOpenSettings={handleOpenSettings}
-        />
+        {/* "Floating" container with rounded top corners */}
+        <Box
+          sx={{
+            borderRadius: '12px 12px 0 0',
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: theme.shadows[2],
+            p: 4,
+            minHeight: 120,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <UserControls
+            user={user}
+            isMuted={isMuted}
+            isDeafened={isDeafened}
+            onToggleMute={handleToggleMute}
+            onToggleDeafen={handleToggleDeafen}
+            onOpenSettings={handleOpenSettings}
+          />
+        </Box>
       </Box>
 
       {/* Settings Modal */}
       <SettingsModal open={isSettingsOpen} onClose={handleCloseSettings} />
     </Box>
   );
+
+
 
   return (
     <>
