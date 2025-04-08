@@ -32,49 +32,6 @@ import { getSenderFromUser } from '../utils';
 import CloseIcon from '@mui/icons-material/Close';
 import MultiUploadSnackbar from './MultiUploadSnackbar';
 
-interface MessageActionPopupProps {
-  actionLabel: string;
-  message: Message;
-  onCancel: () => void;
-}
-
-const MessageActionPopup: React.FC<MessageActionPopupProps> = ({ actionLabel, message, onCancel }) => {
-  return (
-    <Box
-      sx={{
-        position: 'absolute',
-        bottom: 110,
-        left: 8,
-        right: 8,
-        zIndex: 10,
-      }}
-    >
-      <Paper
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          p: 1,
-          backgroundColor: 'background.paper',
-          boxShadow: 3,
-        }}
-      >
-        <Box>
-          <Typography variant="body2" color="text.secondary">
-            {actionLabel}: {message.content}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {message.sender.firstName} {message.sender.lastName}
-          </Typography>
-        </Box>
-        <IconButton onClick={onCancel}>
-          <CloseIcon />
-        </IconButton>
-      </Paper>
-    </Box>
-  );
-};
-
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
   const dispatch = useAppDispatch();
@@ -90,11 +47,6 @@ const Dashboard: React.FC = () => {
 
   type UploadProgress = { id: number; fileName: string; progress: number };
   const [uploadProgresses, setUploadProgresses] = useState<UploadProgress[]>([]);
-
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const handleDrawerToggle = () => {
-    setMobileOpen((prevState) => !prevState);
-  };
 
   useEffect(() => {
     dispatch(fetchUserChannelsThunk());
@@ -273,7 +225,7 @@ const Dashboard: React.FC = () => {
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
       <Header
         drawerWidth={drawerWidth}
-        handleDrawerToggle={handleDrawerToggle}
+        handleDrawerToggle={() => { }}
         channelName={selectedChannel ? selectedChannel.description : 'Channel Description'}
       />
       <Sidebar
@@ -290,8 +242,8 @@ const Dashboard: React.FC = () => {
         onSelectChannel={handleChannelSelect}
         selectedChannelId={selectedChannelId}
         drawerWidth={drawerWidth}
-        mobileOpen={mobileOpen}           
-        handleDrawerToggle={handleDrawerToggle}
+        mobileOpen={false}
+        handleDrawerToggle={() => { }}
       />
       <Box
         component="main"
@@ -299,7 +251,7 @@ const Dashboard: React.FC = () => {
           flexGrow: 1,
           p: 3,
           pt: '64px',
-          ml: { md: `${drawerWidth}px` },
+          ml: { sm: `${drawerWidth}px` },
           backgroundColor: 'background.default',
           display: 'flex',
           flexDirection: 'column',
@@ -357,15 +309,23 @@ const Dashboard: React.FC = () => {
                     left: 8,
                     right: 8,
                     zIndex: 10,
-                    p: 1,
+                    p: 0.5,
                   }}
                 >
-                  <Typography variant="body2" color="text.secondary">
-                    Editing: {editingMessage.content}
-                  </Typography>
-                  <IconButton onClick={() => setEditingMessage(null)}>
-                    <CloseIcon />
-                  </IconButton>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Editing: {editingMessage.content}
+                    </Typography>
+                    <IconButton onClick={() => setEditingMessage(null)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
                 </Paper>
               )}
               {replyingMessage && (
@@ -376,15 +336,32 @@ const Dashboard: React.FC = () => {
                     left: 8,
                     right: 8,
                     zIndex: 10,
-                    p: 1,
+                    p: 0.5,
                   }}
                 >
-                  <Typography variant="body2" color="text.secondary">
-                    Replying: {replyingMessage.content}
+                  {/* Flex container for the header row */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Replying to: {replyingMessage.sender.firstName} {replyingMessage.sender.lastName} •{' '}
+                      {new Date(replyingMessage.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Typography>
+                    <IconButton onClick={() => setReplyingMessage(null)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+                  {/* Message content with extra spacing */}
+                  <Typography variant="body2" sx={{ pb: 0.5 }}>
+                    {replyingMessage.content}
                   </Typography>
-                  <IconButton onClick={() => setReplyingMessage(null)}>
-                    <CloseIcon />
-                  </IconButton>
                 </Paper>
               )}
               <MessageInput
