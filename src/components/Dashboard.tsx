@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, CircularProgress, Alert, Paper, IconButton } from '@mui/material';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Paper,
+  IconButton,
+} from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MessageList from './MessageList';
@@ -7,13 +14,23 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { sendMessage, markMessageError, updateMessage, updateUploadProgress, deleteMessage, deleteMessagePermanently } from '../store/messageSlice';
-import { setSelectedChannelId, fetchUserChannelsThunk, setSelectedStudyLevel, setSelectedStudyProgram } from '../store/channelSlice';
+import { sendMessage, markMessageError, updateMessage } from '../store/messageSlice';
+import {
+  setSelectedChannelId,
+  fetchUserChannelsThunk,
+  setSelectedStudyLevel,
+  setSelectedStudyProgram,
+} from '../store/channelSlice';
 import { Channel, Message, Attachment, NewMessageDTO, Type } from '../types/global';
 import { useSocket } from '../context/SocketContext';
-import { sendMessage as sendMessageBackend, editMessage, uploadFileMessage } from '../api/channelApi';
+import {
+  sendMessage as sendMessageBackend,
+  editMessage,
+  uploadFileMessage,
+} from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
 import CloseIcon from '@mui/icons-material/Close';
+import MultiUploadSnackbar from './MultiUploadSnackbar';
 
 interface MessageActionPopupProps {
   actionLabel: string;
@@ -61,7 +78,8 @@ const MessageActionPopup: React.FC<MessageActionPopupProps> = ({ actionLabel, me
 const Dashboard: React.FC = () => {
   const drawerWidth = 240;
   const dispatch = useAppDispatch();
-  const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } = useAppSelector((state) => state.channel);
+  const { studyLevels, selectedStudyLevel, selectedStudyProgram, loading, error } =
+    useAppSelector((state) => state.channel);
   const selectedChannelId = useAppSelector((state) => state.channel.selectedChannelId);
   const { stompService } = useSocket();
   const currentUser = useAppSelector((state) => state.user);
@@ -69,6 +87,9 @@ const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [replyingMessage, setReplyingMessage] = useState<Message | null>(null);
+
+  type UploadProgress = { id: number; fileName: string; progress: number };
+  const [uploadProgresses, setUploadProgresses] = useState<UploadProgress[]>([]);
 
   useEffect(() => {
     dispatch(fetchUserChannelsThunk());
@@ -100,7 +121,7 @@ const Dashboard: React.FC = () => {
     }
     return null;
   };
-  
+
   const selectedChannel = getSelectedChannel();
 
   const handleChannelSelect = (id: number) => {
@@ -110,42 +131,9 @@ const Dashboard: React.FC = () => {
   const handleSendMessage = (content: string, attachments: Attachment[]) => {
     if (content.trim() === '' && attachments.length === 0) return;
     if (!selectedChannel || selectedChannel.type !== 'text') return;
-  
+
     const parentMessageId = replyingMessage ? replyingMessage.id : null;
-  
-    if (editingMessage) {
-      const updatedMessageDTO = {
-        id: editingMessage.id,
-        content: content.trim(),
-        createdAt: editingMessage.timestamp,
-        type: editingMessage.type.toUpperCase() as Type,
-        mediaUrl: attachments.length > 0 ? attachments.map((att) => att.url) : [],
-        sender: editingMessage.sender,
-        reactions: editingMessage.reactions,
-        parentMessage:
-          Array.isArray(editingMessage.parentMessage) && editingMessage.parentMessage.length === 0
-            ? null
-            : editingMessage.parentMessage,
-        isDeleted: false,
-        isEdited: true,
-      };
-  
-      const updatedMessage: Message = {
-        ...editingMessage,
-        content: content.trim(),
-        attachments: attachments.length > 0 ? attachments : editingMessage.attachments,
-        edited: true,
-        status: 'pending',
-      };
-  
-      dispatch(updateMessage(updatedMessage));
-      editMessage(editingMessage.id, updatedMessageDTO);
-  
-      setEditingMessage(null);
-      setReplyingMessage(null);
-      return;
-    }
-  
+
     if (content.trim() !== '') {
       const textMessagePayload: Omit<Message, 'id'> = {
         channelId: selectedChannel.id,
@@ -160,9 +148,8 @@ const Dashboard: React.FC = () => {
         attachments: undefined,
         status: 'pending',
       };
-  
       dispatch(sendMessage(textMessagePayload));
-  
+
       const newTextMessageDTO: NewMessageDTO = {
         content: content.trim(),
         type: Type.TEXT,
@@ -170,9 +157,9 @@ const Dashboard: React.FC = () => {
         parentMessage: parentMessageId,
         textChannel: selectedChannel.id,
       };
-  
+
       sendMessageBackend(newTextMessageDTO);
-  
+
       setTimeout(() => {
         dispatch(
           markMessageError({
@@ -183,60 +170,41 @@ const Dashboard: React.FC = () => {
         );
       }, 5000);
     }
-  
+
     if (attachments.length > 0) {
       attachments.forEach((attachment) => {
         if (attachment.file) {
-          const tempId = Date.now() + Math.random();
-    
-          const { file, ...cleanAttachment } = attachment;
-    
-          const attachmentMessagePayload: Omit<Message, 'id'> & { tempId: number; uploadProgress: number } = {
-            channelId: selectedChannel.id,
-            sender,
-            type: attachment.type as Type,
-            content: '',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            reactions: [],
-            parentMessage: parentMessageId,
-            edited: false,
-            deleted: false,
-            attachments: [{ ...cleanAttachment }],
-            status: 'pending',
-            tempId,
-            uploadProgress: 0,
-          };
-    
-          dispatch(sendMessage(attachmentMessagePayload));
-    
+          const uploadId = Date.now() + Math.random();
+          setUploadProgresses((prev) => [
+            ...prev,
+            { id: uploadId, fileName: attachment.name || 'Untitled', progress: 0 },
+          ]);
+
           uploadFileMessage(
             attachment.file,
             selectedChannel.id,
             attachment.type,
             parentMessageId ?? undefined,
             (progress: number) => {
-              dispatch(updateUploadProgress({ tempId, progress }));
+              setUploadProgresses((prev) =>
+                prev.map((entry) =>
+                  entry.id === uploadId ? { ...entry, progress } : entry
+                )
+              );
             }
           )
             .then((response) => {
-              dispatch(deleteMessagePermanently({ channelId: selectedChannel.id, messageId: tempId }));
+              setUploadProgresses((prev) => prev.filter((entry) => entry.id !== uploadId));
             })
             .catch(() => {
-              dispatch(
-                markMessageError({
-                  channelId: selectedChannel.id,
-                  content: '',
-                  currentId: currentUser.id,
-                })
-              );
+              setUploadProgresses((prev) => prev.filter((entry) => entry.id !== uploadId));
             });
         }
       });
-    }    
-        
-  
+    }
+
     setReplyingMessage(null);
-  };  
+  };
 
   const handleSendGif = (gifUrl: string) => {
     if (!selectedChannel || selectedChannel.type !== 'text') return;
@@ -377,18 +345,42 @@ const Dashboard: React.FC = () => {
                 onReplyMessage={handleReplyMessage}
               />
               {editingMessage && (
-                <MessageActionPopup
-                  actionLabel="Editing"
-                  message={editingMessage}
-                  onCancel={() => setEditingMessage(null)}
-                />
+                <Paper
+                  sx={{
+                    position: 'absolute',
+                    bottom: 110,
+                    left: 8,
+                    right: 8,
+                    zIndex: 10,
+                    p: 1,
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    Editing: {editingMessage.content}
+                  </Typography>
+                  <IconButton onClick={() => setEditingMessage(null)}>
+                    <CloseIcon />
+                  </IconButton>
+                </Paper>
               )}
               {replyingMessage && (
-                <MessageActionPopup
-                  actionLabel="Replying"
-                  message={replyingMessage}
-                  onCancel={() => setReplyingMessage(null)}
-                />
+                <Paper
+                  sx={{
+                    position: 'absolute',
+                    bottom: 110,
+                    left: 8,
+                    right: 8,
+                    zIndex: 10,
+                    p: 1,
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    Replying: {replyingMessage.content}
+                  </Typography>
+                  <IconButton onClick={() => setReplyingMessage(null)}>
+                    <CloseIcon />
+                  </IconButton>
+                </Paper>
               )}
               <MessageInput
                 editingContent={editingMessage ? editingMessage.content : undefined}
@@ -426,6 +418,13 @@ const Dashboard: React.FC = () => {
           }}
         />
       </Box>
+      {/* Render the multi-file upload Snackbar at the top */}
+      <MultiUploadSnackbar
+        uploads={uploadProgresses}
+        onClose={(uploadId) =>
+          setUploadProgresses((prev) => prev.filter((item) => item.id !== uploadId))
+        }
+      />
     </Box>
   );
 };
