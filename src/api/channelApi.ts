@@ -20,7 +20,7 @@ const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
             textChannels: category.textChannels
               .sort((c1: any, c2: any) => c1.name.localeCompare(c2.name))
               .map((channel: any) => ({
-                id: channel.id, // original id
+                id: channel.id,
                 name: channel.name,
                 type: 'text',
                 description: channel.description,
@@ -82,13 +82,15 @@ export const deleteMessageBackend = async (messageId: number): Promise<void> => 
 export const uploadFileMessage = async (
   file: File,
   textChannel: number,
-  type: string,            
-  parentMessage?: number   
+  type: string,
+  parentMessage?: number,
+  fileName: string = file.name,
 ): Promise<any> => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('textChannel', textChannel.toString());
   formData.append('type', type);
+  formData.append('fileName', fileName);
   if (parentMessage !== undefined && parentMessage !== null) {
     formData.append('parentMessage', parentMessage.toString());
   }

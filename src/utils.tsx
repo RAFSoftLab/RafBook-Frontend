@@ -52,14 +52,7 @@ export const transformBackendMessage = (msg: MessageDTO, channelId: number): Mes
         id: Number(msg.id),
         type: msg.type as Type,
         url: msg.mediaUrl,
-        name:
-          msg.type === 'IMAGE'
-            ? 'Image'
-            : msg.type === 'VIDEO'
-              ? 'Video'
-              : msg.type === 'VOICE'
-                ? 'Voice'
-                : 'File',
+        name: msg.content
       }
     : null;
 

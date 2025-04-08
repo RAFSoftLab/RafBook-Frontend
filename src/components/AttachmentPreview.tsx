@@ -1,5 +1,3 @@
-// src/components/AttachmentPreview.tsx
-
 import React from 'react';
 import { Box, Typography, IconButton, Link } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -234,10 +232,6 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                 <Typography variant="body2" noWrap>
                   {attachment.name}
                 </Typography>
-                {/* Download Link */}
-                <Link href={attachment.url} download underline="hover">
-                  Download
-                </Link>
                 {/* Remove Button */}
                 <IconButton
                   size="small"

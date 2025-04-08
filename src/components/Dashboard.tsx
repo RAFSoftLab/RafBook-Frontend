@@ -187,26 +187,13 @@ const Dashboard: React.FC = () => {
     if (attachments.length > 0) {
       attachments.forEach((attachment) => {
         if (attachment.file) {
-          const { file, ...cleanAttachment } = attachment;
-          const attachmentMessagePayload: Omit<Message, 'id'> = {
-            channelId: selectedChannel.id,
-            sender,
-            type: attachment.type as Type,
-            content: '',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            reactions: [],
-            parentMessage: parentMessageId,
-            edited: false,
-            deleted: false,
-            attachments: [cleanAttachment],
-            status: 'pending',
-          };
-    
-          dispatch(sendMessage(attachmentMessagePayload));
-    
-          uploadFileMessage(attachment.file, selectedChannel.id, attachment.type, parentMessageId ?? undefined)
+          uploadFileMessage(
+            attachment.file,
+            selectedChannel.id,
+            attachment.type,
+            parentMessageId ?? undefined
+          )
             .then((response) => {
-              dispatch(updateMessage(response.data));
             })
             .catch(() => {
               dispatch(
@@ -219,7 +206,7 @@ const Dashboard: React.FC = () => {
             });
         }
       });
-    }  
+    }
   
     setReplyingMessage(null);
   };  
