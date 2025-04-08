@@ -7,7 +7,7 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { sendMessage, markMessageError, updateMessage } from '../store/messageSlice';
+import { sendMessage, markMessageError, updateMessage, updateUploadProgress, deleteMessage, deleteMessagePermanently } from '../store/messageSlice';
 import { setSelectedChannelId, fetchUserChannelsThunk, setSelectedStudyLevel, setSelectedStudyProgram } from '../store/channelSlice';
 import { Channel, Message, Attachment, NewMessageDTO, Type } from '../types/global';
 import { useSocket } from '../context/SocketContext';
@@ -187,13 +187,39 @@ const Dashboard: React.FC = () => {
     if (attachments.length > 0) {
       attachments.forEach((attachment) => {
         if (attachment.file) {
+          const tempId = Date.now() + Math.random();
+    
+          const { file, ...cleanAttachment } = attachment;
+    
+          const attachmentMessagePayload: Omit<Message, 'id'> & { tempId: number; uploadProgress: number } = {
+            channelId: selectedChannel.id,
+            sender,
+            type: attachment.type as Type,
+            content: '',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            reactions: [],
+            parentMessage: parentMessageId,
+            edited: false,
+            deleted: false,
+            attachments: [{ ...cleanAttachment }],
+            status: 'pending',
+            tempId,
+            uploadProgress: 0,
+          };
+    
+          dispatch(sendMessage(attachmentMessagePayload));
+    
           uploadFileMessage(
             attachment.file,
             selectedChannel.id,
             attachment.type,
-            parentMessageId ?? undefined
+            parentMessageId ?? undefined,
+            (progress: number) => {
+              dispatch(updateUploadProgress({ tempId, progress }));
+            }
           )
             .then((response) => {
+              dispatch(deleteMessagePermanently({ channelId: selectedChannel.id, messageId: tempId }));
             })
             .catch(() => {
               dispatch(
@@ -206,7 +232,8 @@ const Dashboard: React.FC = () => {
             });
         }
       });
-    }
+    }    
+        
   
     setReplyingMessage(null);
   };  

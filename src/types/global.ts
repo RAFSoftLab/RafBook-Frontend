@@ -90,6 +90,8 @@ export interface Message {
     edited: boolean;
     attachments?: Attachment[];
     status?: 'pending' | 'sent' | 'error';
+    tempId?: number;
+    uploadProgress?: number;
 }
 
 export interface Sender {

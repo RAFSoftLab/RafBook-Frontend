@@ -1,5 +1,3 @@
-// src/store/messageSlice.ts
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Message, MessageState, Type } from '../types/global';
 import { transformBackendMessage } from '../utils';
@@ -77,12 +75,22 @@ const messageSlice = createSlice({
     },
     deleteMessage: (state, action: PayloadAction<{ channelId: number; messageId: number }>) => {
       const { channelId, messageId } = action.payload;
-      const message = state.messages[channelId].find((msg) => msg.id === messageId);
+      const message = state.messages[channelId].find((msg) => msg.id === messageId || msg.tempId === messageId);
       if (message) {
         message.attachments = [];
         message.content = "user deleted message";
         message.type = Type.TEXT;
         console.log(`Marked message ${messageId} as deleted in channel ${channelId}`);
+      }
+    },
+    deleteMessagePermanently: (state, action: PayloadAction<{ channelId: number; messageId: number }>) => {
+      const { channelId, messageId } = action.payload;
+      const message = state.messages[channelId].find((msg) => msg.tempId === messageId);
+      if (message) {
+        state.messages[channelId] = state.messages[channelId].filter((msg) => msg.tempId !== messageId);
+        console.log(`Deleted message ${messageId} from channel ${channelId}`);
+      } else {
+        console.warn(`Message ${messageId} not found in channel ${channelId}`);
       }
     },
     markMessageError: (
@@ -101,11 +109,23 @@ const messageSlice = createSlice({
         state.messages[channelId][index].status = 'error';
         console.log(`Marked message as error in channel ${channelId}:`, channelMessages[index]);
       }
+    }, 
+    updateUploadProgress: (state, action: PayloadAction<{ tempId: number; progress: number }>) => {
+      const { tempId, progress } = action.payload;
+      Object.keys(state.messages).forEach((channelId) => {
+        const index = state.messages[Number(channelId)].findIndex((msg: any) => msg.tempId === tempId);
+        if (index !== -1) {
+          state.messages[Number(channelId)][index] = {
+            ...state.messages[Number(channelId)][index],
+            uploadProgress: progress,
+          };
+        }
+      });
     },    
   },
   extraReducers: () => {},
 });
 
-export const { addMessages, sendMessage, receiveMessage, markMessageError, updateMessage, deleteMessage } = messageSlice.actions;
+export const { addMessages, sendMessage, receiveMessage, markMessageError, updateMessage, deleteMessage, deleteMessagePermanently, updateUploadProgress } = messageSlice.actions;
 
 export default messageSlice.reducer;

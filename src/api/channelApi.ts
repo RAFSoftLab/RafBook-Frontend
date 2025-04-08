@@ -1,6 +1,7 @@
 import axiosInstance from './axiosConfig';
 import { StudyLevel } from '../types/global';
 import { NewMessageDTO } from '../types/global';
+import { AxiosProgressEvent } from 'axios';
 
 const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
     return data.map((studyLevel: any) => ({
@@ -84,6 +85,7 @@ export const uploadFileMessage = async (
   textChannel: number,
   type: string,
   parentMessage?: number,
+  onProgress?: (progress: number) => void,
   fileName: string = file.name,
 ): Promise<any> => {
   const formData = new FormData();
@@ -91,12 +93,18 @@ export const uploadFileMessage = async (
   formData.append('textChannel', textChannel.toString());
   formData.append('type', type);
   formData.append('fileName', fileName);
-  if (parentMessage !== undefined && parentMessage !== null) {
+  if (parentMessage !== undefined) {
     formData.append('parentMessage', parentMessage.toString());
   }
   return axiosInstance.post('/messages/upload-file', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+      if (progressEvent.total && onProgress) {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        onProgress(progress);
+      }
+    }
   });
 };

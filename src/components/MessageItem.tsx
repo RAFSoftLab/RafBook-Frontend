@@ -13,6 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography as MuiTypography,
+  LinearProgress,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
@@ -318,6 +319,15 @@ const MessageItem: React.FC<MessageItemProps> = ({
                 canRemove={false}
                 data-cy={`message-files-${message.id}`}
               />
+            </Box>
+          )}
+
+          {message.status === 'pending' && typeof message.uploadProgress === 'number' && (
+            <Box sx={{ mt: 1, pl: 1 }}>
+              <Typography variant="caption">
+                Uploading {message.attachments?.[0]?.name || ''} {message.uploadProgress}%
+              </Typography>
+              <LinearProgress variant="determinate" value={message.uploadProgress} />
             </Box>
           )}
 
