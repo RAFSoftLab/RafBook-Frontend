@@ -25,7 +25,6 @@ const ImageThumbnail: React.FC<ImageThumbnailProps> = ({
         width: '100%',
         borderRadius: 1,
         overflow: 'hidden',
-        border: '1px solid #ccc',
         cursor: 'pointer',
         aspectRatio: '1 / 1',
       }}

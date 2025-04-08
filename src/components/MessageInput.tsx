@@ -112,6 +112,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       type: getFileType(file),
       url: URL.createObjectURL(file),
       name: file.name,
+      file
     }));
     setLocalAttachments((prev) => [...prev, ...newAttachments]);
     onSendAttachments(newAttachments);

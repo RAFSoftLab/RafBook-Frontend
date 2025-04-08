@@ -4,34 +4,43 @@ import { NewMessageDTO } from '../types/global';
 
 const mapBackendChannelsToFrontend = (data: any[]): StudyLevel[] => {
     return data.map((studyLevel: any) => ({
-        id: studyLevel.id,
-        name: studyLevel.name,
-        description: studyLevel.description,
-        studyPrograms: studyLevel.studyPrograms.map((program: any) => ({
-            id: program.id,
-            name: program.name,
-            description: program.description,
-            categories: program.categories
-                .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                .map((category: any) => ({
-                    id: category.id,
-                    name: category.name,
-                    description: category.description,
-                    textChannels: category.textChannels
-                        .sort((c1: any, c2: any) => c1.name.localeCompare(c2.name))
-                        .map((channel: any) => ({
-                            id: channel.id,
-                            name: channel.name,
-                            type: 'text',
-                            description: channel.description,
-                            canWrite: channel.canWrite,
-                            messageDTOList: channel.messageDTOList
-                                .reverse(),
-                        })),
-                })),
-        })),
+      id: studyLevel.id,
+      name: studyLevel.name,
+      description: studyLevel.description,
+      studyPrograms: studyLevel.studyPrograms.map((program: any) => ({
+        id: program.id,
+        name: program.name,
+        description: program.description,
+        categories: program.categories
+          .sort((a: any, b: any) => a.name.localeCompare(b.name))
+          .map((category: any) => ({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            textChannels: category.textChannels
+              .sort((c1: any, c2: any) => c1.name.localeCompare(c2.name))
+              .map((channel: any) => ({
+                id: channel.id, // original id
+                name: channel.name,
+                type: 'text',
+                description: channel.description,
+                canWrite: channel.canWrite,
+                messageDTOList: channel.messageDTOList.reverse(),
+              })),
+            voiceChannels: category.voiceChannels
+              .sort((c1: any, c2: any) => c1.name.localeCompare(c2.name))
+              .map((channel: any) => ({
+                id: channel.id,
+                name: channel.name,
+                type: 'voice',
+                description: channel.description,
+                canSpeak: channel.canSpeak,
+                rolePermissions: channel.rolePermissions,
+              })),
+          })),
+      })),
     }));
-};
+  };
 
 export const fetchUserChannels = async (): Promise<StudyLevel[]> => {
     try {
@@ -69,3 +78,23 @@ export const deleteMessageBackend = async (messageId: number): Promise<void> => 
         console.error('Error deleting message:', error);
     }
 }
+
+export const uploadFileMessage = async (
+  file: File,
+  textChannel: number,
+  type: string,            
+  parentMessage?: number   
+): Promise<any> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('textChannel', textChannel.toString());
+  formData.append('type', type);
+  if (parentMessage !== undefined && parentMessage !== null) {
+    formData.append('parentMessage', parentMessage.toString());
+  }
+  return axiosInstance.post('/messages/upload-file', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

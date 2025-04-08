@@ -11,7 +11,7 @@ import { sendMessage, markMessageError, updateMessage } from '../store/messageSl
 import { setSelectedChannelId, fetchUserChannelsThunk, setSelectedStudyLevel, setSelectedStudyProgram } from '../store/channelSlice';
 import { Channel, Message, Attachment, NewMessageDTO, Type } from '../types/global';
 import { useSocket } from '../context/SocketContext';
-import { sendMessage as sendMessageBackend, editMessage } from '../api/channelApi';
+import { sendMessage as sendMessageBackend, editMessage, uploadFileMessage } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -93,12 +93,14 @@ const Dashboard: React.FC = () => {
   const getSelectedChannel = (): Channel | null => {
     if (!selectedStudyProgram) return null;
     for (const category of selectedStudyProgram.categories) {
-      const channel = category.textChannels.find((ch) => ch.id === selectedChannelId);
-      if (channel) return channel;
+      const textChannel = category.textChannels.find((ch) => ch.id === selectedChannelId);
+      if (textChannel) return textChannel;
+      const voiceChannel = category.voiceChannels.find((ch) => ch.id === selectedChannelId);
+      if (voiceChannel) return voiceChannel;
     }
     return null;
   };
-
+  
   const selectedChannel = getSelectedChannel();
 
   const handleChannelSelect = (id: number) => {
@@ -144,7 +146,6 @@ const Dashboard: React.FC = () => {
       return;
     }
   
-    // --- SEND TEXT MESSAGE (if any) ---
     if (content.trim() !== '') {
       const textMessagePayload: Omit<Message, 'id'> = {
         channelId: selectedChannel.id,
@@ -183,46 +184,42 @@ const Dashboard: React.FC = () => {
       }, 5000);
     }
   
-    // --- SEND EACH ATTACHMENT SEPARATELY ---
     if (attachments.length > 0) {
       attachments.forEach((attachment) => {
-        const attachmentMessagePayload: Omit<Message, 'id'> = {
-          channelId: selectedChannel.id,
-          sender,
-          type: attachment.type as Type,
-          content: '',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          reactions: [],
-          parentMessage: parentMessageId,
-          edited: false,
-          deleted: false,
-          attachments: [attachment],
-          status: 'pending',
-        };
-  
-        dispatch(sendMessage(attachmentMessagePayload));
-  
-        const newAttachmentMessageDTO: NewMessageDTO = {
-          content: '',
-          type: attachment.type.toUpperCase() as Type,
-          mediaUrl: attachment.url,
-          parentMessage: parentMessageId,
-          textChannel: selectedChannel.id,
-        };
-  
-        sendMessageBackend(newAttachmentMessageDTO);
-  
-        setTimeout(() => {
-          dispatch(
-            markMessageError({
-              channelId: selectedChannel.id,
-              content: '',
-              currentId: currentUser.id,
+        if (attachment.file) {
+          const { file, ...cleanAttachment } = attachment;
+          const attachmentMessagePayload: Omit<Message, 'id'> = {
+            channelId: selectedChannel.id,
+            sender,
+            type: attachment.type as Type,
+            content: '',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            reactions: [],
+            parentMessage: parentMessageId,
+            edited: false,
+            deleted: false,
+            attachments: [cleanAttachment],
+            status: 'pending',
+          };
+    
+          dispatch(sendMessage(attachmentMessagePayload));
+    
+          uploadFileMessage(attachment.file, selectedChannel.id, attachment.type, parentMessageId ?? undefined)
+            .then((response) => {
+              dispatch(updateMessage(response.data));
             })
-          );
-        }, 5000);
+            .catch(() => {
+              dispatch(
+                markMessageError({
+                  channelId: selectedChannel.id,
+                  content: '',
+                  currentId: currentUser.id,
+                })
+              );
+            });
+        }
       });
-    }
+    }  
   
     setReplyingMessage(null);
   };  
@@ -268,11 +265,11 @@ const Dashboard: React.FC = () => {
   };
 
   const handleSendAttachments = (newAttachments: Attachment[]) => {
-    // Optional: Dashboard may handle this if needed.
+    // Optional
   };
 
   const handleRemoveAttachment = (id: number) => {
-    // Optional: Dashboard may handle removal if needed.
+    // Optional
   };
 
   const handleEditMessage = useCallback((message: Message) => {

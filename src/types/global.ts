@@ -1,10 +1,22 @@
-export interface Channel {
+export type Channel = TextChannel | VoiceChannel;
+
+export interface BaseChannel {
     id: number;
     name: string;
-    type: 'text' | 'voice';
     description: string;
+    uniqueId: string;
+}
+
+export interface TextChannel extends BaseChannel {
+    type: 'text';
     canWrite: boolean;
     messageDTOList: MessageDTO[];
+}
+
+export interface VoiceChannel extends BaseChannel {
+    type: 'voice';
+    canSpeak: boolean;
+    rolePermissions: any[];
 }
 
 export interface ChannelState {
@@ -21,7 +33,8 @@ export interface Category {
     id: number;
     name: string;
     description: string;
-    textChannels: Channel[];
+    textChannels: TextChannel[];
+    voiceChannels: VoiceChannel[];
 }
 
 export interface StudyProgram {
@@ -36,12 +49,6 @@ export interface StudyLevel {
     name: string;
     description: string;
     studyPrograms: StudyProgram[];
-}
-
-export interface ChannelListProps {
-    channels: Channel[];
-    selectedChannel: number | null;
-    onSelectChannel: (id: number) => void;
 }
 
 export interface HeaderProps {
@@ -120,6 +127,7 @@ export interface Attachment {
     type: Type;
     url: string;
     name?: string;
+    file?: File;
 }
 
 export interface AttachmentPreviewProps {

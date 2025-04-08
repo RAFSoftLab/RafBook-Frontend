@@ -11,10 +11,12 @@ import {
   useTheme,
 } from '@mui/material';
 import { ExpandLess, ExpandMore, Tag } from '@mui/icons-material';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import TextsmsIcon from '@mui/icons-material/Textsms';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleMute, toggleDeafen } from '../store/voiceSlice';
 import SettingsModal from './SettingsModal';
-import { SidebarProps } from '../types/global';
+import { SidebarProps, Channel } from '../types/global';
 import UserControls from './UserControls';
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -69,13 +71,66 @@ const Sidebar: React.FC<SidebarProps> = ({
     }));
   };
 
-
   const categoryTextColor =
     theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[600];
   const hoverTextColor =
     theme.palette.mode === 'dark'
       ? theme.palette.grey[300]
       : theme.palette.grey[700];
+
+  const getChannelIcon = (channel: Channel) => {
+    return channel.type === 'voice' ? (
+      <VolumeUpIcon sx={{ fontSize: '1.2em', mr: 1 }} data-cy="voice-icon" />
+    ) : (
+      <Tag sx={{ fontSize: '1.2em', mr: 1 }} data-cy="tag-icon" />
+    );
+  };
+
+  const renderChannels = (category: any) => {
+    const mergedChannels: Channel[] = [
+      ...category.textChannels,
+      ...category.voiceChannels,
+    ].sort((a, b) => a.name.localeCompare(b.name));
+
+    return (
+      <List component="div" disablePadding>
+        {mergedChannels.map((channel: Channel) => (
+          <ListItemButton
+            disableRipple
+            key={channel.id}
+            sx={{
+              ml: 1,
+              mr: 1,
+              mb: 0.33,
+              py: 0.5,
+              color: categoryTextColor,
+              backgroundColor: 'transparent',
+              borderRadius: '4px',
+              '&:hover': {
+                color: hoverTextColor,
+                backgroundColor: theme.palette.action.hover,
+              },
+              ...(selectedChannelId === channel.id && {
+                color: hoverTextColor,
+              }),
+            }}
+            onClick={() => onSelectChannel(channel.id)}
+            selected={selectedChannelId === channel.id}
+            data-cy={`channel-${channel.id}`}
+          >
+            {getChannelIcon(channel)}
+            <ListItemText
+              primary={channel.name}
+              primaryTypographyProps={{
+                variant: 'body2',
+                sx: { fontSize: '0.9em', color: 'inherit' },
+              }}
+            />
+          </ListItemButton>
+        ))}
+      </List>
+    );
+  };
 
   const drawerContent = (
     <Box
@@ -140,42 +195,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
               {/* Channels List */}
               <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {category.textChannels.map((channel) => (
-                    <ListItemButton
-                      disableRipple
-                      key={channel.id}
-                      sx={{
-                        ml: 1,
-                        mr: 1,
-                        mb: 0.33,
-                        py: 0.5,
-                        color: categoryTextColor,
-                        backgroundColor: 'transparent',
-                        borderRadius: '4px',
-                        '&:hover': {
-                          color: hoverTextColor,
-                          backgroundColor: theme.palette.action.hover,
-                        },
-                        ...(selectedChannelId === channel.id && {
-                          color: hoverTextColor,
-                        }),
-                      }}
-                      onClick={() => onSelectChannel(channel.id)}
-                      selected={selectedChannelId === channel.id}
-                      data-cy={`channel-${channel.id}`}
-                    >
-                      <Tag sx={{ fontSize: '1.2em', mr: 1 }} />
-                      <ListItemText
-                        primary={channel.name}
-                        primaryTypographyProps={{
-                          variant: 'body2',
-                          sx: { fontSize: '0.9em', color: 'inherit' },
-                        }}
-                      />
-                    </ListItemButton>
-                  ))}
-                </List>
+                {renderChannels(category)}
               </Collapse>
             </Box>
           ))}
@@ -212,7 +232,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
         data-cy="user-controls"
       >
-        {/* "Floating" container with rounded top corners */}
         <Box
           sx={{
             borderRadius: '12px 12px 0 0',
@@ -240,8 +259,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       <SettingsModal open={isSettingsOpen} onClose={handleCloseSettings} />
     </Box>
   );
-
-
 
   return (
     <>
