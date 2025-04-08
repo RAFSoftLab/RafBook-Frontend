@@ -13,8 +13,8 @@ const Header: React.FC<HeaderProps> = ({ drawerWidth, handleDrawerToggle, channe
     <AppBar
       position="fixed"
       sx={{
-        width: { sm: `calc(100% - ${drawerWidth}px)` },
-        ml: { sm: `${drawerWidth}px` },
+        width: { md: `calc(100% - ${drawerWidth}px)` },
+        ml: { minWidth: `${drawerWidth}px` },
       }}
       data-cy="header"
     >
@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ drawerWidth, handleDrawerToggle, channe
           aria-label="open drawer"
           edge="start"
           onClick={handleDrawerToggle}
-          sx={{ mr: 2, display: { sm: 'none' } }}
+          sx={{ mr: 2, display: { md: 'none' } }}
           data-cy="menu-button"
         >
           <MenuIcon />

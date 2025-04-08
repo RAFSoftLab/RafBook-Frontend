@@ -91,6 +91,11 @@ const Dashboard: React.FC = () => {
   type UploadProgress = { id: number; fileName: string; progress: number };
   const [uploadProgresses, setUploadProgresses] = useState<UploadProgress[]>([]);
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const handleDrawerToggle = () => {
+    setMobileOpen((prevState) => !prevState);
+  };
+
   useEffect(() => {
     dispatch(fetchUserChannelsThunk());
   }, [dispatch]);
@@ -268,7 +273,7 @@ const Dashboard: React.FC = () => {
     <Box sx={{ display: 'flex', height: '100vh' }} data-cy="dashboard-container">
       <Header
         drawerWidth={drawerWidth}
-        handleDrawerToggle={() => {}}
+        handleDrawerToggle={handleDrawerToggle}
         channelName={selectedChannel ? selectedChannel.description : 'Channel Description'}
       />
       <Sidebar
@@ -285,8 +290,8 @@ const Dashboard: React.FC = () => {
         onSelectChannel={handleChannelSelect}
         selectedChannelId={selectedChannelId}
         drawerWidth={drawerWidth}
-        mobileOpen={false}
-        handleDrawerToggle={() => {}}
+        mobileOpen={mobileOpen}           
+        handleDrawerToggle={handleDrawerToggle}
       />
       <Box
         component="main"
@@ -294,7 +299,7 @@ const Dashboard: React.FC = () => {
           flexGrow: 1,
           p: 3,
           pt: '64px',
-          ml: { sm: `${drawerWidth}px` },
+          ml: { md: `${drawerWidth}px` },
           backgroundColor: 'background.default',
           display: 'flex',
           flexDirection: 'column',

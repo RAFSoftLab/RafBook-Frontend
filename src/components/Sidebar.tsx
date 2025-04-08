@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Drawer,
   Typography,
@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import { ExpandLess, ExpandMore, Tag } from '@mui/icons-material';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import TextsmsIcon from '@mui/icons-material/Textsms';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleMute, toggleDeafen } from '../store/voiceSlice';
 import SettingsModal from './SettingsModal';
@@ -31,12 +30,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-
   const user = useAppSelector((state) => state.user);
   const { isMuted, isDeafened } = useAppSelector((state) => state.voice);
-
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const [openCategories, setOpenCategories] = React.useState<{ [key: number]: boolean }>({});
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [openCategories, setOpenCategories] = useState<{ [key: number]: boolean }>({});
 
   React.useEffect(() => {
     if (selectedStudyProgram) {
@@ -149,15 +146,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Typography>
       </Box>
 
-      {/* Divider */}
       <Divider />
 
-      {/* Channel List based on selectedStudyProgram */}
       {selectedStudyProgram ? (
         <Box sx={{ flexGrow: 1, overflowY: 'auto' }} data-cy="channel-list-container">
           {selectedStudyProgram.categories.map((category, index) => (
             <Box key={category.id} sx={{ pt: index === 0 ? 4 : 0, mb: 2 }} data-cy={`category-${category.id}`}>
-              {/* Category Header */}
               <ListItemButton
                 disableRipple
                 onClick={() => handleToggleCategory(category.id)}
@@ -193,7 +187,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </Typography>
               </ListItemButton>
 
-              {/* Channels List */}
               <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
                 {renderChannels(category)}
               </Collapse>
@@ -221,7 +214,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Box>
       )}
 
-      {/* This pushes the bottom user controls to the bottom */}
       <Box sx={{ flexGrow: 1 }} />
 
       {/* Bottom Section: User Controls */}
@@ -255,7 +247,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </Box>
       </Box>
 
-      {/* Settings Modal */}
       <SettingsModal open={isSettingsOpen} onClose={handleCloseSettings} />
     </Box>
   );
@@ -269,7 +260,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         onClose={handleDrawerToggle}
         ModalProps={{ keepMounted: true }}
         sx={{
-          display: { xs: 'block', sm: 'none' },
+          display: { xs: 'block', md: 'none' },
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
         }}
         data-cy="mobile-drawer"
@@ -281,7 +272,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Drawer
         variant="permanent"
         sx={{
-          display: { xs: 'none', sm: 'block' },
+          display: { xs: 'none', md: 'block' },
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
         }}
         open
