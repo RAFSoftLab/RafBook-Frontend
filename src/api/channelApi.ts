@@ -108,3 +108,16 @@ export const uploadFileMessage = async (
     }
   });
 };
+
+export const toggleReaction = async (messageId: number, emoteName: string): Promise<any> => {
+  try {
+    const response = await axiosInstance.post('/messages/reaction', {
+      messageId,
+      emoteName
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error toggling reaction:', error);
+    throw error;
+  }
+};

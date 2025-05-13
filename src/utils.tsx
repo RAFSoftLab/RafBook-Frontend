@@ -8,7 +8,10 @@ import ZipIcon from '@mui/icons-material/Archive';
 import { Message, MessageDTO, Attachment, Sender, UserState } from './types/global';
 import { Type } from './types/global';
 import { jwtDecode } from 'jwt-decode';
+import data from '@emoji-mart/data'
+import { init, SearchIndex } from 'emoji-mart'
 
+init({ data })
 /**
  * Returns an appropriate icon component based on the file extension.
  * @param fileName - The name of the file.
@@ -177,5 +180,13 @@ const mergeImageMessages = (group: Message[]): Message[] => {
   return mergedGroup;
 };
 
+export async function getNativeByName(name: string): Promise<string|undefined> {
+  const emojis = await SearchIndex.search(name, {
+    caller: 'getNativeByName',
+    maxResults: 1,
+  });
 
+  if (emojis.length === 0) return undefined;
+  return emojis[0].skins[0].native;
+}
 

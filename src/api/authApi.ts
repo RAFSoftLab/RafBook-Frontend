@@ -11,7 +11,6 @@ export interface LoginResponse {
 
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
-    console.log('credentials', credentials);
     const response = await axiosInstance.post<LoginResponse>('/users/auth/login', credentials);
     return response.data;
   } catch (error: any) {

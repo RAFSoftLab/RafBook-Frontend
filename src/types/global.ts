@@ -84,7 +84,7 @@ export interface Message {
     type: Type;
     content: string;
     timestamp: string;
-    reactions: any[];
+    reactions: Reaction[];
     parentMessage: number | null;
     deleted: boolean;
     edited: boolean;
@@ -94,6 +94,17 @@ export interface Message {
     uploadProgress?: number;
 }
 
+export interface Reaction {
+    emotes: Emote;
+    users: Sender[];
+}
+
+export interface Emote {
+    id: number;
+    name: string;
+    data?: Uint8Array;
+}
+  
 export interface Sender {
     id: number;
     firstName: string;

@@ -121,11 +121,30 @@ const messageSlice = createSlice({
           };
         }
       });
-    },    
+    },   
+    updateMessageReactions: (state, action: PayloadAction<Message>) => {
+      const updated = action.payload;
+      const channelMessages = state.messages[updated.channelId] || [];
+      const messageIndex = channelMessages.findIndex((msg) => msg.id === updated.id);
+      if (messageIndex !== -1) {
+        state.messages[updated.channelId][messageIndex].reactions = updated.reactions;
+        console.log(`Updated message reactions in channel ${updated.channelId} for message ${updated.id}`);
+      }
+    }     
   },
   extraReducers: () => {},
 });
 
-export const { addMessages, sendMessage, receiveMessage, markMessageError, updateMessage, deleteMessage, deleteMessagePermanently, updateUploadProgress } = messageSlice.actions;
+export const {
+  addMessages,
+  sendMessage,
+  receiveMessage,
+  markMessageError,
+  updateMessage,
+  deleteMessage,
+  deleteMessagePermanently,
+  updateUploadProgress,
+  updateMessageReactions
+} = messageSlice.actions;
 
 export default messageSlice.reducer;

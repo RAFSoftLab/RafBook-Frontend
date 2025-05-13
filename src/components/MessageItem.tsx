@@ -28,6 +28,8 @@ import MarkdownRenderer from './MarkdownRenderer';
 import { deleteMessage } from '../store/messageSlice';
 import { deleteMessageBackend } from '../api/channelApi';
 import EmojiPicker from './EmojiPicker';
+import { toggleReaction } from '../api/channelApi';
+import { getCurrentUser, getNativeByName } from '../utils';
 
 const isGif = (url?: string): boolean => {
   return url ? url.toLowerCase().includes('giphy') : false;
@@ -66,12 +68,26 @@ const MessageItem: React.FC<MessageItemProps> = ({
   const otherAttachments = message.attachments?.filter((att) => att.type === Type.FILE) || [];
   const firstAttachmentUrl = message.attachments?.[0]?.url;
   const hasGifAttachment = isGif(firstAttachmentUrl);
+  const currentUser = getCurrentUser();
 
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [reactionAnchorEl, setReactionAnchorEl] = useState<HTMLElement | null>(null);
   const [reactions, setReactions] = useState<Array<{ emoji: string; count: number }>>([]);
+  const [isReacting, setIsReacting] = useState<boolean>(false);
+  const [emojiMap, setEmojiMap] = useState<Record<string,string>>({});
+
+  useEffect(() => {
+    message.reactions.forEach(({ emotes }) => {
+      if (!emojiMap[emotes.name]) {
+        getNativeByName(emotes.name).then(native => {
+          setEmojiMap(m => ({ ...m, [emotes.name]: native || emotes.name }));
+        });
+      }
+    });
+  }, [message.reactions, emojiMap]);
+
 
   const parentMessageObj = useAppSelector((state) =>
     state.messages.messages[message.channelId]?.find((msg) => msg.id === message.parentMessage)
@@ -106,23 +122,38 @@ const MessageItem: React.FC<MessageItemProps> = ({
   };
 
   const handleReact = (event: React.MouseEvent<HTMLLIElement>) => {
-    setReactionAnchorEl(event.currentTarget);
-    handleCloseContextMenu();
+    if (event.currentTarget) {
+      setReactionAnchorEl(event.currentTarget);
+      handleCloseContextMenu();
+    }
   };
 
-  const handleEmojiSelect = (emoji: any) => {
-    console.log('Selected emoji reaction:', emoji);
-    setReactions((prev) => {
-      const existing = prev.find((r) => r.emoji === emoji.native);
-      if (existing) {
-        return prev.map((r) =>
-          r.emoji === emoji.native ? { ...r, count: r.count + 1 } : r
-        );
-      } else {
-        return [...prev, { emoji: emoji.native, count: 1 }];
-      }
-    });
-    setReactionAnchorEl(null);
+  // For handling reaction clicks correctly
+  const handleReactionClick = async (emojiName: string) => {
+    try {
+      setIsReacting(true);
+      await toggleReaction(message.id, emojiName);
+    } catch (error) {
+      console.error('Error toggling reaction:', error);
+      // You might want to show an error notification here
+    } finally {
+      setIsReacting(false);
+    }
+  };
+
+  // For selecting new emojis
+  const handleEmojiSelect = async (emoji: any) => {
+    try {
+      setIsReacting(true);
+      // Use either the id or the native representation
+      const emojiIdentifier = emoji.id || emoji.native || emoji.colons || emoji.name;
+      await toggleReaction(message.id, emojiIdentifier);
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+    } finally {
+      setIsReacting(false);
+      setReactionAnchorEl(null);
+    }
   };
 
   const handleImageClick = (index: number) => {
@@ -332,36 +363,57 @@ const MessageItem: React.FC<MessageItemProps> = ({
           )}
 
           {/* Reaction Bar */}
-          {reactions.length > 0 && (
+          {message.reactions && message.reactions.length > 0 && (
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 flexWrap: 'wrap',
+                gap: 0.5,
+                mt: 0.5,
               }}
             >
-              {reactions.map((reaction, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor: theme.palette.action.selected,
-                    borderRadius: '16px',
-                    px: 1,
-                    py: 0.25,
-                    mr: 0.5,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <Typography variant="body2" sx={{ mr: 0.5 }}>
-                    {reaction.emoji}
-                  </Typography>
-                  <Typography variant="caption">{reaction.count}</Typography>
-                </Box>
-              ))}
+              {message.reactions.map((reaction, index) => {
+                // Calculate if current user has reacted with this emoji
+                const hasReacted = reaction.users.some(user => user.id === currentUser.id);
+                const char = emojiMap[reaction.emotes.name] || reaction.emotes.name;
+
+                return (
+                  <Box
+                    key={index}
+                    onClick={() => handleReactionClick(reaction.emotes.name)}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: hasReacted
+                        ? theme.palette.primary.main
+                        : theme.palette.action.selected,
+                      color: hasReacted
+                        ? theme.palette.primary.contrastText
+                        : theme.palette.text.primary,
+                      borderRadius: '16px',
+                      px: 1,
+                      py: 0.25,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: hasReacted
+                          ? theme.palette.primary.dark
+                          : theme.palette.action.hover,
+                      },
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ mr: 0.5 }}>
+                      {char}
+                    </Typography>
+                    <Typography variant="caption">
+                      {reaction.users.length}
+                    </Typography>
+                  </Box>
+                );
+              })}
             </Box>
           )}
+
         </Box>
       </Box>
 

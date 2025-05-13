@@ -14,7 +14,7 @@ import MessageInput from './MessageInput';
 import VoiceChannel from './VoiceChannel';
 import StudyProgramSelectorModal from './StudyProgramSelectorModal';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { sendMessage, markMessageError, updateMessage } from '../store/messageSlice';
+import { sendMessage, markMessageError } from '../store/messageSlice';
 import {
   setSelectedChannelId,
   fetchUserChannelsThunk,
@@ -25,7 +25,6 @@ import { Channel, Message, Attachment, NewMessageDTO, Type } from '../types/glob
 import { useSocket } from '../context/SocketContext';
 import {
   sendMessage as sendMessageBackend,
-  editMessage,
   uploadFileMessage,
 } from '../api/channelApi';
 import { getSenderFromUser } from '../utils';
@@ -150,7 +149,7 @@ const Dashboard: React.FC = () => {
               );
             }
           )
-            .then((response) => {
+            .then((_response) => {
               setUploadProgresses((prev) => prev.filter((entry) => entry.id !== uploadId));
             })
             .catch(() => {
@@ -203,11 +202,11 @@ const Dashboard: React.FC = () => {
     setReplyingMessage(null);
   };
 
-  const handleSendAttachments = (newAttachments: Attachment[]) => {
+  const handleSendAttachments = (_newAttachments: Attachment[]) => {
     // Optional
   };
 
-  const handleRemoveAttachment = (id: number) => {
+  const handleRemoveAttachment = (_id: number) => {
     // Optional
   };
 
@@ -293,7 +292,7 @@ const Dashboard: React.FC = () => {
           </Box>
         ) : selectedChannel ? (
           selectedChannel.type === 'voice' ? (
-            <VoiceChannel selectedChannel={selectedChannel.id} data-cy="voice-channel-component" />
+            <VoiceChannel selectedChannel={selectedChannel.id.toString()} data-cy="voice-channel-component" />
           ) : (
             <>
               <MessageList

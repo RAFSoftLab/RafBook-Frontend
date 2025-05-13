@@ -1,17 +1,24 @@
+// EmojiPicker.tsx
 import React from 'react';
-import { Popover } from '@mui/material';
-import Picker from '@emoji-mart/react';
+import { Popover, Box } from '@mui/material';
 import data from '@emoji-mart/data';
-import { EmojiPickerProps } from '../types/global';
-import { useTheme, useMediaQuery } from '@mui/material';
+import Picker from '@emoji-mart/react';
 
-const EmojiPicker: React.FC<EmojiPickerProps> = ({ open, onClose, onSelectEmoji, anchorEl }) => {
-  if (!open) return null;
+interface EmojiPickerProps {
+  open: boolean;
+  anchorEl: HTMLElement | null;
+  onClose: () => void;
+  onSelectEmoji: (emoji: any) => void;
+}
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
-  const pickerWidth = isLargeScreen ? 350 : isSmallScreen ? 300 : 350;
+const EmojiPicker: React.FC<EmojiPickerProps> = ({
+  open,
+  anchorEl,
+  onClose,
+  onSelectEmoji,
+}) => {
+  // Don't render anything if not open to avoid the anchorEl issue
+  if (!open || !anchorEl) return null;
 
   return (
     <Popover
@@ -19,20 +26,23 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ open, onClose, onSelectEmoji,
       anchorEl={anchorEl}
       onClose={onClose}
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
         vertical: 'bottom',
         horizontal: 'center',
       }}
-      PaperProps={{
-        style: { width: pickerWidth },
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'center',
       }}
     >
-      <Picker data={data} onEmojiSelect={onSelectEmoji} />
+      <Box sx={{ p: 1 }}>
+        <Picker
+          data={data}
+          onEmojiSelect={onSelectEmoji}
+          previewPosition="none"
+        />
+      </Box>
     </Popover>
   );
 };
 
-export default React.memo(EmojiPicker);
+export default EmojiPicker;
